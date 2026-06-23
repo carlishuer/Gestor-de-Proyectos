@@ -2060,19 +2060,41 @@ function renderTabla(lista){
     container.innerHTML=`<div class="empty-state"><svg width="40" height="40" fill="none" stroke="var(--ink3)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No hay expedientes que coincidan con los filtros aplicados.</p></div>`;
     return;
   }
-  const rows=lista.map(p=>`<tr>
-    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
-    <td>${p.fecha_creacion}</td>
-    <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
-    <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
-    <td>${p.municipio||'—'}</td>
-    <td>
-      <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
-      <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
-      <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-    </td>
-  </tr>`).join('');
-  container.innerHTML=`<div class="project-list-wrap"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  const isMobile=window.innerWidth<=640;
+  if(isMobile){
+    const cards=lista.map(p=>`
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <strong style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)">${p.expediente}</strong>
+          <span style="font-size:11px;color:var(--ink3)">${p.fecha_creacion}</span>
+        </div>
+        <div style="font-size:12px;margin-bottom:4px;">${p.cliente_nombre_completo||p.cliente_nombre}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">
+          <span style="font-size:10px;background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3);padding:2px 8px;border-radius:20px;">${p.tipo_obra}</span>
+          <span style="font-size:11px;color:var(--ink3)">${p.municipio||'—'}</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" style="flex:1;padding:10px;font-size:11px;justify-content:center;" onclick="verExpediente('${p.expediente}')">Ver</button>
+          <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:11px;justify-content:center;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
+          <button class="btn" style="padding:10px 12px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div>
+      </div>`).join('');
+    container.innerHTML=`<div style="padding:12px;">${cards}</div>`;
+  } else {
+    const rows=lista.map(p=>`<tr>
+      <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
+      <td>${p.fecha_creacion}</td>
+      <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
+      <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
+      <td>${p.municipio||'—'}</td>
+      <td>
+        <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
+        <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
+        <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+      </td>
+    </tr>`).join('');
+    container.innerHTML=`<div class="project-list-wrap"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
 }
 
 function borrarExpediente(code){
