@@ -1,5 +1,5 @@
 // Service Worker — Gestor de Proyectos PWA
-const CACHE = 'gestor-v1';
+const CACHE = 'gestor-v2';
 const ASSETS = [
   '/Gestor-de-Proyectos/',
   '/Gestor-de-Proyectos/index.html',
@@ -25,19 +25,14 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Solo cachear GET
   if(e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if(cached) return cached;
-      return fetch(e.request).then(res => {
-        // Cachear respuestas válidas de nuestro propio origen
-        if(res && res.status === 200 && res.type !== 'opaque'){
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => cached);
-    })
+    fetch(e.request).then(res => {
+      if(res && res.status === 200 && res.type !== 'opaque'){
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
