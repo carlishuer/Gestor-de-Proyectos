@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor de Proyectos · Estudio Juan José Ramón Vindel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#F5F2EC;--surface:#FDFBF7;--surface2:#EDE9E0;--border:#D4CEBE;--border-strong:#A89F8C;--ink:#1C1A16;--ink2:#5C5648;--ink3:#9C9282;--accent:#2D4A3E;--accent-light:#4A7A69;--accent-pale:#E8F0ED;--warn:#C4622D;--warn-pale:#FBF0EB;--ok:#2D6A4F;--ok-pale:#EBF5F0;--radius:4px;--shadow:0 1px 3px rgba(28,26,22,.08),0 4px 16px rgba(28,26,22,.04);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6;}
+header{background:var(--accent);color:#fff;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15);}
+.header-brand{display:flex;align-items:baseline;gap:14px;}
+.header-brand h1{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;font-weight:400;}
+.header-brand span{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase;}
+.header-coacm{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.05em;}
+.app{max-width:960px;margin:0 auto;padding:32px 24px 64px;}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:32px;}
+.tab{padding:10px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;background:none;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab:hover{color:var(--ink2);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+.section{display:none;}.section.active{display:block;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;}
+.card-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface2);}
+.card-header h2{font-family:'DM Serif Display',serif;font-size:15px;font-weight:400;}
+.card-header .tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:var(--accent-pale);color:var(--accent);padding:2px 8px;border-radius:2px;}
+.card-body{padding:20px;}
+.catastro-row{display:flex;gap:10px;align-items:flex-end;}
+.catastro-row .field{flex:1;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.span-2{grid-column:span 2;}.span-3{grid-column:span 3;}
+.field{display:flex;flex-direction:column;gap:5px;}
+label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:500;}
+label .req{color:var(--warn);margin-left:2px;}
+label .auto{color:var(--ok);font-size:9px;margin-left:4px;background:var(--ok-pale);padding:1px 5px;border-radius:2px;}
+input,select,textarea{font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 11px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(74,122,105,.12);}
+input.filled{background:var(--ok-pale);border-color:#A8D5BF;color:var(--ok);font-family:'DM Mono',monospace;font-size:12.5px;}
+input::placeholder,textarea::placeholder{color:var(--ink3);}
+input:disabled,select:disabled{opacity:.6;cursor:not-allowed;}
+textarea{resize:vertical;min-height:70px;}
+.btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;border:none;cursor:pointer;border-radius:var(--radius);transition:all .15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;padding:10px 20px;}
+.btn-primary:hover{background:var(--accent-light);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-secondary{background:var(--surface2);color:var(--ink2);border:1px solid var(--border);padding:9px 16px;}
+.btn-secondary:hover{background:var(--border);}
+.btn-danger{background:var(--warn-pale);color:var(--warn);border:1px solid #E8C0AD;padding:9px 16px;}
+.btn-lg{padding:13px 28px;font-size:12px;}
+.btn-word{background:#1F5C9E;color:#fff;padding:10px 20px;}
+.btn-word:hover{background:#1a4e89;}
+.btn-pdf{background:#8B1A1A;color:#fff;padding:10px 20px;}
+.btn-pdf:hover{background:#a52020;}
+@media print{
+  body *{visibility:hidden;}
+  #print-area,#print-area *{visibility:visible;}
+  #print-area{position:fixed;left:0;top:0;width:100%;padding:20mm 25mm;background:#fff;font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#000;}
+  #print-area h3{font-size:12pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:normal;}
+  #print-area .ficha{display:grid;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
+  #print-area .fk{font-weight:bold;text-transform:uppercase;font-size:8.5pt;}
+  #print-area .fv{font-weight:bold;}
+  #print-area .cuerpo p{margin-bottom:7pt;text-align:justify;}
+  #print-area .firma{margin-top:24pt;}
+  #print-area .firma-lugar{margin-bottom:14pt;}
+  #print-area .firma-bloque{font-weight:bold;font-size:9.5pt;}
+  #print-area hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
+}
+.status{padding:10px 14px;border-radius:var(--radius);font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-top:12px;}
+.status.loading{background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;}
+.status.ok{background:var(--ok-pale);color:var(--ok);border:1px solid #A8D5BF;}
+.status.error{background:var(--warn-pale);color:var(--warn);border:1px solid #E8C0AD;}
+.status.info{background:var(--accent-pale);color:var(--accent);border:1px solid #B8D4C8;}
+.spinner{width:14px;height:14px;border:2px solid rgba(55,48,163,.2);border-top-color:#3730A3;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-top:2px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.expediente-badge{background:var(--accent);color:#fff;font-family:'DM Mono',monospace;font-size:20px;letter-spacing:.12em;padding:14px 24px;border-radius:var(--radius);display:inline-block;margin-bottom:4px;}
+.output-panel{background:var(--ink);color:#E8E4DA;border-radius:var(--radius);padding:18px 20px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;max-height:420px;overflow-y:auto;}
+.output-panel .key{color:#7FC4A8;}.output-panel .val{color:#F0E6CC;}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.exp-preview{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);background:var(--accent-pale);border:1px solid #B8D4C8;border-radius:var(--radius);padding:8px 12px;letter-spacing:.06em;}
+.project-list{width:100%;border-collapse:collapse;font-size:11px;}
+.project-list th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
+.project-list td{padding:8px 8px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+.project-list tr:last-child td{border-bottom:none;}
+.project-list tr:hover td{background:var(--accent-pale);}
+.project-list td:nth-child(1){min-width:120px;}
+.project-list td:nth-child(4){white-space:normal;min-width:140px;}
+.project-list td:nth-child(5){white-space:normal;min-width:120px;}
+.project-list td:nth-child(6){white-space:nowrap;}
+.badge-tipo{font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:2px;letter-spacing:.05em;}
+.empty-state{text-align:center;padding:48px 24px;color:var(--ink3);}
+.empty-state p{font-size:13px;margin-top:8px;}
+.steps{display:flex;margin-bottom:24px;}
+.step{flex:1;padding:8px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);border-bottom:2px solid var(--border);text-align:center;}
+.step.done{color:var(--ok);border-bottom-color:var(--ok);}
+.step.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+.help{font-size:11px;color:var(--ink3);margin-top:2px;}
+/* DOCUMENTOS */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:10px;}
+.doc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;}
+.doc-card:hover{border-color:var(--accent-light);background:var(--accent-pale);}
+.doc-card.selected{border-color:var(--accent);background:var(--accent-pale);box-shadow:0 0 0 2px rgba(45,74,62,.15);}
+.doc-card-cat{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;}
+.doc-card-name{font-size:13px;font-weight:500;color:var(--ink);line-height:1.3;margin-bottom:4px;}
+.doc-card-desc{font-size:11px;color:var(--ink2);line-height:1.4;}
+.doc-card-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:var(--accent);display:none;align-items:center;justify-content:center;}
+.doc-card.selected .doc-card-check{display:flex;}
+.doc-cat-header{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:10px;margin-top:18px;}
+.doc-cat-header:first-child{margin-top:0;}
+.doc-variables{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+.doc-variables-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.exp-loaded{background:var(--ok-pale);border:1px solid #A8D5BF;border-radius:var(--radius);padding:12px 16px;margin-bottom:0;display:none;}
+.exp-loaded-badge{font-family:'DM Mono',monospace;font-size:16px;color:var(--accent);font-weight:500;}
+.exp-loaded-info{font-size:12px;color:var(--ink2);margin-top:4px;}
+/* PREVIEW DOC */
+.doc-preview{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:32px 36px;font-size:12.5px;line-height:1.7;color:#1C1A16;max-height:580px;overflow-y:auto;}
+.doc-preview h3{font-family:'DM Serif Display',serif;font-size:13px;font-weight:400;text-align:center;margin-bottom:18px;text-decoration:underline;letter-spacing:.02em;}
+.doc-preview .ficha{display:grid;grid-template-columns:160px 1fr;gap:2px 10px;margin-bottom:16px;font-size:11px;}
+.doc-preview .fk{font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.04em;padding:1px 0;}
+.doc-preview .fv{font-weight:700;padding:1px 0;}
+.doc-preview .cuerpo p{margin-bottom:8px;text-align:justify;}
+.doc-preview .firma{margin-top:28px;}
+.doc-preview .firma-lugar{margin-bottom:16px;}
+.doc-preview .firma-bloque{font-weight:600;font-size:11px;margin-top:6px;}
+.doc-preview hr{border:none;border-top:.5px solid #ccc;margin:14px 0;}
+/* ── RESPONSIVE MÓVIL ────────────────────────────────── */
+@media(max-width:640px){
+  /* Layout base */
+  header{padding:12px 16px;flex-wrap:wrap;gap:4px;}
+  .header-brand h1{font-size:15px;}
+  .header-brand span{font-size:10px;}
+  .header-coacm{font-size:10px;}
+  .app{padding:16px 12px 80px;}
+
+  /* Tabs: scroll horizontal en lugar de truncar */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:10px 14px;font-size:10px;white-space:nowrap;}
+
+  /* Steps: compactar texto */
+  .steps{gap:0;}
+  .step{font-size:9px;padding:8px 6px;letter-spacing:.03em;}
+
+  /* Grids: siempre una columna */
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .span-2,.span-3{grid-column:span 1;}
+  .catastro-row{flex-direction:column;}
+  .catastro-row .btn{width:100%;}
+
+  /* Cards */
+  .card-header{padding:12px 14px;}
+  .card-header h2{font-size:14px;}
+  .card-body{padding:14px 12px;}
+
+  /* Inputs más grandes para el tacto */
+  input,select,textarea{font-size:16px;padding:11px 12px;}  /* 16px evita zoom en iOS */
+  label{font-size:9.5px;}
+
+  /* Botones: full-width en contextos de acción */
+  .btn-lg{width:100%;justify-content:center;}
+  .btn-primary.btn-lg{padding:14px 20px;}
+
+  /* Grupos de botones de portada */
+  .portadas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+  /* Badge expediente */
+  .expediente-badge{font-size:16px;padding:11px 16px;word-break:break-all;}
+
+  /* Output panel */
+  .output-panel{font-size:11px;max-height:260px;}
+
+  /* Tabla listado: scroll horizontal */
+  .project-list-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .project-list{min-width:560px;}
+  .project-list th,.project-list td{padding:8px 6px;font-size:12px;}
+
+  /* Barra de búsqueda del listado */
+  .lista-controles{flex-direction:column;gap:8px;}
+  .lista-controles input,.lista-controles select{width:100%;}
+
+  /* Documentos */
+  .doc-grid{grid-template-columns:1fr;}
+  .doc-preview{padding:18px 14px;font-size:12px;}
+
+  /* Sección resultado final */
+  #resultado-panel .grid-2{grid-template-columns:1fr;}
+
+  /* Ficha de preview doc */
+  .doc-preview .ficha{grid-template-columns:110px 1fr;}
+
+  /* Botón flotante "Guardar" en móvil — siempre visible */
+  .fab-guardar{
+    display:flex;
+    position:fixed;bottom:18px;right:18px;
+    background:var(--accent);color:#fff;
+    border:none;border-radius:50px;
+    padding:14px 20px;gap:8px;
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    box-shadow:0 4px 18px rgba(45,74,62,.35);
+    cursor:pointer;z-index:200;align-items:center;
+    transition:background .15s;
+  }
+  .fab-guardar:active{background:var(--accent-light);}
+}
+@media(min-width:641px){.fab-guardar{display:none;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-brand">
+    <h1>Gestor de Proyectos</h1>
+    <span>Juan José Ramón Vindel · Arquitecto</span>
+  </div>
+  <div class="header-coacm">COACM nº 4.236</div>
+</header>
+<div class="app">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('nuevo',this)">+ Nuevo Expediente</button>
+    <button class="tab" onclick="showTab('documentos',this)">Generar Documentos</button>
+    <button class="tab" onclick="showTab('listado',this)">Listado de Proyectos</button>
+  </div>
+
+  <!-- TAB NUEVO -->
+  <div id="tab-nuevo" class="section active">
+    <div class="steps">
+      <div class="step active" id="step1">1 · Catastro</div>
+      <div class="step" id="step2">2 · Cliente</div>
+      <div class="step" id="step3">3 · Proyecto</div>
+      <div class="step" id="step4">4 · Generar</div>
+    </div>
+    <div class="card" id="card-catastro">
+      <div class="card-header"><h2>Datos Catastrales</h2><span class="tag">API Catastro</span></div>
+      <div class="card-body">
+        <div class="catastro-row">
+          <div class="field">
+            <label>Referencia Catastral <span class="req">*</span></label>
+            <input type="text" id="ref-catastral" placeholder="Ej: 9872023VH5797S0001WX" maxlength="20" oninput="this.value=this.value.toUpperCase();comprobarRefCatastral(this.value)"/>
+            <span class="help">14 o 20 caracteres alfanuméricos</span>
+          </div>
+          <button class="btn btn-primary" onclick="consultarCatastro()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Consultar
+          </button>
+        </div>
+        <div id="catastro-status"></div>
+        <div id="catastral-proyectos-aviso"></div>
+        <div id="catastro-data" style="display:none;margin-top:20px;">
+          <hr class="divider" style="margin-top:0">
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="field"><label>Dirección <span class="auto">automático</span></label><input type="text" id="c-direccion" class="filled" readonly/></div>
+            <div class="field"><label>Municipio <span class="auto">automático</span></label><input type="text" id="c-municipio" class="filled" readonly/></div>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label>Provincia <span class="auto">automático</span></label><input type="text" id="c-provincia" class="filled" readonly/></div>
+            <div class="field"><label>Código Postal <span class="auto">automático</span></label><input type="text" id="c-cp" class="filled" readonly/></div>
+            <div class="field"><label>Clase</label><input type="text" id="c-clase" class="filled" readonly/></div>
+          </div>
+          <div class="grid-3" style="margin-top:14px;">
+            <div class="field"><label>Uso Principal <span class="auto">automático</span></label><input type="text" id="c-uso" class="filled" readonly/></div>
+            <div class="field"><label>Año Construcción <span class="auto">automático</span></label><input type="text" id="c-anio" class="filled" readonly/></div>
+            <div class="field"><label>Sup. Construida (m²) <span class="auto">automático</span></label><input type="text" id="c-sup-cons" class="filled" readonly/></div>
+          </div>
+          <div class="grid-2" style="margin-top:14px;">
+            <div class="field"><label>Sup. Parcela (m²) <span class="auto">automático</span></label><input type="text" id="c-sup-suelo" class="filled" readonly/></div>
+            <div class="field"><label>Coef. Participación (%)</label><input type="text" id="c-coef" class="filled" readonly placeholder="N/D"/></div>
+          </div>
+          <hr class="divider">
+          <div class="field" style="margin-bottom:14px;">
+            <label>Nombre de archivo / carpeta <span class="auto">editable</span></label>
+            <input type="text" id="nombre-carpeta" placeholder="Se genera automáticamente"/>
+            <span class="help">Formato: 1234-2026-CUE TIPO DE OBRA CL IGLESIA 10 — el código inicial (1234-2026-CUE) coincide con "Nº de Expediente" y se usa como prefijo de las subcarpetas (PLANOS, FOTOGRAFÍAS, PDF...) y de los documentos.</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="abrirFichaCatastro()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Abrir ficha en Catastro
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card-cliente">
+      <div class="card-header"><h2>Datos del Cliente / Promotor</h2></div>
+      <div class="card-body">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:10px;">Promotor Principal <span class="req">*</span></label>
+        <div class="grid-3" style="margin-bottom:20px;">
+          <div class="field"><label>Nombre <span class="req">*</span></label><input type="text" id="cli-nombre" placeholder="Nombre"/></div>
+          <div class="field"><label>Primer Apellido <span class="req">*</span></label><input type="text" id="cli-apellido1" placeholder="Primer apellido"/></div>
+          <div class="field"><label>Segundo Apellido</label><input type="text" id="cli-apellido2" placeholder="Segundo apellido"/></div>
+          <div class="field"><label>NIF / CIF <span class="req">*</span></label><input type="text" id="cli-nif" placeholder="00000000A" oninput="this.value=this.value.toUpperCase()"/></div>
+          <div class="field"><label>Teléfono</label><input type="tel" id="cli-tel" placeholder="600 000 000"/></div>
+          <div class="field"><label>Email</label><input type="email" id="cli-email" placeholder="cliente@email.com"/></div>
+          <div class="field span-3"><label>Dirección</label><input type="text" id="cli-dir" placeholder="Calle, número, piso, puerta..."/></div>
+          <div class="field"><label>Código Postal</label><input type="text" id="cli-cp" placeholder="00000" maxlength="5"/></div>
+          <div class="field"><label>Municipio</label><input type="text" id="cli-municipio" placeholder="Municipio"/></div>
+          <div class="field"><label>Provincia</label><input type="text" id="cli-provincia" placeholder="Cuenca"/></div>
+        </div>
+        <hr class="divider">
+        <div style="margin-bottom:10px;"><button class="btn btn-secondary" onclick="toggleSeccion('sec-promotor2',this)" style="padding:6px 14px;font-size:10px;">+ Añadir Promotor 2</button></div>
+        <div id="sec-promotor2" style="display:none;margin-bottom:20px;">
+          <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:10px;">Promotor 2</label>
+          <div class="grid-3">
+            <div class="field"><label>Nombre</label><input type="text" id="cli2-nombre" placeholder="Nombre"/></div>
+            <div class="field"><label>Primer Apellido</label><input type="text" id="cli2-apellido1" placeholder="Primer apellido"/></div>
+            <div class="field"><label>Segundo Apellido</label><input type="text" id="cli2-apellido2" placeholder="Segundo apellido"/></div>
+            <div class="field"><label>NIF / CIF</label><input type="text" id="cli2-nif" placeholder="00000000A" oninput="this.value=this.value.toUpperCase()"/></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="cli2-tel" placeholder="600 000 000"/></div>
+            <div class="field"><label>Email</label><input type="email" id="cli2-email" placeholder="cliente@email.com"/></div>
+            <div class="field span-3"><label>Dirección</label><input type="text" id="cli2-dir" placeholder="Calle, número, piso, puerta..."/></div>
+            <div class="field"><label>Código Postal</label><input type="text" id="cli2-cp" placeholder="00000" maxlength="5"/></div>
+            <div class="field"><label>Municipio</label><input type="text" id="cli2-municipio" placeholder="Municipio"/></div>
+            <div class="field"><label>Provincia</label><input type="text" id="cli2-provincia" placeholder="Cuenca"/></div>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;"><button class="btn btn-secondary" onclick="toggleSeccion('sec-promotor3',this)" style="padding:6px 14px;font-size:10px;">+ Añadir Promotor 3</button></div>
+        <div id="sec-promotor3" style="display:none;margin-bottom:20px;">
+          <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:10px;">Promotor 3</label>
+          <div class="grid-3">
+            <div class="field"><label>Nombre</label><input type="text" id="cli3-nombre" placeholder="Nombre"/></div>
+            <div class="field"><label>Primer Apellido</label><input type="text" id="cli3-apellido1" placeholder="Primer apellido"/></div>
+            <div class="field"><label>Segundo Apellido</label><input type="text" id="cli3-apellido2" placeholder="Segundo apellido"/></div>
+            <div class="field"><label>NIF / CIF</label><input type="text" id="cli3-nif" placeholder="00000000A" oninput="this.value=this.value.toUpperCase()"/></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="cli3-tel" placeholder="600 000 000"/></div>
+            <div class="field"><label>Email</label><input type="email" id="cli3-email" placeholder="cliente@email.com"/></div>
+            <div class="field span-3"><label>Dirección</label><input type="text" id="cli3-dir" placeholder="Calle, número, piso, puerta..."/></div>
+            <div class="field"><label>Código Postal</label><input type="text" id="cli3-cp" placeholder="00000" maxlength="5"/></div>
+            <div class="field"><label>Municipio</label><input type="text" id="cli3-municipio" placeholder="Municipio"/></div>
+            <div class="field"><label>Provincia</label><input type="text" id="cli3-provincia" placeholder="Cuenca"/></div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div style="margin-bottom:10px;">
+          <button class="btn btn-secondary" onclick="toggleSeccion('sec-representante',this)" style="padding:6px 14px;font-size:10px;">+ Añadir Representante</button>
+          <span class="help" style="margin-left:10px;">Para promotores personas jurídicas</span>
+        </div>
+        <div id="sec-representante" style="display:none;">
+          <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:10px;">Representante / Apoderado</label>
+          <div class="grid-3">
+            <div class="field"><label>Nombre</label><input type="text" id="rep-nombre" placeholder="Nombre"/></div>
+            <div class="field"><label>Primer Apellido</label><input type="text" id="rep-apellido1" placeholder="Primer apellido"/></div>
+            <div class="field"><label>Segundo Apellido</label><input type="text" id="rep-apellido2" placeholder="Segundo apellido"/></div>
+            <div class="field"><label>NIF</label><input type="text" id="rep-nif" placeholder="00000000A" oninput="this.value=this.value.toUpperCase()"/></div>
+            <div class="field"><label>Cargo / Calidad</label><input type="text" id="rep-cargo" placeholder="Administrador, Apoderado..."/></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="rep-tel" placeholder="600 000 000"/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card-proyecto">
+      <div class="card-header"><h2>Datos del Proyecto</h2></div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="field">
+            <label>Tipo de Obra / Encargo <span class="req">*</span></label>
+            <select id="pro-tipo">
+              <option value="">— Seleccionar —</option>
+              <option value="OBRA NUEVA">Obra Nueva</option>
+              <option value="REFORMA">Reforma</option>
+              <option value="REFORMA Y AMPLIACION">Reforma y Ampliación</option>
+              <option value="AMPLIACION">Ampliación</option>
+              <option value="REHABILITACION">Rehabilitación</option>
+              <option value="REHABILITACION VIVIENDA">Rehabilitación de Vivienda</option>
+              <option value="LEGALIZACION">Legalización</option>
+              <option value="CAMBIO DE USO">Cambio de Uso</option>
+              <option value="MEMORIA VALORADA">Memoria Valorada</option>
+              <option value="MODIFICADO">Modificado de Proyecto</option>
+              <option value="NAVE INDUSTRIAL">Nave Industrial</option>
+              <option value="GARAJE">Garaje</option>
+              <option value="EDIFICIO DOS VIVIENDAS">Edificio para Dos Viviendas</option>
+              <option value="OTRO">Otro (especificar abajo)</option>
+            </select>
+            <input type="text" id="pro-tipo-otro" placeholder="Especifica el tipo de obra..." style="display:none;margin-top:6px;"/>
+          </div>
+          <input type="hidden" id="pro-descripcion" value=""/>
+          <div class="field"><label>Nombre del Proyecto</label><input type="text" id="pro-nombre-proyecto" placeholder="Ej: TRES VIVIENDAS EN LANDETE"/></div>
+          <div class="field"><label>Fase del Proyecto</label>
+            <select id="pro-fase">
+              <option value="PROYECTO BÁSICO Y DE EJECUCIÓN">Proyecto Básico y de Ejecución</option>
+              <option value="PROYECTO BÁSICO">Proyecto Básico</option>
+              <option value="PROYECTO DE EJECUCIÓN">Proyecto de Ejecución</option>
+              <option value="PROYECTO DE ACTIVIDAD">Proyecto de Actividad</option>
+              <option value="MEMORIA VALORADA">Memoria Valorada</option>
+              <option value="INFORME TÉCNICO">Informe Técnico</option>
+            </select>
+          </div>
+          <div class="field"><label>Dirección del Inmueble</label><input type="text" id="pro-dir-inmueble" placeholder="Se rellena desde Catastro o manual"/></div>
+          <div class="field"><label>Municipio del Proyecto</label><input type="text" id="pro-municipio" placeholder="Se rellena desde Catastro o manual"/></div>
+          <div class="field"><label>Provincia</label><input type="text" id="pro-provincia" placeholder="Cuenca"/></div>
+          <div class="field"><label>Código Postal</label><input type="text" id="pro-cp" placeholder="16000" maxlength="5"/></div>
+          <div class="field"><label>Director de Ejecución</label><input type="text" id="pro-dir-ejecucion" placeholder="Arquitecto Técnico"/></div>
+          <div class="field"><label>Constructor / Empresa</label><input type="text" id="pro-constructor" placeholder="Nombre empresa constructora"/></div>
+          <div class="field"><label>NIF Empresa Constructora</label><input type="text" id="pro-constructor-nif" placeholder="A00000000" oninput="this.value=this.value.toUpperCase()"/></div>
+          <div class="field"><label>Representante Empresa</label><input type="text" id="pro-constructor-rep" placeholder="Nombre del representante"/></div>
+          <div class="field"><label>Zona Climática CTE</label>
+            <select id="pro-zona">
+              <option value="">— Seleccionar —</option>
+              <option value="A3">A3</option><option value="A4">A4</option>
+              <option value="B3">B3</option><option value="B4">B4</option>
+              <option value="C1">C1</option><option value="C2">C2</option>
+              <option value="C3">C3</option><option value="C4">C4</option>
+              <option value="D1">D1</option><option value="D2" selected>D2</option>
+              <option value="D3">D3</option><option value="E1">E1</option>
+            </select>
+          </div>
+          <div class="field"><label>Uso del Inmueble</label>
+            <select id="pro-uso">
+              <option value="">— Seleccionar —</option>
+              <option value="Vivienda unifamiliar">Vivienda unifamiliar</option>
+              <option value="Vivienda plurifamiliar">Vivienda plurifamiliar</option>
+              <option value="Local comercial">Local comercial</option>
+              <option value="Nave industrial">Nave industrial</option>
+              <option value="Edificio de oficinas">Edificio de oficinas</option>
+              <option value="Equipamiento">Equipamiento</option>
+              <option value="Garaje">Garaje</option>
+              <option value="Almacén">Almacén</option>
+              <option value="Turismo rural">Turismo rural</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="field"><label>Presupuesto de Ejecución Material (€)</label><input type="number" id="pro-pem" placeholder="0.00" step="0.01"/></div>
+          <div class="field"><label>Honorarios (€)</label><input type="number" id="pro-honorarios" placeholder="0.00" step="0.01"/></div>
+          <div class="field"><label>Licencia de Obras</label><input type="text" id="pro-licencia" placeholder="Fecha o nº de licencia"/></div>
+          <div class="field"><label>Fecha Comienzo de Obra</label><input type="date" id="pro-fecha-inicio"/></div>
+          <div class="field"><label>Fecha Fin de Obra</label><input type="date" id="pro-fecha-fin"/></div>
+          <div class="field"><label>Fecha Acta de Recepción</label><input type="date" id="pro-fecha-recepcion"/></div>
+          <div class="field"><label>Fecha Visado / Entrega</label><input type="date" id="pro-fecha-visado"/></div>
+          <div class="field span-2"><label>Observaciones</label><textarea id="pro-obs" placeholder="Notas internas, referencias, condicionantes..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Datos del Expediente</h2></div>
+      <div class="card-body">
+        <p style="color:var(--ink2);font-size:13px;margin-bottom:14px;">El número se asigna automáticamente según el correlativo del año en curso, o puedes escribir tú el número real (formato <code>NNNN-YYYY-MUN</code>) y se usará ese como nombre principal del expediente.</p>
+        <div class="field" style="margin-bottom:14px;max-width:320px;">
+          <label>Nº de Expediente <span class="auto">opcional — déjalo en blanco para autonumerar</span></label>
+          <input type="text" id="exp-num-manual" placeholder="Ej: 1216-2026-CAR" oninput="this.value=this.value.toUpperCase();previewExpediente();actualizarNombreCarpeta();"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+          <div id="exp-preview" class="exp-preview">— — — — — — —</div>
+        </div>
+        <hr class="divider">
+        <div class="actions" style="flex-wrap:wrap;gap:8px;">
+          <button class="btn btn-primary btn-lg" onclick="generarExpediente()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Generar Expediente
+          </button>
+          <button class="btn btn-secondary" onclick="generarExcelDatos()" id="btn-excel">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar Excel (DATOS)
+          </button>
+          <button class="btn btn-secondary" onclick="copiarDatosGestorMemorias()" id="btn-datos-memorias" style="background:#1a4e8a;color:#fff;border-color:#1a4e8a;">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar datos → Gestor de Memorias
+          </button>
+          <button class="btn btn-secondary" onclick="limpiarFormulario()">+ Nuevo expediente</button>
+        </div>
+        <div id="gen-status"></div>
+        <div id="excel-status" style="margin-top:6px;"></div>
+        <div id="memorias-status" style="margin-top:6px;"></div>
+
+        <hr class="divider">
+        <p style="color:var(--ink2);font-size:13px;margin-bottom:10px;">Portadas en PDF con los datos de este expediente (mismo formato que el Gestor de Memorias).</p>
+        <div class="actions" style="flex-wrap:wrap;gap:8px;">
+          <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PORTADAS DIPUTACIÓN
+          </button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['MEMORIA'],'portada memoria','portada-status')">↓ Memoria</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['FOTOGRAFÍAS'],'portada fotografías','portada-status')">↓ Fotografías</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">↓ Anexos ahorro energía</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
+        </div>
+        <div id="portada-status" style="margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <div id="resultado-panel" style="display:none;">
+      <div class="card">
+        <div class="card-header"><h2>Expediente Generado</h2><span class="tag">OK</span></div>
+        <div class="card-body">
+          <div style="margin-bottom:18px;">
+            <div id="exp-badge" class="expediente-badge"></div>
+            <div style="font-size:12px;color:var(--ink3);margin-top:6px;" id="exp-fecha"></div>
+          </div>
+
+          <!-- JSON plegado -->
+          <details style="margin-bottom:10px;">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--ink2);padding:6px 0;user-select:none;">Datos del expediente (JSON) <span style="font-weight:400;color:var(--ink3);">— clic para ver</span></summary>
+            <div style="display:flex;justify-content:flex-end;margin:6px 0 4px;">
+              <button class="btn btn-secondary" onclick="copiarJSON()" style="padding:5px 12px;">Copiar</button>
+            </div>
+            <div class="output-panel" id="output-json"></div>
+          </details>
+
+          <!-- Variables plegado -->
+          <details style="margin-bottom:14px;">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--ink2);padding:6px 0;user-select:none;">Variables para Memoria (texto plano) <span style="font-weight:400;color:var(--ink3);">— clic para ver</span></summary>
+            <div style="display:flex;justify-content:flex-end;margin:6px 0 4px;">
+              <button class="btn btn-secondary" onclick="copiarVariables()" style="padding:5px 12px;">Copiar</button>
+            </div>
+            <div class="output-panel" id="output-variables"></div>
+          </details>
+
+          <hr class="divider">
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <label style="display:block;margin:0;">Crear estructura en Google Drive vía Make</label>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+              <div class="field" style="flex:1;min-width:260px;">
+                <label>URL del Webhook de Make</label>
+                <input type="text" id="make-webhook-url" placeholder="https://hook.eu1.make.com/xxxxxxxxxxxxxxxx" oninput="localStorage.setItem('make_webhook_url',this.value)"/>
+                <span class="help">Se guarda automáticamente en el navegador</span>
+              </div>
+              <button class="btn btn-primary" onclick="enviarAMake()" id="btn-make">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Enviar a Make → Drive
+              </button>
+              <button class="btn btn-secondary" id="btn-make-reset" onclick="resetarDriveEnviado()" style="display:none;" title="Permite volver a enviar a Drive (úsalo si borraste la carpeta en Drive)">↺ Reenviar</button>
+            </div>
+            <div id="make-status" style="margin-top:8px;"></div>
+          </div>
+          <hr class="divider">
+          <div class="actions">
+            <button class="btn btn-primary" onclick="guardarEnListado()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>Guardar en listado
+            </button>
+            <button class="btn btn-secondary" onclick="irADocumentos()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Generar documentos
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-nuevo -->
+
+  <!-- TAB DOCUMENTOS -->
+  <div id="tab-documentos" class="section">
+    <div class="card">
+      <div class="card-header"><h2>Expediente Activo</h2><span class="tag" id="doc-exp-tag">Sin seleccionar</span></div>
+      <div class="card-body">
+        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;">
+          <div class="field" style="flex:1;">
+            <label>Seleccionar expediente guardado</label>
+            <select id="doc-exp-select" onchange="cargarExpedienteDocumentos(this.value)">
+              <option value="">— Seleccionar expediente —</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" onclick="usarExpedienteActual()">Usar expediente actual</button>
+        </div>
+        <div id="doc-exp-loaded" class="exp-loaded">
+          <div id="doc-exp-loaded-badge" class="exp-loaded-badge"></div>
+          <div id="doc-exp-loaded-info" class="exp-loaded-info"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Seleccionar Documento</h2></div>
+      <div class="card-body">
+        <div style="margin-bottom:14px;">
+          <input type="text" id="doc-search" placeholder="Buscar documento..." oninput="filtrarDocumentos(this.value)" style="max-width:400px;"/>
+        </div>
+        <div id="doc-catalogo"></div>
+      </div>
+    </div>
+
+    <div id="doc-panel-generacion" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <h2 id="doc-panel-titulo">Generar documento</h2>
+          <span class="tag" id="doc-panel-cat"></span>
+        </div>
+        <div class="card-body">
+          <div id="doc-variables-extra"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <label style="display:block;margin:0;">Vista previa</label>
+            <button class="btn btn-secondary" style="padding:5px 12px;" onclick="actualizarPreview()">↻ Actualizar</button>
+          </div>
+          <div id="doc-preview-container" class="doc-preview"></div>
+          <hr class="divider">
+          <div class="actions" style="margin-top:4px;">
+            <button class="btn btn-word" onclick="descargarRTF()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar .RTF (Word)
+            </button>
+            <button class="btn btn-pdf" onclick="imprimirPDF()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir / PDF
+            </button>
+            <button class="btn btn-secondary" onclick="copiarTextoDoc()">Copiar texto</button>
+          </div>
+          <div id="doc-gen-status" style="margin-top:10px;"></div>
+          <div id="print-area" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-documentos -->
+
+  <!-- TAB LISTADO -->
+  <div id="tab-listado" class="section">
+    <div class="card">
+      <div class="card-header"><h2>Expedientes</h2><span class="tag" id="badge-count">0 proyectos</span></div>
+      <div class="card-body" style="padding-bottom:14px;">
+        <!-- BUSCADOR + FILTROS -->
+        <div class="lista-controles" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+          <div class="field" style="flex:2;min-width:200px;">
+            <label>Búsqueda libre</label>
+            <div style="position:relative;">
+              <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" fill="none" stroke="var(--ink3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="lista-busqueda" placeholder="Expediente, cliente, municipio, ref. catastral…" oninput="filtrarListado()" style="padding-left:32px;"/>
+            </div>
+          </div>
+          <div class="field" style="min-width:160px;">
+            <label>Tipo de obra</label>
+            <select id="lista-filtro-tipo" onchange="filtrarListado()">
+              <option value="">— Todos —</option>
+              <option value="OBRA NUEVA">Obra Nueva</option>
+              <option value="REFORMA">Reforma</option>
+              <option value="REFORMA Y AMPLIACION">Reforma y Ampliación</option>
+              <option value="AMPLIACION">Ampliación</option>
+              <option value="REHABILITACION">Rehabilitación</option>
+              <option value="REHABILITACION VIVIENDA">Rehabilitación Vivienda</option>
+              <option value="LEGALIZACION">Legalización</option>
+              <option value="CAMBIO DE USO">Cambio de Uso</option>
+              <option value="MEMORIA VALORADA">Memoria Valorada</option>
+              <option value="MODIFICADO">Modificado</option>
+              <option value="NAVE INDUSTRIAL">Nave Industrial</option>
+              <option value="GARAJE">Garaje</option>
+            </select>
+          </div>
+          <div class="field" style="min-width:100px;">
+            <label>Año</label>
+            <select id="lista-filtro-anio" onchange="filtrarListado()">
+              <option value="">— Todos —</option>
+            </select>
+          </div>
+          <div class="field" style="justify-content:flex-end;">
+            <label style="visibility:hidden;">x</label>
+            <button class="btn btn-secondary" onclick="limpiarFiltros()" style="padding:8px 14px;">✕ Limpiar filtros</button>
+          </div>
+        </div>
+        <div id="lista-resultados-info" style="font-size:12px;color:var(--ink3);margin-bottom:8px;display:none;"></div>
+      </div>
+      <div class="card-body" style="padding:0;"><div id="listado-container"><div class="empty-state"><svg width="40" height="40" fill="none" stroke="var(--ink3)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><p>Todavía no hay expedientes guardados.</p></div></div></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="exportarCSV()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar CSV</button>
+      <button class="btn btn-secondary" onclick="exportarJSON()">Exportar JSON</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-json-input').click()" title="Restaurar expedientes desde un archivo JSON exportado previamente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Importar JSON</button>
+      <input type="file" id="import-json-input" accept=".json" style="display:none;" onchange="importarJSON(this)"/>
+      
+    </div>
+  </div>
+</div><!-- /app -->
+<script>
+// ============================================================
+//  CONFIG — Editar aquí al migrar de cuenta o estudio
+// ============================================================
+const CONFIG = {
+  // Estudio
+  arquitecto:      'JUAN JOSÉ RAMÓN VINDEL. ARQUITECTO',
+  arq_nombre:      'JUAN JOSÉ RAMÓN VINDEL',
+  arq_nif:         '04568387N',
+  arq_num:         '4.236',
+  arq_dir:         'calle Dalmacio García Izcara número 6, 16004 de Cuenca',
+  arq_email:       'juanjoseramonarquitecto@gmail.com',
+  coacm:           'COACM nº 4.236',
+  localStorage_key:'proyectos_estudio',
+
+  // Google Drive
+  drive: {
+    carpeta_proyectos: '1fcTSYt-Owy29FT5iiKJ0WjPN32RV77WH',
+    carpeta_anio:      '1-5tUfIXIIYY4lUUuDdKsmSJXqeGxF-NJ',  // actualizar cada año
+    carpeta_plantillas:'1gLZTPYedv1oqCcmkSpjOZA4yAo0Hem3f',
+    plantillas_memorias: {
+      programa_mantenimiento:    '1TK0Pw0Eek6XMbwYMl0ipDW0ldWMOaP6w',
+      plan_control_calidad:      '1MwehHS5fC9-zfgKT_LZ_wSoivwP3o7gk',
+      normativa:                 '1ITlwGcB_Qonc_q2KbTk2hvbw_homlalS',
+      pliego_condiciones:        '1t9MyDqlhVLSQDUhBywAq0RRubQY7Ha0v',
+      ebss:                      '1fWSpd5cgYQjQoqHq66l_UD84YkXVgyFP',
+    },
+    plantilla_excel: '1UI961YLV7oZYG-ijPCD9iMiKy0w5iQnW',
+  },
+
+  // Make.com
+  make: {
+    webhook_catastro: 'https://hook.eu1.make.com/9rqokwld7q4krip46l4dmaz4myufmasi',
+    // El webhook principal de Drive/expedientes se guarda en localStorage
+    // (campo "URL del webhook" en la pestaña Configuración)
+  },
+};
+// ============================================================
+
+const CATALOGO=[
+  {id:'cert-fin-obra-edif',cat:'Certificados',nombre:'Certificado Final de Obra — Edificación',desc:'Certifica que la edificación ha quedado terminada bajo dirección del arquitecto.',vars:['fecha_acta','tipo_obra_cert']},
+  {id:'cert-fin-obra-demol',cat:'Certificados',nombre:'Certificado Final de Obra — Demolición',desc:'Certifica que la demolición ha quedado ejecutada conforme al proyecto.',vars:['fecha_acta']},
+  {id:'cert-resistencia-cub',cat:'Certificados',nombre:'Certificado Resistencia de Cubierta (placas solares)',desc:'Certifica que la cubierta soporta la instalación de placas fotovoltaicas.',vars:['fecha_acta','destinatario_cert']},
+  {id:'cert-libro-ordenes',cat:'Certificados',nombre:'Comunicado Libro de Órdenes (verbal)',desc:'Informa al Colegio que las órdenes se comunicaron verbalmente.',vars:['fecha_acta']},
+  {id:'acta-replanteo',cat:'Actas',nombre:'Acta de Comprobación del Replanteo',desc:'Constata la comprobación del replanteo por los agentes de la obra.',vars:['fecha_acta','hora_acta']},
+  {id:'acta-recepcion',cat:'Actas',nombre:'Acta de Recepción de Obra',desc:'Formaliza la recepción de la obra por la propiedad.',vars:['fecha_acta','hora_acta','fecha_fin_garantia']},
+  {id:'acta-pavimento',cat:'Actas',nombre:'Acta Comprobación Pavimento y Mobiliario',desc:'Documenta el estado del pavimento y mobiliario urbano antes del inicio.',vars:['fecha_acta','hora_acta']},
+  {id:'acta-libro-visitas',cat:'Actas',nombre:'Acta del Libro de Órdenes y Visitas',desc:'Entrada en el libro de órdenes con incidencias y temas tratados.',vars:['fecha_acta','num_acta','incidencias','acuerdos','temas','seguridad']},
+  {id:'solicitud-libro-papel',cat:'Solicitudes y Libros',nombre:'Solicitud Libro de Órdenes (papel)',desc:'Solicita al Colegio la expedición del Libro de Órdenes en papel.',vars:['fecha_acta']},
+  {id:'solicitud-libro-digital',cat:'Solicitudes y Libros',nombre:'Solicitud Libro de Órdenes (digital)',desc:'Solicita al Colegio la expedición del Libro de Órdenes digital.',vars:['fecha_acta']},
+  {id:'autorizacion-licencia',cat:'Autorizaciones',nombre:'Autorización Gestión Licencia Urbanística (obra futura)',desc:'Autoriza al arquitecto a gestionar la solicitud de licencia.',vars:['fecha_acta','destinatario_ayto']},
+  {id:'autorizacion-licencia-legaliz',cat:'Autorizaciones',nombre:'Autorización Gestión Licencia (legalización / 1ª ocupación)',desc:'Autoriza al arquitecto a gestionar la licencia de primera ocupación.',vars:['fecha_acta','destinatario_ayto']},
+  {id:'autorizacion-pree5000',cat:'Autorizaciones',nombre:'Autorización Gestión Ayuda PREE 5000',desc:'Autoriza al arquitecto a gestionar la convocatoria PREE 5000.',vars:['fecha_acta']},
+  {id:'autorizacion-cee',cat:'Autorizaciones',nombre:'Autorización Inscripción CEE — Anexo V',desc:'Autoriza la inscripción del CEE en el Registro Autonómico de CLM.',vars:['fecha_acta','ref_catastral_cee','denominacion_cee']},
+  {id:'decl-iva',cat:'Declaraciones',nombre:'Declaración de IVA no deducible',desc:'Declara que el IVA soportado no es recuperable.',vars:['fecha_acta','destinatario_decl','actuacion_decl']},
+  {id:'decl-titularidad',cat:'Declaraciones',nombre:'Declaración de Titularidad del Inmueble',desc:'Declara la titularidad del edificio.',vars:['fecha_acta','destinatario_decl','actuacion_decl','texto_titularidad']},
+  {id:'decl-corriente',cat:'Declaraciones',nombre:'Declaración de Estar al Corriente con las Administraciones',desc:'Declara estar al corriente de obligaciones tributarias y SS.',vars:['fecha_acta','destinatario_decl','actuacion_decl']},
+  {id:'decl-subvenciones',cat:'Declaraciones',nombre:'Declaración de Subvenciones Solicitadas',desc:'Declara no haber solicitado otras subvenciones para la misma actuación.',vars:['fecha_acta','destinatario_decl','actuacion_decl']},
+  {id:'decl-iva-pree',cat:'Declaraciones',nombre:'Declaración Responsable IVA (PREE 5000)',desc:'Declara la naturaleza del IVA en subvenciones PREE 5000.',vars:['fecha_acta','iva_recuperable']},
+  {id:'solicitud-licencia',cat:'Solicitudes Administrativas',nombre:'Solicitud de Licencia de Obra',desc:'Solicita al Ayuntamiento la licencia urbanística municipal.',vars:['fecha_acta','destinatario_ayto']},
+  {id:'primera-ocupacion',cat:'Solicitudes Administrativas',nombre:'Declaración Responsable Primera Ocupación',desc:'Declaración responsable para la primera ocupación de la edificación.',vars:['fecha_acta','promotores_decl']},
+  {id:'modificado',cat:'Modificados y Anexos',nombre:'Modificado nº __',desc:'Presenta modificaciones al proyecto durante la ejecución de la obra.',vars:['fecha_acta','num_modificado','texto_modificado']},
+  {id:'anexo-fin-obra',cat:'Modificados y Anexos',nombre:'Anexo Fin de Obra',desc:'Detalla y justifica las modificaciones realizadas durante la ejecución.',vars:['fecha_acta','texto_anexo']},
+  {id:'alegaciones',cat:'Modificados y Anexos',nombre:'Alegaciones a Desestimación de Ayuda',desc:'Presenta alegaciones frente a la desestimación de una solicitud de ayuda.',vars:['fecha_acta','exp_admin','ot_admin','titular_admin','emplaz_admin','texto_alegaciones','docs_lista']},
+  {id:'subsanacion',cat:'Modificados y Anexos',nombre:'Subsanación de Solicitud de Ayuda',desc:'Contesta a un requerimiento de subsanación de solicitud de ayuda.',vars:['fecha_acta','exp_admin','ot_admin','titular_admin','emplaz_admin','texto_subsanacion','docs_lista']},
+];
+
+const VARS_CFG={
+  fecha_acta:{label:'Fecha del documento',type:'date',default:()=>new Date().toISOString().split('T')[0]},
+  hora_acta:{label:'Hora',type:'text',placeholder:'Ej: 09:00'},
+  tipo_obra_cert:{label:'Tipo de obra (para certificado)',type:'select',opciones:['Edificación','Demolición','Reforma','Rehabilitación','Ampliación']},
+  destinatario_cert:{label:'Destinatario del certificado',type:'text',placeholder:'Ej: Ayuntamiento de Landete'},
+  destinatario_ayto:{label:'Destinatario (alcalde/municipio)',type:'text',placeholder:'Ej: ILMO. ALCALDE DEL MUNICIPIO DE LANDETE'},
+  destinatario_decl:{label:'Destinatario de la declaración',type:'text',placeholder:'Ej: GERENTE DEL CONSORCIO CIUDAD DE CUENCA'},
+  actuacion_decl:{label:'Finalidad de la actuación',type:'text',placeholder:'Ej: para solicitar una subvención para la siguiente actuación'},
+  texto_titularidad:{label:'Texto sobre titularidad',type:'textarea',placeholder:'Ej: Que el edificio es una vivienda unifamiliar y es el titular del inmueble.'},
+  iva_recuperable:{label:'¿El IVA es recuperable?',type:'select',opciones:['NO es susceptible de recuperación o compensación total o parcial.','SÍ es susceptible de recuperación o compensación total o parcial.']},
+  promotores_decl:{label:'Promotores firmantes (separados por coma si son varios)',type:'text',placeholder:'TERESA NAVIDAD PALOMARES, ALBERTO PERPIÑÁN SACRISTÁN'},
+  fecha_fin_garantia:{label:'Fecha fin del plazo de garantía (1 año desde recepción)',type:'date'},
+  num_acta:{label:'Número de acta',type:'text',placeholder:'1'},
+  incidencias:{label:'Incidencias',type:'textarea',placeholder:'Texto de incidencias...'},
+  acuerdos:{label:'Cumplimiento de acuerdos anteriores',type:'textarea',placeholder:'Texto...'},
+  temas:{label:'Temas tratados',type:'textarea',placeholder:'Texto...'},
+  seguridad:{label:'Seguridad y salud',type:'textarea',placeholder:'Texto...'},
+  num_modificado:{label:'Número de modificado',type:'text',placeholder:'1'},
+  texto_modificado:{label:'Texto del modificado',type:'textarea',placeholder:'Se modifica la memoria, presupuesto y planos para...'},
+  texto_anexo:{label:'Texto del anexo fin de obra',type:'textarea',placeholder:'Por cuestiones económicas sobrevenidas...'},
+  exp_admin:{label:'Nº Expediente administrativo',type:'text',placeholder:'Ej: 1474885C'},
+  ot_admin:{label:'Expediente OT',type:'text',placeholder:'Ej: 2025-05-SCC-VIV'},
+  titular_admin:{label:'Titular del expediente administrativo',type:'text',placeholder:'Nombre completo del titular'},
+  emplaz_admin:{label:'Emplazamiento del expediente',type:'text',placeholder:'Ej: CL MAYOR 10, 16000, CUENCA'},
+  texto_alegaciones:{label:'Texto introductorio de las alegaciones',type:'textarea',placeholder:'Se presenta la siguiente documentación del expediente...'},
+  texto_subsanacion:{label:'Texto introductorio de la subsanación',type:'textarea',placeholder:'Se presenta la siguiente documentación del expediente...'},
+  docs_lista:{label:'Lista de documentos aportados (uno por línea)',type:'textarea',placeholder:'1. FORMULARIO. Se adjunta...\n2. CERTIFICADOS. Se aportan...'},
+  ref_catastral_cee:{label:'Referencia catastral (CEE)',type:'text',placeholder:'9292020XK3199S0001QR'},
+  denominacion_cee:{label:'Denominación del edificio (CEE)',type:'text',placeholder:'Ej: Vivienda unifamiliar CL Mayor 10'},
+};
+
+let proyectos=JSON.parse(localStorage.getItem(CONFIG.localStorage_key)||'[]');
+let datosCatastro=null,expedienteActual=null,docExpedienteActivo=null,docSeleccionado=null;
+
+function showTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='listado')renderListado();
+  if(name==='documentos')iniciarTabDocumentos();
+}
+
+function irADocumentos(){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-documentos').classList.add('active');
+  document.querySelectorAll('.tab')[1].classList.add('active');
+  iniciarTabDocumentos();
+  if(expedienteActual)setTimeout(usarExpedienteActual,50);
+}
+
+function iniciarTabDocumentos(){
+  renderCatalogoDocumentos('');
+  actualizarSelectorExpedientes();
+}
+
+function actualizarSelectorExpedientes(){
+  const sel=document.getElementById('doc-exp-select');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Seleccionar expediente —</option>';
+  proyectos.forEach(p=>{
+    const o=document.createElement('option');
+    o.value=p.expediente;
+    o.textContent=`${p.expediente} · ${p.cliente_nombre_completo||p.cliente_nombre} · ${p.municipio}`;
+    sel.appendChild(o);
+  });
+  if(cur)sel.value=cur;
+}
+
+function cargarExpedienteDocumentos(code){
+  if(!code)return;
+  const p=proyectos.find(x=>x.expediente===code);
+  if(!p)return;
+  docExpedienteActivo=p;
+  mostrarExpedienteCargado(p);
+}
+
+function usarExpedienteActual(){
+  if(!expedienteActual)return;
+  docExpedienteActivo=expedienteActual;
+  const sel=document.getElementById('doc-exp-select');
+  sel.value=expedienteActual.expediente;
+  mostrarExpedienteCargado(expedienteActual);
+}
+
+function mostrarExpedienteCargado(p){
+  document.getElementById('doc-exp-loaded-badge').textContent=p.expediente;
+  document.getElementById('doc-exp-loaded-info').textContent=`${p.cliente_nombre_completo||p.cliente_nombre} · ${p.tipo_obra} · ${p.direccion_proyecto||p.direccion_inmueble}, ${p.municipio}`;
+  document.getElementById('doc-exp-tag').textContent=p.expediente;
+  document.getElementById('doc-exp-loaded').style.display='block';
+  if(docSeleccionado)actualizarPreview();
+}
+
+function renderCatalogoDocumentos(filtro){
+  const f=filtro.toLowerCase();
+  const docs=f?CATALOGO.filter(d=>d.nombre.toLowerCase().includes(f)||d.cat.toLowerCase().includes(f)||d.desc.toLowerCase().includes(f)):CATALOGO;
+  const cats=[...new Set(docs.map(d=>d.cat))];
+  let html='';
+  cats.forEach(cat=>{
+    html+=`<div class="doc-cat-header">${cat}</div><div class="doc-grid">`;
+    docs.filter(d=>d.cat===cat).forEach(d=>{
+      const sel=docSeleccionado?.id===d.id?'selected':'';
+      html+=`<div class="doc-card ${sel}" onclick="seleccionarDocumento('${d.id}')" id="dcard-${d.id}">
+        <div class="doc-card-cat">${d.cat}</div>
+        <div class="doc-card-name">${d.nombre}</div>
+        <div class="doc-card-desc">${d.desc}</div>
+        <div class="doc-card-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  if(!docs.length)html='<div class="empty-state"><p>No se encontraron documentos con ese filtro.</p></div>';
+  document.getElementById('doc-catalogo').innerHTML=html;
+}
+
+function filtrarDocumentos(v){renderCatalogoDocumentos(v);}
+
+function seleccionarDocumento(id){
+  docSeleccionado=CATALOGO.find(d=>d.id===id);
+  if(!docSeleccionado)return;
+  document.querySelectorAll('.doc-card').forEach(c=>c.classList.remove('selected'));
+  const card=document.getElementById('dcard-'+id);
+  if(card)card.classList.add('selected');
+  document.getElementById('doc-panel-titulo').textContent=docSeleccionado.nombre;
+  document.getElementById('doc-panel-cat').textContent=docSeleccionado.cat;
+  renderVariablesExtra(docSeleccionado);
+  document.getElementById('doc-panel-generacion').style.display='block';
+  actualizarPreview();
+  document.getElementById('doc-panel-generacion').scrollIntoView({behavior:'smooth'});
+}
+
+function renderVariablesExtra(doc){
+  const container=document.getElementById('doc-variables-extra');
+  if(!doc.vars||!doc.vars.length){container.innerHTML='';return;}
+  let html='<div class="doc-variables"><div class="doc-variables-title">Campos variables del documento</div><div class="grid-2">';
+  doc.vars.forEach(vId=>{
+    const c=VARS_CFG[vId];if(!c)return;
+    const isSpan=c.type==='textarea';
+    html+=`<div class="field${isSpan?' span-2':''}"><label>${c.label}</label>`;
+    if(c.type==='date'){html+=`<input type="date" id="docvar-${vId}" value="${c.default?c.default():''}" onchange="actualizarPreview()"/>`;}
+    else if(c.type==='select'){html+=`<select id="docvar-${vId}" onchange="actualizarPreview()">`;c.opciones.forEach(o=>html+=`<option value="${o}">${o}</option>`);html+='</select>';}
+    else if(c.type==='textarea'){html+=`<textarea id="docvar-${vId}" placeholder="${c.placeholder||''}" rows="3" oninput="actualizarPreview()"></textarea>`;}
+    else{html+=`<input type="text" id="docvar-${vId}" placeholder="${c.placeholder||''}" oninput="actualizarPreview()"/>`;}
+    html+='</div>';
+  });
+  html+='</div></div>';
+  container.innerHTML=html;
+}
+
+function gv(id){const el=document.getElementById('docvar-'+id);return el?el.value.trim():'';}
+
+function getDatosDoc(){
+  const e=docExpedienteActivo||{};
+  return{
+    expediente:e.expediente||'—',
+    proyecto:e.pro_nombre_proyecto||e.tipo_obra||'—',
+    fase:e.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN',
+    emplazamiento:e.direccion_proyecto||e.direccion_inmueble||'—',
+    cp_obra:e.cp_proyecto||e.cp||'—',
+    municipio:e.municipio_proyecto||e.municipio||'—',
+    provincia:e.provincia_proyecto||e.provincia||'CUENCA',
+    ref_catastral:e.ref_catastral||'—',
+    promotor1:e.cliente_nombre_completo||e.cliente_nombre||'—',
+    promotor1_nif:e.cliente_nif||'—',
+    promotor1_dir:e.cliente_direccion||'—',
+    promotor1_cp:e.cliente_cp||'—',
+    promotor1_mun:e.cliente_municipio||'—',
+    promotor1_prov:e.cliente_provincia||'—',
+    promotor2:e.promotor2_nombre||'',
+    promotores_todos:[e.cliente_nombre_completo||e.cliente_nombre,e.promotor2_nombre,e.promotor3_nombre].filter(Boolean).join(', '),
+    nifs_todos:[e.cliente_nif,e.promotor2_nif,e.promotor3_nif].filter(Boolean).join(', '),
+    arq:CONFIG.arq_nombre,
+    arq_nif:CONFIG.arq_nif,
+    arq_num:CONFIG.arq_num,
+    arq_dir:CONFIG.arq_dir,
+    arq_email:CONFIG.arq_email,
+    constructor:e.pro_constructor||'—',
+    licencia:e.licencia||'—',
+    fecha_inicio:e.pro_fecha_inicio?fES(e.pro_fecha_inicio):'—',
+  };
+}
+
+function fES(iso,corto){
+  if(!iso)return'—';
+  const d=new Date(iso+'T12:00:00');
+  if(corto)return d.toLocaleDateString('es-ES');
+  const m=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return`${d.getDate()} de ${m[d.getMonth()]} del año ${d.getFullYear()}`;
+}
+
+function fLugar(iso,municipio){
+  const d=new Date((iso||new Date().toISOString().split('T')[0])+'T12:00:00');
+  const m=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return`En ${municipio||'Cuenca'}, a ${d.getDate()} de ${m[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+function firmaArq(d,fecha){
+  return`<div class="firma"><div class="firma-lugar">${fLugar(fecha,d.municipio)}</div>
+  <div class="firma-bloque" style="margin-top:80pt;">EL PROYECTISTA Y DIRECTOR DE OBRA</div>
+  <div style="margin-top:40px;">${d.arq}</div>
+  <div style="font-size:11px;">Arquitecto Colegiado nº ${d.arq_num}</div>
+  <div style="font-size:11px;">Colegio Oficial de Arquitectos de Castilla la Mancha</div></div>`;
+}
+
+function fichaBase(d){
+  return`<div class="ficha">
+    <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+    <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+    <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+    <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+    <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+    <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+    <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+  </div>`;
+}
+
+function fichaObra(d){
+  return`<div class="ficha">
+    <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+    <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+    <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+    <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+    <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+    <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
+    <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+    <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
+    <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
+  </div>`;
+}
+
+function encabezadoDecl(d,dest,actuacion){
+  return`<p style="margin-bottom:14px;"><strong>${dest}</strong></p>
+  <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
+  <div class="cuerpo">
+    <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+    <p>Que quiere ${actuacion}: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
+  </div>`;
+}
+
+function generarTextoDoc(doc,d){
+  const fecha=gv('fecha_acta')||new Date().toISOString().split('T')[0];
+  const fechaES=fES(fecha);
+  const fechaC=fES(fecha,'c');
+  const fechaLugar=fLugar(fecha,d.municipio);
+  const fa=firmaArq(d,fecha);
+
+  switch(doc.id){
+
+    case'cert-fin-obra-edif':{
+      const tipo=gv('tipo_obra_cert')||'Edificación';
+      return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
+      <div class="ficha">
+        <span class="fk">Edificación</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Tipo de Obra</span><span class="fv">${tipo.toUpperCase()}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+      </div>
+      <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
+      <div class="cuerpo">
+        <p>${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, en calidad de Proyectista y Director de Obra de ${d.proyecto} en ${d.emplazamiento} del municipio de ${d.municipio}, provincia de ${d.provincia}.</p>
+        <p>Que con fecha de ${fechaES}, la edificación reseñada ha quedado terminada bajo mi dirección de conformidad con el proyecto objeto de licencia y la documentación técnica que lo complementa, hallándose dispuesta para su adecuada utilización con arreglo a las instrucciones de uso y mantenimiento.</p>
+        <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
+      </div>${fa}`;}
+
+    case'cert-fin-obra-demol':
+      return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
+      <div class="ficha">
+        <span class="fk">Edificación</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Tipo de Obra</span><span class="fv">DEMOLICIÓN</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+      </div>
+      <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
+      <div class="cuerpo">
+        <p>${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, en calidad de Proyectista y Director de Obra de ${d.proyecto} en ${d.emplazamiento} del municipio de ${d.municipio}, provincia de ${d.provincia}.</p>
+        <p>Que con fecha de ${fechaES}, la edificación reseñada ha quedado demolida bajo mi dirección de conformidad con el proyecto objeto de licencia y la documentación técnica que lo complementa, hallándose dispuesto el solar para su utilización con arreglo a las ordenanzas urbanísticas vigentes.</p>
+        <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
+      </div>${fa}`;
+
+    case'cert-resistencia-cub':{
+      const dest=gv('destinatario_cert')||'la Administración competente';
+      return`<h3>CERTIFICADO DE RESISTENCIA DE CUBIERTA PARA LA INSTALACIÓN DE PLACAS SOLARES</h3>
+      ${fichaBase(d)}
+      <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
+      <div class="cuerpo">
+        <p>${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, en calidad de Proyectista y Director de Obra de ${d.proyecto} en ${d.emplazamiento} del municipio de ${d.municipio}, provincia de ${d.provincia}.</p>
+        <p>Que la realización de la obra de instalación de placas solares fotovoltaica de producción de energía eléctrica para autoconsumo en la cubierta de la vivienda situada en ${d.emplazamiento}, ${d.cp_obra}, no disminuye la seguridad estructural y no compromete la resistencia mecánica y la estabilidad del edificio, salvo vicios ocultos.</p>
+        <p>Y para que conste ante ${dest} a los efectos previstos en el artículo 3 de la Ley 38/1999 de 5 de noviembre de Ordenación de la Edificación, expido el presente certificado.</p>
+      </div>${fa}`;}
+
+    case'cert-libro-ordenes':
+      return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA — LIBRO DE ÓRDENES</h3>
+      ${fichaObra(d)}
+      <div class="cuerpo">
+        <p>Ilmo. Sr. Arquitecto de Control:</p>
+        <p>El Colegiado que suscribe comunica a V.I. que no ha sido necesario el libro de órdenes relativo a la construcción que se detalla arriba, puesto que las órdenes oportunas fueron comunicadas verbalmente al constructor.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div style="font-size:11px;margin-top:8px;">Fdo.: D. ${d.arq}</div>
+      <div style="font-size:11px;">Colegiado ${d.arq_num} COACM</div></div>`;
+
+    case'acta-replanteo':{
+      const hora=gv('hora_acta')||'09:00';
+      return`<h3>ACTA DE COMPROBACIÓN DEL REPLANTEO</h3>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
+      </div>
+      <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
+      <div class="cuerpo">
+        <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen exclusivamente los firmantes, para proceder a la comprobación del replanteo de las obras.</p>
+        <p>${d.promotor1}, como promotor de la obra, como representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>Proceden a efectuar la comprobación del replanteo de la obra con el siguiente resultado: Que aprobado el proyecto técnico de la obra cuya ejecución se pretende realizar es conforme con la memoria que considera las necesidades a satisfacer, planos de conjunto y detalles, pliego de prescripciones técnicas, presupuesto y calles afectadas. Asimismo, indica la propiedad que dispone de los terrenos, autorizaciones y concesiones precisas.</p>
+        <p>Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.</p>
+      </div>
+      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
+        <div><div class="firma-bloque">EL DIRECTOR DE OBRA</div><div style="margin-top:80pt;">${d.arq}</div></div>
+        <div><div class="firma-bloque">LA PROPIEDAD</div><div style="margin-top:80pt;">${d.promotor1}</div></div>
+        <div><div class="firma-bloque">EL CONTRATISTA</div></div>
+      </div>`;}
+
+    case'acta-recepcion':{
+      const hora=gv('hora_acta')||'13:00';
+      const fechaGar=gv('fecha_fin_garantia')?fES(gv('fecha_fin_garantia')):'—';
+      return`<h3>ACTA DE RECEPCIÓN DE OBRA</h3>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
+      </div>
+      <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
+      <div class="cuerpo">
+        <p>${d.promotor1} como propietario, el representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen exclusivamente los firmantes, para proceder por parte de la Propiedad a su recepción.</p>
+        <p>Tras el reconocimiento detallado de las obras, el Director de la obra expone que las mismas han sido ejecutadas sensiblemente de acuerdo con el proyecto y sus modificaciones aprobadas, en su caso, teniendo en cuenta todas las prescripciones en vigor, y que se encuentran en condiciones de ser recibidas.</p>
+        <p>La propiedad solicita a los asistentes que manifiesten cuanto estimen conveniente en relación al acto que se está realizando y a las actuaciones llevadas a cabo, no haciéndolo ninguno de ellos.</p>
+        <p>En consecuencia, y con la conformidad de los firmantes, la Propiedad da por recibida la obra, entregándola al uso o servicio correspondiente y finalizando el plazo de garantía a las ${hora} horas del día ${fechaGar}.</p>
+      </div>
+      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
+        <div><div class="firma-bloque">EL PROYECTISTA Y DIRECTOR DE OBRA</div><div style="margin-top:80pt;">${d.arq}</div></div>
+        <div><div class="firma-bloque">LA PROPIEDAD</div><div style="margin-top:80pt;">${d.promotor1}</div></div>
+        <div><div class="firma-bloque">EL CONTRATISTA</div></div>
+      </div>`;}
+
+    case'acta-pavimento':{
+      const hora=gv('hora_acta')||'17:00';
+      return`<h3>ACTA DE COMPROBACIÓN DEL ESTADO ACTUAL DE PAVIMENTO Y MOBILIARIO</h3>
+      ${fichaObra(d)}
+      <div class="cuerpo">
+        <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen los firmantes, para proceder a la comprobación del estado actual del pavimento y del mobiliario urbano de la zona de actuación y zonas adyacentes.</p>
+        <p>Como representante de la empresa constructora ${d.constructor}, ${d.arq}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>Se adjuntan con este acta las fotografías tomadas en la comprobación del estado del pavimento y del mobiliario urbano.</p>
+        <p>Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.</p>
+      </div>
+      <div class="firma" style="display:flex;gap:60px;flex-wrap:wrap;">
+        <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
+        <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
+      </div>`;}
+
+    case'acta-libro-visitas':{
+      const numActa=gv('num_acta')||'1';
+      return`<h3>LIBRO DE ÓRDENES Y VISITAS</h3>
+      <div class="ficha">
+        <span class="fk">Acta Nº</span><span class="fv">${numActa}</span>
+        <span class="fk">Fecha</span><span class="fv">${fechaC}</span>
+        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}, ${d.cp_obra}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">Director de Obra</span><span class="fv">${d.arq}, ARQUITECTO</span>
+        <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
+        <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
+      </div>
+      <hr>
+      <p style="font-weight:600;">INCIDENCIAS</p><p style="margin:6px 0 12px;">${gv('incidencias')||'—'}</p>
+      <p style="font-weight:600;">CUMPLIMIENTO DE ACUERDOS ANTERIORES</p><p style="margin:6px 0 12px;">${gv('acuerdos')||'—'}</p>
+      <p style="font-weight:600;">TEMAS TRATADOS</p><p style="margin:6px 0 12px;">${gv('temas')||'—'}</p>
+      <p style="font-weight:600;">SEGURIDAD Y SALUD</p><p style="margin:6px 0 12px;">${gv('seguridad')||'—'}</p>
+      <hr>
+      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
+        <div><div class="firma-bloque">${d.promotor1}</div></div>
+        <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
+      </div>`;}
+
+    case'solicitud-libro-papel':
+    case'solicitud-libro-digital':{
+      const esD=doc.id==='solicitud-libro-digital';
+      const fmt=esD?'LIBRO DE ORDENES Y ASISTENCIAS DIGITAL':'LIBRO DE ORDENES Y ASISTENCIAS FORMATO PAPEL';
+      return`<h3>SOLICITUD DE LIBRO DE ÓRDENES${esD?' DIGITAL':''}</h3>
+      <div class="ficha">
+        <span class="fk">Clase de Trabajo</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Provincia</span><span class="fv">${d.provincia}</span>
+        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
+        <span class="fk">Coordinador S&amp;S</span><span class="fv">${d.arq}</span>
+        <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
+        <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
+      </div>
+      <div class="cuerpo">
+        <p>${d.arq} Arquitecto Director de las obras que se reseñan y en cumplimiento de lo dispuesto en el Artículo 2.º de la Orden del Ministerio de la Vivienda de fecha 9 de Junio de 1971 (B.O.E. nº. 144), por la que se dictan normas sobre el Libro de Ordenes y Asistencias en las obras de edificación, en desarrollo de las previsiones del Decreto 462/71.</p>
+        <p>Lo que pongo en conocimiento de esa Demarcación Colegial, para que conste y a efectos de que procedan a la EXPEDICIÓN DEL ${fmt} correspondiente.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div class="firma-bloque" style="margin-top:80pt;">EL DIRECTOR DE OBRA</div>
+      <div style="margin-top:80pt;">${d.arq}</div>
+      <div style="font-size:11px;">Arquitecto Colegiado nº ${d.arq_num}</div>
+      <div style="font-size:11px;">Colegio Oficial de Arquitectos de Cuenca</div></div>`;}
+
+    case'autorizacion-licencia':{
+      const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
+      ${encabezadoDecl(d,dest,'realizar la siguiente actuación urbanística')}
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
+      <div class="cuerpo">
+        <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
+        <p>Para que realice y gestione en su nombre la solicitud de las licencias urbanísticas necesarias para realizar la actuación arriba referida.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
+
+    case'autorizacion-licencia-legaliz':{
+      const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
+      <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
+      <div class="cuerpo">
+        <p>D. ${d.promotor1}, Mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        <p>Que realizó la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, para la cual obtuvo la preceptiva licencia de obra mayor.</p>
+      </div>
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
+      <div class="cuerpo">
+        <p>A D. ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
+        <p>Para que realice y gestione en su nombre la solicitud de las licencia de primera ocupación.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado D. ${d.promotor1}</div></div>`;}
+
+    case'autorizacion-pree5000':
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN DE LA AYUDA PREE 5000</h3>
+      ${encabezadoDecl(d,'','solicitar una ayuda de la convocatoria PREE 5000 para la siguiente actuación')}
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
+      <div class="cuerpo">
+        <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
+        <p>Para que realice y gestione en su nombre la ayuda de la convocatoria PREE5000 para la actuación arriba referida.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;
+
+    case'autorizacion-cee':{
+      const refCEE=gv('ref_catastral_cee')||d.ref_catastral;
+      const denomCEE=gv('denominacion_cee')||d.proyecto;
+      return`<h3>ANEXO V — MODELO DE REPRESENTACIÓN EN EL PROCEDIMIENTO DE INSCRIPCIÓN DE CERTIFICADOS DE EFICIENCIA ENERGÉTICA</h3>
+      <div class="cuerpo">
+        <p>Don/Doña: ${d.promotor1} con NIF ${d.promotor1_nif}</p>
+        <p>Como: ✗ Propietario / promotor</p>
+        <p style="margin-top:10px;">Autoriza a</p>
+        <p>Don/Doña: ${d.arq} con NIF ${d.arq_nif}</p>
+        <p>En calidad de: ✗ Técnico competente que suscribe el certificado que se pretende registrar.</p>
+        <p style="margin-top:10px;">A realizar las gestiones necesarias en el procedimiento de inscripción del certificado en el Registro Autonómico de Certificados de Eficiencia Energética de Castilla-La Mancha.</p>
+        <p style="margin-top:8px;">✗ Para el siguiente edificio:</p>
+        <p>Denominación: ${denomCEE}</p>
+        <p>Referencia catastral: ${refCEE}</p>
+        <p>Dirección: ${d.emplazamiento}, ${d.cp_obra}, ${d.municipio}, ${d.provincia}</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div style="margin-top:80pt;">Fdo.: ${d.promotor1}</div>
+      <div style="font-size:11px;">(la persona representada)</div></div>`;}
+
+    case'decl-iva':
+    case'decl-titularidad':
+    case'decl-corriente':
+    case'decl-subvenciones':{
+      const dest=gv('destinatario_decl')||'GERENTE DEL CONSORCIO CIUDAD DE CUENCA';
+      const act=gv('actuacion_decl')||'solicitar una subvención para la siguiente actuación';
+      const titulos={
+        'decl-iva':'DECLARACIÓN DE IVA',
+        'decl-titularidad':'DECLARACIÓN DE TITULARIDAD DE TODO EL INMUEBLE',
+        'decl-corriente':'DECLARACIÓN DE ESTAR AL CORRIENTE CON LAS ADMINISTRACIONES',
+        'decl-subvenciones':'DECLARACIÓN DE SUBVENCIONES SOLICITADAS Y OBTENIDAS PARA ESTA ACTUACIÓN',
+      };
+      const textos={
+        'decl-iva':'Que no se puede desgravar el IVA correspondiente a esta actuación.',
+        'decl-titularidad':gv('texto_titularidad')||'Que el edificio es una vivienda unifamiliar y es el titular del inmueble.',
+        'decl-corriente':`Estar al corriente de las obligaciones tributarias con la Administración estatal, autonómica, Ayuntamiento de ${d.municipio} y Diputación de ${d.provincia}, así como estar al corriente del cumplimiento de las obligaciones con la Seguridad Social.`,
+        'decl-subvenciones':'Que no ha solicitado ni obtenido ninguna otra subvención para esta actuación.',
+      };
+      return`<h3>${titulos[doc.id]}</h3>
+      ${encabezadoDecl(d,dest,act)}
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE DECLARA:</p>
+      <div class="cuerpo"><p>${textos[doc.id]}</p></div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
+
+    case'decl-iva-pree':{
+      const ivaOpt=gv('iva_recuperable')||'NO es susceptible de recuperación o compensación total o parcial.';
+      return`<h3>DECLARACIÓN RESPONSABLE SOBRE LA NATURALEZA DEL IVA</h3>
+      <div class="cuerpo">
+        <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        <p>A los efectos previstos en la Resolución de 05/03/2024, de la Consejería de Fomento, por la que se convocan ayudas para actuaciones de rehabilitación energética en viviendas y en edificios de viviendas existentes, en ejecución del Programa de rehabilitación energética para edificios existentes en municipios de reto demográfico (Programa PREE 5000) de Castilla-La Mancha.</p>
+        <p>Que el IVA soportado contenido en los justificantes de gasto presentados con ocasión de la justificación de la ayuda:</p>
+      </div>
+      <p style="font-weight:600;margin:12px 0 10px;">DECLARA:</p>
+      <div class="cuerpo"><p>✗ ${ivaOpt}</p></div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
+
+    case'solicitud-licencia':{
+      const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
+      return`<h3>SOLICITUD DE LICENCIA DE OBRA</h3>
+      <p style="margin-bottom:14px;"><strong>${dest}</strong></p>
+      <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
+      <div class="cuerpo">
+        <p>D. ${d.promotor1}, Mayor de edad, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        <p>Que quiere realizar la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, que se adjunta con esta solicitud.</p>
+        <p>Por todo lo expuesto, SOLICITA a V.I. que, previos los trámites e informes reglamentarios, le sea concedida la correspondiente licencia urbanística municipal.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado D. ${d.promotor1}</div></div>`;}
+
+    case'primera-ocupacion':{
+      const proms=gv('promotores_decl')||d.promotores_todos;
+      return`<h3>PRIMERA OCUPACIÓN DE VIVIENDA — DECLARACIÓN RESPONSABLE</h3>
+      <p style="font-weight:600;margin-bottom:8px;">DATOS DEL DECLARANTE</p>
+      <div class="ficha">
+        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        <span class="fk">CIF/NIF</span><span class="fv">${d.nifs_todos}</span>
+        <span class="fk">Dirección</span><span class="fv">${d.promotor1_dir}</span>
+        <span class="fk">C.P.</span><span class="fv">${d.promotor1_cp}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.promotor1_mun}</span>
+        <span class="fk">Provincia</span><span class="fv">${d.promotor1_prov}</span>
+      </div>
+      <p style="font-weight:600;margin-bottom:8px;">DATOS DE LA EDIFICACIÓN</p>
+      ${fichaBase(d)}
+      <div class="cuerpo">
+        <p>${proms} declaran, bajo su responsabilidad, que el inmueble construido arriba referido es acorde con la licencia de obras en su momento concedida, habiéndose cumplido las condiciones en ella impuestas, y todo ello a los efectos de la primera ocupación o utilización de la edificación.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div style="margin-top:8px;">SR. ALCALDE-PRESIDENTE del Excmo. Ayuntamiento de ${d.municipio}</div>
+      <div style="margin-top:20px;">Firmado: ${proms}</div></div>`;}
+
+    case'modificado':{
+      const numMod=gv('num_modificado')||'1';
+      const textoMod=gv('texto_modificado')||'[Describir las modificaciones realizadas]';
+      return`<h3>MODIFICADO NÚMERO ${numMod}</h3>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.fase}, ${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}, ${d.cp_obra} del municipio de ${d.municipio}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+      </div>
+      <div class="cuerpo">
+        <p>Se presenta el siguiente modificado del ${d.proyecto} ${d.emplazamiento} en ${d.cp_obra} del municipio de ${d.municipio}.</p>
+        <p>${textoMod}</p>
+        <p>Para que conste y surta los efectos oportunos firmo el presente modificado del ${d.proyecto} ${d.emplazamiento}.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div class="firma-bloque" style="margin-top:80pt;">EL ARQUITECTO / EL DIRECTOR DE OBRA</div>
+      <div style="margin-top:80pt;">${d.arq}</div>
+      <div style="font-size:11px;">Arquitecto Colegiado nº ${d.arq_num}</div>
+      <div style="font-size:11px;">Colegio Oficial de Arquitectos de Cuenca</div></div>`;}
+
+    case'anexo-fin-obra':{
+      const textoAnexo=gv('texto_anexo')||'[Describir las modificaciones realizadas durante la ejecución de la obra]';
+      return`<h3>ANEXO FIN DE OBRA — ${d.fase}, ${d.proyecto}</h3>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.fase}, ${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.promotor1_dir}, ${d.promotor1_cp}, ${d.promotor1_mun}</span>
+        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+      </div>
+      <div class="cuerpo">
+        <p>Se presenta el siguiente ANEXO FIN DE OBRA del ${d.fase} ${d.proyecto} en ${d.emplazamiento} del municipio de ${d.cp_obra}, ${d.municipio}, para detallar y justificar las modificaciones que se han realizado durante la ejecución de la obra.</p>
+        <p>${textoAnexo}</p>
+        <p>Para que conste y surta los efectos oportunos firmo el presente ANEXO FIN DE OBRA del ${d.proyecto} ${d.emplazamiento}.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div></div>`;}
+
+    case'alegaciones':
+    case'subsanacion':{
+      const esAleg=doc.id==='alegaciones';
+      const expA=gv('exp_admin')||'—';
+      const otA=gv('ot_admin')||'—';
+      const titA=gv('titular_admin')||d.promotor1;
+      const emplA=gv('emplaz_admin')||d.emplazamiento;
+      const textoI=esAleg?(gv('texto_alegaciones')||''):(gv('texto_subsanacion')||'');
+      const docsL=gv('docs_lista')||'';
+      const titulo=esAleg?'ALEGACIONES A LA DESESTIMACIÓN DE SOLICITUD DE AYUDA':'SUBSANACIÓN DE SOLICITUD DE AYUDA';
+      return`<h3>${titulo}</h3>
+      <div class="ficha">
+        <span class="fk">Expediente</span><span class="fv">${expA}</span>
+        <span class="fk">Expediente OT</span><span class="fv">${otA}</span>
+        <span class="fk">Titular</span><span class="fv">${titA}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${emplA}</span>
+        <span class="fk">Agente Gestor</span><span class="fv">${d.arq}</span>
+      </div>
+      <div class="cuerpo">
+        <p>${textoI}</p>
+        <div style="white-space:pre-line;margin-top:8px;">${docsL}</div>
+        <p style="margin-top:12px;">Para que conste y surta los efectos oportunos firmo las presentes ${esAleg?'alegaciones a la desestimación':'subsanación'} de la ayuda a la ${d.proyecto} ${d.emplazamiento}.</p>
+      </div>
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div class="firma-bloque" style="margin-top:80pt;">EL ARQUITECTO</div></div>`;}
+
+    default:return'<p style="color:var(--ink3);font-style:italic;">Selecciona un documento del catálogo.</p>';
+  }
+}
+
+function actualizarPreview(){
+  if(!docSeleccionado)return;
+  document.getElementById('doc-preview-container').innerHTML=generarTextoDoc(docSeleccionado,getDatosDoc());
+}
+
+function copiarTextoDoc(){
+  const t=document.getElementById('doc-preview-container')?.innerText||'';
+  navigator.clipboard.writeText(t).then(()=>{
+    document.getElementById('doc-gen-status').innerHTML='<div class="status ok">✓ Texto copiado al portapapeles.</div>';
+    setTimeout(()=>document.getElementById('doc-gen-status').innerHTML='',3000);
+  });
+}
+
+function imprimirPDF(){
+  const statusEl=document.getElementById('doc-gen-status');
+  if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
+  if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
+  const contenido=document.getElementById('doc-preview-container')?.innerHTML||'';
+  const w=window.open('','_blank','width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title></title>
+  <style>
+    @page{margin:20mm 25mm;size:A4;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#000;background:#fff;}
+    .page{width:210mm;margin:0 auto;padding:15mm 0;}
+    h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:16pt;font-weight:bold;}
+    .ficha{display:grid;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
+    .fk{font-weight:bold;text-transform:uppercase;font-size:8.5pt;}
+    .fv{font-weight:bold;}
+    .cuerpo p{margin-bottom:8pt;text-align:justify;}
+    .firma{margin-top:20pt;}
+    .firma-lugar{margin-bottom:80pt;}
+    .firma-bloque{font-weight:bold;font-size:9.5pt;}
+    hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
+    @media print{
+      body{margin:0;}
+      .page{margin:0;padding:0;width:100%;}
+      .no-print{display:none!important;}
+    }
+  </style></head><body>
+  <div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#f0f0f0;padding:8px;text-align:center;font-size:12px;z-index:999;box-shadow:0 1px 4px rgba(0,0,0,.15);">
+    <button onclick="window.print()" style="padding:6px 18px;background:#2d5a27;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">🖨 Imprimir / Guardar como PDF</button>
+    <span style="margin-left:16px;color:#666;">Más ajustes → desactiva <strong>Encabezados y pies de página</strong> → Guardar como PDF</span>
+  </div>
+  <div class="page" style="margin-top:40px;">${contenido}</div>
+  </body></html>`);
+  w.document.close();
+  statusEl.innerHTML='<div class="status ok">✓ Documento abierto en nueva ventana. Usa el botón "Imprimir / Guardar como PDF" o Ctrl+P.</div>';
+  setTimeout(()=>statusEl.innerHTML='',8000);
+}
+
+function descargarRTF(){
+  const statusEl=document.getElementById('doc-gen-status');
+  if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
+  if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
+  const container=document.getElementById('doc-preview-container');
+  if(!container){return;}
+
+  // Convertir HTML a RTF preservando formato
+  function esc(s){
+    return (s||'').replace(/\\/g,'\\\\').replace(/\{/g,'\\{').replace(/\}/g,'\\}')
+      .replace(/[^\x00-\x7F]/g,c=>{
+        const code=c.charCodeAt(0);
+        return code<256?`\\'${code.toString(16).padStart(2,'0')}`:`\\u${code}?`;
+      });
+  }
+  function nodeToRtf(node){
+    if(node.nodeType===3)return esc(node.textContent);
+    if(node.nodeType!==1)return'';
+    const tag=node.tagName.toLowerCase();
+    const inner=Array.from(node.childNodes).map(nodeToRtf).join('');
+    if(tag==='h3'){return`\\pard\\sb200\\sa100\\qc\\b\\ul ${inner}\\ulnone\\b0\\par\n`;}
+    if(tag==='p'){
+      const style=node.getAttribute('style')||'';
+      const center=node.style?.textAlign==='center'||style.includes('center');
+      return`\\pard\\sb0\\sa120\\qj ${inner}\\par\n`;
+    }
+    if(tag==='strong'||tag==='b')return`\\b ${inner}\\b0 `;
+    if(tag==='em'||tag==='i')return`\\i ${inner}\\i0 `;
+    if(tag==='u')return`\\ul ${inner}\\ulnone `;
+    if(tag==='br')return`\\line `;
+    if(tag==='hr')return`\\pard\\brdrb\\brdrs\\brdrw5\\brsp20 \\par\n`;
+    if(tag==='div'){
+      const cls=node.className||'';
+      if(cls.includes('ficha')){
+        // Tabla catastral: convertir spans fk/fv a dos columnas
+        const fks=node.querySelectorAll('.fk');
+        const fvs=node.querySelectorAll('.fv');
+        let rows='';
+        for(let i=0;i<fks.length;i++){
+          rows+=`\\trowd\\trgaph108\\cellx2800\\cellx9000\n\\pard\\intbl\\b\\fs18 ${esc(fks[i]?.textContent||'')}\\b0\\cell\n\\pard\\intbl\\b\\fs22 ${esc(fvs[i]?.textContent||'')}\\b0\\cell\\row\n`;
+        }
+        return rows;
+      }
+      if(cls.includes('firma')){return`\\pard\\sb400 ${inner}\\par\n`;}
+      if(cls.includes('firma-lugar')){return`\\pard\\sb200\\sa200 ${inner}\\par\n`;}
+      if(cls.includes('firma-bloque')){return`\\pard\\sb0\\b ${inner}\\b0\\par\n`;}
+      return inner;
+    }
+    if(tag==='span'){
+      const cls=node.className||'';
+      if(cls.includes('fk'))return`\\b\\fs18 ${inner}\\b0\\fs22 `;
+      if(cls.includes('fv'))return`\\b ${inner}\\b0 `;
+      return inner;
+    }
+    return inner;
+  }
+
+  const rtfBody=Array.from(container.childNodes).map(nodeToRtf).join('');
+  const rtf=`{\\rtf1\\ansi\\ansicpg1252\\deff0\n{\\fonttbl{\\f0\\fswiss\\fcharset0 Arial;}}\n{\\colortbl ;\\red0\\green0\\blue0;}\n\\paperw11906\\paperh16838\\margl1800\\margr1800\\margt1440\\margb1440\n\\widowctrl\\f0\\fs22\\cf1\n${rtfBody}\n}`;
+
+  const blob=new Blob([rtf],{type:'application/rtf'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`${docExpedienteActivo.expediente} — ${docSeleccionado.nombre.substring(0,50)}.rtf`;
+  a.click();URL.revokeObjectURL(url);
+  statusEl.innerHTML='<div class="status ok">✓ Documento descargado en formato .RTF con formato completo. Ábrelo con Word o LibreOffice.</div>';
+  setTimeout(()=>statusEl.innerHTML='',6000);
+}
+
+// ============ CATASTRO ============
+async function comprobarRefCatastral(ref){
+  const aviso=document.getElementById('catastral-proyectos-aviso');
+  if(!aviso)return;
+  const r=(ref||'').trim().toUpperCase();
+  if(r.length<14){aviso.innerHTML='';return;}
+  const encontrados=proyectos.filter(p=>(p.ref_catastral||'').toUpperCase()===r);
+  if(!encontrados.length){aviso.innerHTML='';return;}
+  const filas=encontrados.map(p=>`
+    <tr>
+      <td style="font-weight:600;white-space:nowrap;">${p.expediente}</td>
+      <td>${p.fecha_creacion||''}</td>
+      <td>${p.tipo_obra||''}</td>
+      <td>${p.cliente_nombre_completo||p.cliente_nombre||''}</td>
+      <td>
+        <button class="btn btn-secondary" style="padding:2px 8px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
+      </td>
+    </tr>`).join('');
+  aviso.innerHTML=`
+    <div class="status" style="background:#fff8e6;border:1px solid #e8c87a;border-radius:6px;padding:12px 14px;margin-top:10px;">
+      <strong>⚠ Esta referencia catastral ya existe en ${encontrados.length} expediente${encontrados.length>1?'s':''}:</strong>
+      <table style="width:100%;margin-top:8px;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="color:var(--ink3);text-transform:uppercase;font-size:10px;">
+          <th style="text-align:left;padding:4px 8px 4px 0;">Expediente</th>
+          <th style="text-align:left;padding:4px 8px;">Fecha</th>
+          <th style="text-align:left;padding:4px 8px;">Tipo</th>
+          <th style="text-align:left;padding:4px 8px;">Cliente</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>`;
+}
+
+async function consultarCatastro(){
+  const ref=document.getElementById('ref-catastral').value.trim().replace(/\s/g,'');
+  const statusEl=document.getElementById('catastro-status');
+  const dataEl=document.getElementById('catastro-data');
+  if(!ref||(ref.length!==14&&ref.length!==20)){statusEl.innerHTML=`<div class="status error">⚠ Introduce una referencia catastral válida (14 o 20 caracteres).</div>`;return;}
+  statusEl.innerHTML=`<div class="status loading"><div class="spinner"></div> Consultando Catastro vía Make…</div>`;
+  dataEl.style.display='none';datosCatastro=null;
+  try{
+    const r=await fetch(CONFIG.make.webhook_catastro,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref_catastral:ref})});
+    if(!r.ok)throw new Error(`Error ${r.status}`);
+    const text=await r.text();
+    if(!text||text.trim()==='')throw new Error('Make no devolvió datos.');
+    let data;try{data=JSON.parse(text);}catch{throw new Error('Respuesta no válida.');}
+    if(typeof data==='string'){try{data=JSON.parse(data);}catch{}}
+    if(data?.municipio||data?.direccion){
+      const dir=data.direccion||'';const mun=data.municipio||'';const prov=data.provincia||'';
+      const cp=data.cp?.match(/^\d{5}$/)?data.cp:(dir.match(/\b(\d{5})\b/)?.[1]||'');
+      datosCatastro={referencia:ref,direccion:dir,cp,municipio:mun,provincia:prov,uso:data.uso||'',anio:data.anio||'',supConstruida:data.sup_construida||'',supParcela:data.sup_parcela||data.sup_construida||'',coefParticipacion:'',clase:'Urbano'};
+      const sc=dir.match(/^(.*?)\s+\d{5}/);const calle=sc?sc[1].trim():dir.split(',')[0].trim();
+      document.getElementById('c-direccion').value=calle||'—';document.getElementById('c-municipio').value=mun||'—';
+      document.getElementById('c-provincia').value=prov||'—';document.getElementById('c-cp').value=cp||'—';
+      document.getElementById('c-uso').value=data.uso||'—';document.getElementById('c-anio').value=data.anio||'—';
+      document.getElementById('c-sup-cons').value=data.sup_construida||'—';document.getElementById('c-sup-suelo').value=data.sup_parcela||'—';
+      document.getElementById('c-coef').value='N/D';document.getElementById('c-clase').value='Urbano';
+      if(mun){document.getElementById('pro-municipio').value=mun;document.getElementById('pro-dir-inmueble').value=calle;document.getElementById('pro-provincia').value=prov||'Cuenca';document.getElementById('pro-cp').value=cp;previewExpediente();}
+      actualizarNombreCarpeta();dataEl.style.display='block';
+      statusEl.innerHTML=`<div class="status ok">✓ Datos obtenidos correctamente del Catastro.</div>`;
+      activarStep(2);return;
+    }
+    const consulta=data?.consulta_dnprcResult;
+    if(!consulta||consulta.lerr?.err?.cod!=='0')throw new Error(consulta?.lerr?.err?.des||'Referencia no encontrada');
+    const inmueble=consulta.lrcdnp?.rcdnp;const item=Array.isArray(inmueble)?inmueble[0]:inmueble;
+    if(!item)throw new Error('No se encontraron datos');
+    const dir2=item.dt?.locs?.lous?.lourb?.dir||{};const loint=item.dt?.locs?.lous?.lourb?.loint||{};const debi=item.debi||{};
+    const calle2=[dir2.tv,dir2.nv,dir2.pnp].filter(Boolean).join(' ');
+    const extra=[loint.bq?`Bloque ${loint.bq}`:'',loint.es?`Esc. ${loint.es}`:'',loint.pt?`Pl. ${loint.pt}`:'',loint.pu?`Pta. ${loint.pu}`:''].filter(Boolean).join(', ');
+    const cp2=item.dt?.locs?.lous?.lourb?.dp||'';const mun2=item.dt?.nm||'';const prov2=item.dt?.np||'';
+    const dirC=[calle2,extra].filter(Boolean).join(', ');
+    datosCatastro={referencia:ref,direccion:dirC,cp:cp2,municipio:mun2,provincia:prov2,uso:debi.luso||'',anio:debi.ant||'',supConstruida:debi.sfc||'',supParcela:debi.sfc2||debi.sfc||'',coefParticipacion:debi.cpt||'',clase:debi.clase||'Urbano'};
+    document.getElementById('c-direccion').value=dirC||'—';document.getElementById('c-municipio').value=mun2||'—';
+    document.getElementById('c-provincia').value=prov2||'—';document.getElementById('c-cp').value=cp2||'—';
+    document.getElementById('c-uso').value=datosCatastro.uso||'—';document.getElementById('c-anio').value=datosCatastro.anio||'—';
+    document.getElementById('c-sup-cons').value=debi.sfc||'—';document.getElementById('c-sup-suelo').value=debi.sfc2||debi.sfc||'—';
+    document.getElementById('c-coef').value=debi.cpt||'N/D';document.getElementById('c-clase').value=datosCatastro.clase;
+    if(mun2){const sc=dirC.match(/^(.*?)\s+\d{5}/);const cl=sc?sc[1].trim():dirC.split(',')[0].trim();
+      document.getElementById('pro-municipio').value=mun2;document.getElementById('pro-dir-inmueble').value=cl;
+      document.getElementById('pro-provincia').value=prov2||'Cuenca';document.getElementById('pro-cp').value=cp2;previewExpediente();}
+    actualizarNombreCarpeta();dataEl.style.display='block';
+    statusEl.innerHTML=`<div class="status ok">✓ Datos obtenidos correctamente del Catastro.</div>`;activarStep(2);
+  }catch(err){statusEl.innerHTML=`<div class="status error">✗ No se pudo obtener datos: ${err.message}. Puedes introducir los datos manualmente.</div>`;}
+}
+
+function abrirFichaCatastro(){const ref=document.getElementById('ref-catastral').value.trim().replace(/\s/g,'');if(!ref)return;window.open(`https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCListaBienes.aspx?RC1=${ref.substring(0,7)}&RC2=${ref.substring(7,14)}`,'_blank');}
+
+function actualizarNombreCarpeta(){
+  const{code}=previewExpediente();
+  const ts=document.getElementById('pro-tipo')?.value||'';const to=document.getElementById('pro-tipo-otro')?.value||'';
+  const tipo=((ts==='OTRO'&&to)?to:ts).toUpperCase()||'TIPO DE OBRA';
+  const dir=(datosCatastro?.direccion||document.getElementById('pro-dir-inmueble')?.value||'').toUpperCase();
+  const sc=dir.match(/^(.*?)\s+\d{5}/);const dl=sc?sc[1].trim():dir.replace(/,/g,'').replace(/\s+/g,' ').trim();
+  document.getElementById('nombre-carpeta').value=`${code} ${tipo} ${dl}`;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('cli-nombre')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
+  document.getElementById('pro-municipio')?.addEventListener('input',()=>{previewExpediente();actualizarNombreCarpeta();});
+  const ts=document.getElementById('pro-tipo');
+  if(ts)ts.addEventListener('change',()=>{document.getElementById('pro-tipo-otro').style.display=ts.value==='OTRO'?'block':'none';if(datosCatastro)actualizarNombreCarpeta();});
+  document.getElementById('pro-tipo-otro')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
+  const saved=localStorage.getItem('make_webhook_url');
+  if(saved){const el=document.getElementById('make-webhook-url');if(el)el.value=saved;}
+});
+
+function getCorrelativo(){const y=new Date().getFullYear();const ex=proyectos.filter(p=>p.anio==y);return ex.reduce((m,p)=>{const n=parseInt(p.numero_seq||0);return n>m?n:m;},1199)+1;}
+function municipioASufijo(m){if(!m)return'CUE';return m.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').substring(0,3).trim();}
+function copiarDatosGestorMemorias(){
+  const statusEl=document.getElementById('memorias-status');
+  if(!expedienteActual){statusEl.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
+  const d=expedienteActual;
+  const payload=JSON.stringify({
+    expediente:     d.expediente,
+    pro_nombre_proyecto: d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'',
+    descripcion:    d.descripcion||d.tipo_obra||'',
+    tipo_obra:      d.tipo_obra||'',
+    direccion_proyecto: d.direccion_proyecto||d.direccion_inmueble||'',
+    direccion_inmueble: d.direccion_inmueble||'',
+    cp:             d.cp||d.cp_obra||'',
+    cp_obra:        d.cp_obra||d.cp||'',
+    municipio:      d.municipio||'',
+    municipio_proyecto: d.municipio_proyecto||d.municipio||'',
+    provincia:      d.provincia||'CUENCA',
+    ref_catastral:  d.ref_catastral||'',
+    cliente_nombre_completo: d.cliente_nombre_completo||d.cliente_nombre||'',
+    cliente_nombre: d.cliente_nombre||'',
+    cliente_nif:    d.cliente_nif||'',
+    cliente_direccion: d.cliente_direccion||'',
+    promotor1:      d.promotor1||d.cliente_nombre_completo||d.cliente_nombre||'',
+    promotor1_nif:  d.promotor1_nif||d.cliente_nif||'',
+    promotor1_dir:  d.promotor1_dir||d.cliente_direccion||'',
+    pro_fase:       d.pro_fase||'',
+    pem:            d.pem ? parseFloat(d.pem).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) : '',
+  });
+  navigator.clipboard.writeText(payload).then(()=>{
+    statusEl.innerHTML=`<div class="status ok">✓ Datos copiados. Abre el Gestor de Memorias y pulsa "Pegar datos del expediente".</div>`;
+    setTimeout(()=>statusEl.innerHTML='',8000);
+  }).catch(()=>{
+    statusEl.innerHTML=`<div class="status error">⚠ No se pudo copiar al portapapeles. Asegúrate de dar permiso al navegador.</div>`;
+  });
+}
+
+function copiarMensajeMemorias(){
+  const statusEl=document.getElementById('memorias-status');
+  if(!expedienteActual){statusEl.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
+  const d=expedienteActual;
+  const proyecto=(d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'').toUpperCase();
+  const situacion=((d.direccion_proyecto||d.direccion_inmueble||'')+', '+(d.municipio_proyecto||d.municipio||'')+', '+(d.provincia_proyecto||d.provincia||'CUENCA')).toUpperCase();
+  const promotor=(d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
+  const fase=(d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
+  const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const ahora=new Date();
+  const fecha=meses[ahora.getMonth()]+' '+ahora.getFullYear();
+  const exp=d.expediente;
+
+  const msg=`Tengo 5 documentos Word (.docx) en Google Drive que son plantillas del estudio de arquitectura. Descarga cada uno, edita ÚNICAMENTE los datos variables haciendo find & replace del texto antiguo por el nuevo en el XML interno del .docx, y entrégame los 5 archivos con el formato, tipografía, márgenes, estilos y estructura 100% idénticos al original. NO generes el contenido desde cero.
+
+IDs de las plantillas en Google Drive:
+1. ${CONFIG.drive.plantillas_memorias.programa_mantenimiento} — programa de mantenimiento
+2. ${CONFIG.drive.plantillas_memorias.plan_control_calidad} — plan de control de calidad
+3. ${CONFIG.drive.plantillas_memorias.normativa} — normativa
+4. ${CONFIG.drive.plantillas_memorias.pliego_condiciones} — pliego de condiciones
+5. ${CONFIG.drive.plantillas_memorias.ebss} — EBSS
+
+Texto a sustituir (buscar → reemplazar en el XML de cada .docx):
+- "VIVIENDA UNIFAMILIAR EN VALDEMORO SIERRA" → "${proyecto}"
+- "CR CAMPILLOS, 5, VALDEMORO SIERRA, CUENCA" → "${situacion}"
+- "CARLOS GARRIDO LAGUÍA Y ADELINA BARQUERO ORTEGA" → "${promotor}"
+- "PROYECTO BÁSICO Y EJECUCIÓN" → "${fase}"
+- "DICIEMBRE 2025" → "${fecha}"
+
+Nombres de los archivos de salida:
+1. ${exp} 1 programa de mantenimiento.docx
+2. ${exp} 2 plan de control de calidad.docx
+3. ${exp} 3 normativa.docx
+4. ${exp} 4 pliego de condiciones.docx
+5. ${exp} 5 EBSS.docx`;
+
+  navigator.clipboard.writeText(msg).then(()=>{
+    statusEl.innerHTML=`<div class="status ok">✓ Mensaje copiado. Pégalo en una conversación nueva con Claude — generará los 5 .docx con los datos de este expediente a partir de las plantillas de Drive.</div>`;
+    setTimeout(()=>statusEl.innerHTML='',10000);
+  }).catch(()=>{
+    // Fallback: mostrar el texto para copiar manualmente
+    statusEl.innerHTML=`<div class="status info" style="flex-direction:column;align-items:flex-start;">
+      <strong>Copia este mensaje y pégalo en Claude:</strong>
+      <textarea style="width:100%;height:140px;margin-top:8px;font-size:11px;font-family:monospace;border:1px solid var(--border);border-radius:4px;padding:8px;" readonly>${msg}</textarea>
+    </div>`;
+  });
+}
+
+function previewExpediente(){
+  const manual=document.getElementById('exp-num-manual')?.value.trim().toUpperCase()||'';
+  const mun=document.getElementById('c-municipio')?.value||document.getElementById('pro-municipio')?.value||'';
+  const sufijoAuto=municipioASufijo(mun)||'CUE';const y=new Date().getFullYear();
+  let code,num,sufijo,year;
+  const m=manual.match(/^(\d+)-(\d{4})-([A-ZÑ]+)/);
+  if(m){
+    num=parseInt(m[1],10);year=parseInt(m[2],10);sufijo=m[3];code=`${m[1]}-${m[2]}-${m[3]}`;
+  }else if(manual){
+    code=manual;num=getCorrelativo();sufijo=sufijoAuto;year=y;
+  }else{
+    num=getCorrelativo();sufijo=sufijoAuto;year=y;code=`${num}-${y}-${sufijo}`;
+  }
+  const el=document.getElementById('exp-preview');if(el)el.textContent=code;
+  return{code,num,sufijo,year};
+}
+function activarStep(n){for(let i=1;i<=4;i++){const el=document.getElementById('step'+i);el.className='step'+(i<n?' done':i===n?' active':'');}}
+
+function generarExpediente(){
+  const statusEl=document.getElementById('gen-status');
+  const nombre=document.getElementById('cli-nombre').value.trim();
+  const apellido1=document.getElementById('cli-apellido1').value.trim();
+  const nif=document.getElementById('cli-nif').value.trim();
+  const ts=document.getElementById('pro-tipo').value;const to=document.getElementById('pro-tipo-otro')?.value?.trim();
+  const tipo=(ts==='OTRO'&&to)?to.toUpperCase():ts;
+  if(!nombre||!apellido1||!nif||!tipo){statusEl.innerHTML=`<div class="status error">⚠ Rellena: Nombre, Primer apellido, NIF y Tipo de obra.</div>`;return;}
+  statusEl.innerHTML='';activarStep(4);
+  let code,num,sufijo,year,fecha_creacion,fecha_iso,editando=false;
+  const manual=document.getElementById('exp-num-manual')?.value.trim()||'';
+  if(expedienteActual&&expedienteActual.expediente){
+    editando=true;
+    fecha_creacion=expedienteActual.fecha_creacion;fecha_iso=expedienteActual.fecha_iso;
+    if(manual){
+      // El número escrito a mano manda, incluso al editar un expediente existente
+      const prev=previewExpediente();code=prev.code;num=prev.num;sufijo=prev.sufijo;year=prev.year;
+    }else{
+      // Sin número manual: se mantiene el código y fecha de creación del expediente original
+      ({expediente:code,numero_seq:num,anio:year,sufijo}=expedienteActual);
+    }
+  }else{
+    const prev=previewExpediente();code=prev.code;num=prev.num;sufijo=prev.sufijo;year=prev.year;
+    const ahora=new Date();
+    fecha_creacion=ahora.toLocaleDateString('es-ES');fecha_iso=ahora.toISOString().split('T')[0];
+  }
+  const pem=parseFloat(document.getElementById('pro-pem').value)||0;
+  const hon=parseFloat(document.getElementById('pro-honorarios').value)||0;
+  expedienteActual={
+    expediente:code,numero_seq:num,anio:year,sufijo,
+    fecha_creacion,fecha_iso,
+    ref_catastral:document.getElementById('ref-catastral').value.trim()||'',
+    direccion_inmueble:document.getElementById('c-direccion').value||'',
+    cp:document.getElementById('c-cp')?.value||datosCatastro?.cp||'',
+    municipio:document.getElementById('c-municipio').value||document.getElementById('pro-municipio').value||'',
+    provincia:document.getElementById('c-provincia').value||'Cuenca',
+    uso_catastral:document.getElementById('c-uso').value||'',
+    anio_construccion:document.getElementById('c-anio').value||'',
+    sup_construida:document.getElementById('c-sup-cons').value||'',
+    sup_parcela:document.getElementById('c-sup-suelo').value||'',
+    clase_suelo:document.getElementById('c-clase').value||'',
+    nombre_carpeta:document.getElementById('nombre-carpeta')?.value||'',
+    cliente_nombre:nombre,cliente_apellido1:apellido1,
+    cliente_apellido2:document.getElementById('cli-apellido2').value.trim(),
+    cliente_nombre_completo:[nombre,apellido1,document.getElementById('cli-apellido2').value.trim()].filter(Boolean).join(' '),
+    cliente_nif:nif,
+    cliente_telefono:document.getElementById('cli-tel').value.trim(),
+    cliente_email:document.getElementById('cli-email').value.trim(),
+    cliente_direccion:document.getElementById('cli-dir').value.trim(),
+    cliente_cp:document.getElementById('cli-cp').value.trim(),
+    cliente_municipio:document.getElementById('cli-municipio').value.trim(),
+    cliente_provincia:document.getElementById('cli-provincia').value.trim(),
+    promotor2_nombre:[document.getElementById('cli2-nombre')?.value.trim(),document.getElementById('cli2-apellido1')?.value.trim(),document.getElementById('cli2-apellido2')?.value.trim()].filter(Boolean).join(' '),
+    promotor2_nif:document.getElementById('cli2-nif')?.value.trim()||'',
+    promotor3_nombre:[document.getElementById('cli3-nombre')?.value.trim(),document.getElementById('cli3-apellido1')?.value.trim(),document.getElementById('cli3-apellido2')?.value.trim()].filter(Boolean).join(' '),
+    promotor3_nif:document.getElementById('cli3-nif')?.value.trim()||'',
+    representante_nombre:[document.getElementById('rep-nombre')?.value.trim(),document.getElementById('rep-apellido1')?.value.trim(),document.getElementById('rep-apellido2')?.value.trim()].filter(Boolean).join(' '),
+    representante_nif:document.getElementById('rep-nif')?.value.trim()||'',
+    representante_cargo:document.getElementById('rep-cargo')?.value.trim()||'',
+    tipo_obra:tipo,descripcion:document.getElementById('pro-descripcion').value.trim(),
+    pro_nombre_proyecto:document.getElementById('pro-nombre-proyecto')?.value.trim()||'',
+    pro_fase:document.getElementById('pro-fase')?.value||'PROYECTO BÁSICO Y DE EJECUCIÓN',
+    direccion_proyecto:document.getElementById('pro-dir-inmueble')?.value.trim()||'',
+    municipio_proyecto:document.getElementById('pro-municipio').value.trim(),
+    provincia_proyecto:document.getElementById('pro-provincia')?.value.trim()||'Cuenca',
+    cp_proyecto:document.getElementById('pro-cp')?.value.trim()||'',
+    uso_inmueble:document.getElementById('pro-uso')?.value||'',
+    zona_climatica:document.getElementById('pro-zona').value||'D2',
+    pem:pem.toFixed(2),honorarios:hon.toFixed(2),iva_honorarios:(hon*1.21).toFixed(2),
+    licencia:document.getElementById('pro-licencia')?.value.trim()||'',
+    pro_fecha_inicio:document.getElementById('pro-fecha-inicio')?.value||'',
+    pro_fecha_fin:document.getElementById('pro-fecha-fin')?.value||'',
+    pro_fecha_recepcion:document.getElementById('pro-fecha-recepcion')?.value||'',
+    pro_dir_ejecucion:document.getElementById('pro-dir-ejecucion')?.value.trim()||'',
+    pro_constructor:document.getElementById('pro-constructor')?.value.trim()||'',
+    pro_constructor_nif:document.getElementById('pro-constructor-nif')?.value.trim()||'',
+    pro_constructor_rep:document.getElementById('pro-constructor-rep')?.value.trim()||'',
+    fecha_visado:document.getElementById('pro-fecha-visado')?.value||'',
+    observaciones:document.getElementById('pro-obs').value.trim(),
+    arquitecto:'Juan José Ramón Vindel',coacm:'COACM nº 4.236',colaborador:'Carlos (Delineante Proyectista)',
+  };
+  document.getElementById('exp-badge').textContent=code;
+  document.getElementById('exp-fecha').textContent=editando
+    ?`Creado el ${fecha_creacion} · Actualizado el ${new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`
+    :`Creado el ${new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+  document.getElementById('output-json').innerHTML=formatJSON(expedienteActual);
+  document.getElementById('output-variables').textContent=generarVariablesMemoria(expedienteActual);
+  document.getElementById('resultado-panel').style.display='block';
+  statusEl.innerHTML=editando
+    ?`<div class="status ok">✓ Expediente <strong>${code}</strong> actualizado. Pulsa "Guardar en listado" para sobrescribir la versión guardada.</div>`
+    :`<div class="status ok">✓ Expediente <strong>${code}</strong> generado.</div>`;
+  document.getElementById('resultado-panel').scrollIntoView({behavior:'smooth'});
+}
+
+function formatJSON(obj){return JSON.stringify(obj,null,2).split('\n').map(l=>l.replace(/"([^"]+)":/g,'<span class="key">"$1"</span>:').replace(/: "([^"]*)"/g,': <span class="val">"$1"</span>')).join('\n');}
+
+function generarVariablesMemoria(d){
+  return['══════════════════════════════════════════',`  VARIABLES — ${d.expediente}`,'══════════════════════════════════════════','',
+    '— EXPEDIENTE —',`EXPEDIENTE:      ${d.expediente}`,`TIPO DE OBRA:    ${d.tipo_obra}`,`PROYECTO:        ${d.pro_nombre_proyecto||'—'}`,`FASE:            ${d.pro_fase||'—'}`,'',
+    '— INMUEBLE —',`REF. CATASTRAL:  ${d.ref_catastral||'N/D'}`,`DIRECCIÓN:       ${d.direccion_inmueble||'N/D'}`,`MUNICIPIO:       ${d.municipio||'N/D'}`,`PROVINCIA:       ${d.provincia||'Cuenca'}`,'',
+    '— CLIENTE —',`NOMBRE:          ${d.cliente_nombre_completo||d.cliente_nombre||'N/D'}`,`NIF:             ${d.cliente_nif}`,`TELÉFONO:        ${d.cliente_telefono||'N/D'}`,`EMAIL:           ${d.cliente_email||'N/D'}`,'',
+    '— OBRA —',`LICENCIA:        ${d.licencia||'N/D'}`,`INICIO:          ${d.pro_fecha_inicio||'N/D'}`,`FIN:             ${d.pro_fecha_fin||'N/D'}`,`CONSTRUCTOR:     ${d.pro_constructor||'N/D'}`,'',
+    '— ECONÓMICO —',`PEM:             ${parseFloat(d.pem).toLocaleString('es-ES',{minimumFractionDigits:2})} €`,`HONORARIOS:      ${parseFloat(d.honorarios).toLocaleString('es-ES',{minimumFractionDigits:2})} €`,
+    '══════════════════════════════════════════'].join('\n');
+}
+
+function copiarJSON(){navigator.clipboard.writeText(JSON.stringify(expedienteActual,null,2)).then(()=>alert('JSON copiado.'));}
+function copiarVariables(){navigator.clipboard.writeText(generarVariablesMemoria(expedienteActual)).then(()=>alert('Variables copiadas.'));}
+
+function guardarEnListado(){
+  if(!expedienteActual)return;
+  const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
+  if(idx>=0)proyectos[idx]=expedienteActual;else proyectos.unshift(expedienteActual);
+  localStorage.setItem(CONFIG.localStorage_key,JSON.stringify(proyectos));
+  alert(`Expediente ${expedienteActual.expediente} guardado.`);
+}
+
+function actualizarFiltroAnios(){
+  const sel=document.getElementById('lista-filtro-anio');
+  if(!sel)return;
+  const cur=sel.value;
+  const anios=[...new Set(proyectos.map(p=>p.anio||String(p.expediente).split('-')[1]||'').filter(Boolean))].sort((a,b)=>b-a);
+  sel.innerHTML='<option value="">— Todos —</option>';
+  anios.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);});
+  if(cur)sel.value=cur;
+}
+
+function filtrarListado(){
+  const busq=(document.getElementById('lista-busqueda')?.value||'').toLowerCase().trim();
+  const tipo=document.getElementById('lista-filtro-tipo')?.value||'';
+  const anio=document.getElementById('lista-filtro-anio')?.value||'';
+
+  let filtrados=proyectos;
+
+  if(busq){
+    filtrados=filtrados.filter(p=>{
+      const campos=[
+        p.expediente,
+        p.cliente_nombre_completo,p.cliente_nombre,p.cliente_apellido1,
+        p.cliente_nif,p.promotor2_nombre,p.promotor3_nombre,
+        p.municipio,p.municipio_proyecto,
+        p.ref_catastral,
+        p.tipo_obra,p.pro_nombre_proyecto,
+        p.direccion_inmueble,p.direccion_proyecto,
+        p.licencia,p.observaciones
+      ].filter(Boolean).map(v=>v.toLowerCase());
+      return campos.some(c=>c.includes(busq));
+    });
+  }
+  if(tipo) filtrados=filtrados.filter(p=>p.tipo_obra===tipo);
+  if(anio) filtrados=filtrados.filter(p=>(p.anio||String(p.expediente).split('-')[1]||'')==anio);
+
+  const infoEl=document.getElementById('lista-resultados-info');
+  const hayFiltros=busq||tipo||anio;
+  if(hayFiltros){
+    infoEl.style.display='block';
+    infoEl.textContent=filtrados.length===proyectos.length
+      ?`Mostrando todos los expedientes (${proyectos.length})`
+      :`${filtrados.length} de ${proyectos.length} expediente${proyectos.length!==1?'s':''} ${filtrados.length===0?'— sin resultados':''}`;
+  } else {
+    infoEl.style.display='none';
+  }
+
+  renderTabla(filtrados);
+  document.getElementById('badge-count').textContent=`${proyectos.length} proyecto${proyectos.length!==1?'s':''}`;
+}
+
+function limpiarFiltros(){
+  document.getElementById('lista-busqueda').value='';
+  document.getElementById('lista-filtro-tipo').value='';
+  document.getElementById('lista-filtro-anio').value='';
+  filtrarListado();
+}
+
+function renderListado(){
+  actualizarFiltroAnios();
+  filtrarListado();
+}
+
+function renderTabla(lista){
+  const container=document.getElementById('listado-container');
+  document.getElementById('badge-count').textContent=`${proyectos.length} proyecto${proyectos.length!==1?'s':''}`;
+  if(proyectos.length===0){
+    container.innerHTML=`<div class="empty-state"><svg width="40" height="40" fill="none" stroke="var(--ink3)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><p>Todavía no hay expedientes guardados.</p></div>`;
+    return;
+  }
+  if(lista.length===0){
+    container.innerHTML=`<div class="empty-state"><svg width="40" height="40" fill="none" stroke="var(--ink3)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No hay expedientes que coincidan con los filtros aplicados.</p></div>`;
+    return;
+  }
+  const rows=lista.map(p=>`<tr>
+    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
+    <td>${p.fecha_creacion}</td>
+    <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
+    <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
+    <td>${p.municipio||'—'}</td>
+    <td>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
+      <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+    </td>
+  </tr>`).join('');
+  container.innerHTML=`<div class="project-list-wrap"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function borrarExpediente(code){
+  if(!confirm(`¿Eliminar el expediente ${code}?\n\nEsta acción no se puede deshacer. La carpeta de Drive NO se borra.`))return;
+  proyectos=proyectos.filter(p=>p.expediente!==code);
+  localStorage.setItem(CONFIG.localStorage_key,JSON.stringify(proyectos));
+  if(expedienteActual&&expedienteActual.expediente===code)expedienteActual=null;
+  actualizarFiltroAnios();renderListado();
+}
+
+function cargarDatosEnFormulario(p){
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val??'';};
+
+  set('exp-num-manual',p.expediente);
+
+  // Catastro
+  set('ref-catastral',p.ref_catastral);
+  set('c-direccion',p.direccion_inmueble);
+  set('c-municipio',p.municipio);
+  set('c-provincia',p.provincia);
+  set('c-cp',p.cp);
+  set('c-uso',p.uso_catastral);
+  set('c-anio',p.anio_construccion);
+  set('c-sup-cons',p.sup_construida);
+  set('c-sup-suelo',p.sup_parcela);
+  set('c-clase',p.clase_suelo);
+  if(p.ref_catastral){
+    document.getElementById('catastro-data').style.display='block';
+    document.getElementById('catastro-status').innerHTML=`<div class="status ok">✓ Datos catastrales del expediente guardado.</div>`;
+  }
+  datosCatastro={referencia:p.ref_catastral||'',direccion:p.direccion_inmueble||'',cp:p.cp||'',municipio:p.municipio||'',provincia:p.provincia||'',uso:p.uso_catastral||'',anio:p.anio_construccion||'',supConstruida:p.sup_construida||'',supParcela:p.sup_parcela||'',coefParticipacion:'',clase:p.clase_suelo||''};
+
+  set('nombre-carpeta',p.nombre_carpeta);
+
+  // Cliente / promotor principal
+  set('cli-nombre',p.cliente_nombre);
+  set('cli-apellido1',p.cliente_apellido1);
+  set('cli-apellido2',p.cliente_apellido2);
+  set('cli-nif',p.cliente_nif);
+  set('cli-tel',p.cliente_telefono);
+  set('cli-email',p.cliente_email);
+  set('cli-dir',p.cliente_direccion);
+  set('cli-cp',p.cliente_cp);
+  set('cli-municipio',p.cliente_municipio);
+  set('cli-provincia',p.cliente_provincia);
+
+  // Promotores adicionales (solo se guarda el nombre completo y el NIF)
+  set('cli2-nombre',p.promotor2_nombre);
+  set('cli2-nif',p.promotor2_nif);
+  set('cli3-nombre',p.promotor3_nombre);
+  set('cli3-nif',p.promotor3_nif);
+
+  // Representante
+  set('rep-nombre',p.representante_nombre);
+  set('rep-nif',p.representante_nif);
+  set('rep-cargo',p.representante_cargo);
+
+  // Proyecto / obra
+  const tipoSel=document.getElementById('pro-tipo');
+  const otroInput=document.getElementById('pro-tipo-otro');
+  const opciones=[...tipoSel.options].map(o=>o.value);
+  if(opciones.includes(p.tipo_obra)){
+    tipoSel.value=p.tipo_obra;
+    if(otroInput)otroInput.style.display='none';
+  }else{
+    tipoSel.value='OTRO';
+    if(otroInput){otroInput.value=p.tipo_obra||'';otroInput.style.display='block';}
+  }
+  set('pro-descripcion',p.descripcion);
+  set('pro-nombre-proyecto',p.pro_nombre_proyecto);
+  set('pro-fase',p.pro_fase);
+  set('pro-dir-inmueble',p.direccion_proyecto);
+  set('pro-municipio',p.municipio_proyecto);
+  set('pro-provincia',p.provincia_proyecto);
+  set('pro-cp',p.cp_proyecto);
+  set('pro-uso',p.uso_inmueble);
+  set('pro-zona',p.zona_climatica||'D2');
+  set('pro-pem',p.pem);
+  set('pro-honorarios',p.honorarios);
+  set('pro-licencia',p.licencia);
+  set('pro-fecha-inicio',p.pro_fecha_inicio);
+  set('pro-fecha-fin',p.pro_fecha_fin);
+  set('pro-fecha-recepcion',p.pro_fecha_recepcion);
+  set('pro-fecha-visado',p.fecha_visado);
+  set('pro-dir-ejecucion',p.pro_dir_ejecucion);
+  set('pro-constructor',p.pro_constructor);
+  set('pro-constructor-nif',p.pro_constructor_nif);
+  set('pro-constructor-rep',p.pro_constructor_rep);
+  set('pro-obs',p.observaciones);
+}
+
+function verExpediente(code){
+  const p=proyectos.find(x=>x.expediente===code);if(!p)return;
+  expedienteActual=p;
+  cargarDatosEnFormulario(p);
+  previewExpediente();
+  activarStep(4);
+  // Actualizar estado del botón Make según si ya se envió a Drive
+  const btnMake=document.getElementById('btn-make');
+  if(btnMake){
+    if(p.drive_enviado){
+      btnMake.textContent='✓ Ya enviado a Drive';btnMake.style.opacity='0.6';
+      document.getElementById('btn-make-reset').style.display='';
+      document.getElementById('make-status').innerHTML=`<div class="status ok">✓ Este expediente ya fue enviado a Drive. Pulsa "↺ Reenviar" solo si borraste la carpeta en Drive.</div>`;
+    }else{
+      btnMake.innerHTML='<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Enviar a Make → Drive';
+      btnMake.style.opacity='';
+      document.getElementById('btn-make-reset').style.display='none';
+      document.getElementById('make-status').innerHTML='';
+    }
+  }
+  document.getElementById('exp-badge').textContent=p.expediente;
+  document.getElementById('exp-fecha').textContent=`Creado el ${p.fecha_creacion}`;
+  document.getElementById('output-json').innerHTML=formatJSON(p);
+  document.getElementById('output-variables').textContent=generarVariablesMemoria(p);
+  document.getElementById('resultado-panel').style.display='block';
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-nuevo').classList.add('active');
+  document.querySelectorAll('.tab')[0].classList.add('active');
+  document.getElementById('tab-nuevo').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function cargarParaDocumentos(code){
+  const p=proyectos.find(x=>x.expediente===code);if(!p)return;
+  docExpedienteActivo=p;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-documentos').classList.add('active');
+  document.querySelectorAll('.tab')[1].classList.add('active');
+  iniciarTabDocumentos();
+  setTimeout(()=>{document.getElementById('doc-exp-select').value=code;mostrarExpedienteCargado(p);},50);
+}
+
+function exportarCSV(){
+  if(!proyectos.length)return alert('No hay expedientes.');
+  const keys=Object.keys(proyectos[0]);
+  const csv=[keys.join(';'),...proyectos.map(p=>keys.map(k=>`"${(p[k]||'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
+  dlBlob(csv,`expedientes_${new Date().getFullYear()}.csv`,'text/csv;charset=utf-8;');
+}
+function exportarJSON(){if(!proyectos.length)return alert('No hay expedientes.');dlBlob(JSON.stringify(proyectos,null,2),`expedientes_${new Date().getFullYear()}.json`,'application/json');}
+
+function importarJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const datos=JSON.parse(e.target.result);
+      if(!Array.isArray(datos))throw new Error('El archivo no contiene una lista de expedientes.');
+      const nuevos=datos.filter(d=>d.expediente);
+      if(!nuevos.length)throw new Error('No se encontraron expedientes válidos en el archivo.');
+      const existentes=proyectos.map(p=>p.expediente);
+      const duplicados=nuevos.filter(d=>existentes.includes(d.expediente));
+      const novedosos=nuevos.filter(d=>!existentes.includes(d.expediente));
+      let msg=`Se importarán ${nuevos.length} expedientes:\n• ${novedosos.length} nuevos\n• ${duplicados.length} ya existentes (se sobreescribirán).\n\n¿Continuar?`;
+      if(!confirm(msg)){input.value='';return;}
+      // Merge: sobreescribir existentes y añadir nuevos
+      nuevos.forEach(d=>{
+        const idx=proyectos.findIndex(p=>p.expediente===d.expediente);
+        if(idx>=0)proyectos[idx]=d;else proyectos.unshift(d);
+      });
+      proyectos.sort((a,b)=>parseInt(b.numero_seq||0)-parseInt(a.numero_seq||0));
+      localStorage.setItem(CONFIG.localStorage_key,JSON.stringify(proyectos));
+      actualizarFiltroAnios();renderListado();
+      alert(`✓ Importados ${nuevos.length} expedientes correctamente.`);
+    }catch(err){
+      alert(`Error al importar: ${err.message}`);
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function dlBlob(c,n,t){const b=new Blob([c],{type:t});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=n;a.click();URL.revokeObjectURL(u);}
+function limpiarFormulario(){
+  if(!confirm('¿Limpiar el formulario?'))return;
+  document.querySelectorAll('input:not([readonly]),select,textarea').forEach(el=>el.value='');
+  document.getElementById('catastro-data').style.display='none';
+  document.getElementById('catastro-status').innerHTML='';
+  const aviso=document.getElementById('catastral-proyectos-aviso');if(aviso)aviso.innerHTML='';
+  document.getElementById('gen-status').innerHTML='';
+  document.getElementById('resultado-panel').style.display='none';
+  document.getElementById('exp-preview').textContent='— — — — — — —';
+  document.getElementById('pro-zona').value='D2';
+  datosCatastro=null;expedienteActual=null;activarStep(1);
+}
+function nuevoExpediente(){limpiarFormulario();window.scrollTo({top:0,behavior:'smooth'});}
+function limpiarListado(){if(!confirm('¿Eliminar todos los expedientes?'))return;proyectos=[];localStorage.setItem(CONFIG.localStorage_key,JSON.stringify(proyectos));renderListado();}
+const SUBCARPETAS_BASE=['DATOS Y TEXTO','FOTOGRAFIAS','PLANOS','PRESUPUESTO','PDF','CEE','FINAL DE OBRA','GESTION'];
+function buildSubcarpetas(code){return SUBCARPETAS_BASE.map(c=>`${code} ${c}`);}
+
+function toggleSeccion(id,btn){const el=document.getElementById(id);if(el.style.display==='none'){el.style.display='block';btn.textContent=btn.textContent.replace('+ Añadir','− Ocultar');}else{el.style.display='none';btn.textContent=btn.textContent.replace('− Ocultar','+ Añadir');}}
+
+async function enviarAMake(){
+  const wh=document.getElementById('make-webhook-url').value.trim();const statusEl=document.getElementById('make-status');
+  if(!wh||!wh.startsWith('https://hook.')){statusEl.innerHTML=`<div class="status error">⚠ Introduce la URL del webhook de Make.</div>`;return;}
+  if(!expedienteActual){statusEl.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
+
+  // Bloquear reenvío si ya se creó la carpeta en Drive
+  if(expedienteActual.drive_enviado){
+    if(!confirm(`⚠ Este expediente (${expedienteActual.expediente}) ya se envió a Drive.\n\nSi lo vuelves a enviar se creará una carpeta duplicada en Drive.\n\n¿Quieres enviarlo de todas formas?`)){return;}
+  }
+
+  const btn=document.getElementById('btn-make');btn.disabled=true;
+  statusEl.innerHTML=`<div class="status loading"><div class="spinner"></div> Enviando a Make…</div>`;
+  const payload={...expedienteActual,nombre_carpeta:document.getElementById('nombre-carpeta')?.value||expedienteActual.expediente,subcarpetas:buildSubcarpetas(expedienteActual.expediente),anio_carpeta:new Date().getFullYear().toString()};
+  try{
+    const r=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const ct=r.headers.get('content-type')||'';const res=ct.includes('json')?await r.json():{raw:await r.text()};
+    if(r.ok){
+      // Marcar como enviado y guardar en listado
+      expedienteActual.drive_enviado=true;
+      const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
+      if(idx>=0){proyectos[idx]=expedienteActual;localStorage.setItem(CONFIG.localStorage_key,JSON.stringify(proyectos));}
+      const u=res?.folder_url||res?.url||'';
+      document.getElementById('btn-make-reset').style.display='';
+      statusEl.innerHTML=`<div class="status ok">✓ Carpeta creada en Drive.${u?` <a href="${u}" target="_blank" style="color:var(--ok);text-decoration:underline;">Abrir en Drive →</a>`:''} Pulsa "↺ Reenviar" solo si necesitas borrar y recrear la carpeta.</div>`;
+      btn.textContent='✓ Ya enviado a Drive';btn.style.opacity='0.6';
+    }
+    else statusEl.innerHTML=`<div class="status error">✗ Error ${r.status}.</div>`;
+  }catch(err){statusEl.innerHTML=`<div class="status info">ℹ CORS bloqueado — Make puede haberlo recibido igualmente. <button class="btn btn-secondary" onclick="copiarPayloadMake()" style="margin-top:6px;padding:4px 10px;">Copiar payload JSON</button></div>`;}
+  finally{btn.disabled=false;}
+}
+function resetarDriveEnviado(){
+  if(!expedienteActual)return;
+  if(!confirm(`¿Confirmas que la carpeta de Drive del expediente ${expedienteActual.expediente} ya no existe y quieres poder volvera a crearla?`))return;
+  expedienteActual.drive_enviado=false;
+  const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
+  if(idx>=0){proyectos[idx]=expedienteActual;localStorage.setItem(CONFIG.localStorage_key,JSON.stringify(proyectos));}
+  const btn=document.getElementById('btn-make');
+  btn.innerHTML='<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Enviar a Make → Drive';
+  btn.style.opacity='';
+  document.getElementById('btn-make-reset').style.display='none';
+  document.getElementById('make-status').innerHTML=`<div class="status info">ℹ Listo para volver a enviar a Drive.</div>`;
+}
+function copiarPayloadMake(){if(!expedienteActual)return;const p={...expedienteActual,nombre_carpeta:document.getElementById('nombre-carpeta')?.value||expedienteActual.expediente,subcarpetas:buildSubcarpetas(expedienteActual.expediente)};navigator.clipboard.writeText(JSON.stringify(p,null,2)).then(()=>alert('Payload copiado.'));}
+
+async function generarExcelDatos(){
+  const statusEl=document.getElementById('excel-status');
+  if(!expedienteActual){statusEl.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
+  if(typeof ExcelJS==='undefined'){statusEl.innerHTML=`<div class="status error">⚠ No se pudo cargar la librería de Excel (revisa la conexión a internet).</div>`;return;}
+  statusEl.innerHTML=`<div class="status loading"><div class="spinner"></div> Generando Excel…</div>`;
+  try{
+    const d=expedienteActual;
+    const wb=new ExcelJS.Workbook();
+    const ws=wb.addWorksheet('DATOS');
+    ws.columns=[{width:22.71},{width:34.43},{width:31.86},{width:8.43},{width:16},{width:34.43}];
+
+    const F_LABEL={name:'Arial',size:9};
+    const F_PLAIN={name:'Arial',size:10};
+    const F_IN={name:'Arial',size:10,bold:true,color:{argb:'FF0000FF'}};
+    const F_CALC={name:'Arial',size:10,bold:true};
+    const THIN={style:'thin'};
+    const EUR='#,##0.00\\ "€";\\-#,##0.00\\ "€"';
+    const EURBOX='_-* #,##0.00\\ "€"_-;\\-* #,##0.00\\ "€"_-;_-* "-"??\\ "€"_-;_-@_-';
+    const DATEFMT='dd/mm/yyyy';
+
+    function set(addr,val,font,extra){
+      extra=extra||{};
+      const c=ws.getCell(addr);
+      if(val!==undefined)c.value=val;
+      c.font=font;
+      if(extra.numFmt)c.numFmt=extra.numFmt;
+      if(extra.align)c.alignment={horizontal:extra.align};
+    }
+    function header(row,title){
+      ws.mergeCells(`A${row}:F${row}`);
+      const c=ws.getCell(`A${row}`);
+      c.value=title;c.font=F_PLAIN;c.alignment={horizontal:'center'};
+      ['A','B','C','D','E','F'].forEach(col=>{
+        ws.getCell(`${col}${row}`).border={
+          top:THIN,bottom:THIN,
+          left:col==='A'?THIN:undefined,
+          right:col==='F'?THIN:undefined
+        };
+      });
+    }
+    function toDate(s){return s?new Date(s+'T00:00:00'):null;}
+
+    // ── DATOS GENERALES ──
+    header(1,'DATOS GENERALES');
+    set('A2','EXPEDIENTE',F_LABEL); set('B2',d.expediente||'',F_IN,{numFmt:'@'});
+    set('C2','REPRESENTANTE',F_LABEL); set('F2','CONTRATISTA',F_LABEL);
+    set('A3','FECHA INICIAL',F_LABEL);
+    set('B3',d.fecha_iso?toDate(d.fecha_iso):'',F_IN,{numFmt:DATEFMT});
+    set('A4','FECHA',F_LABEL); set('B4',{formula:'TODAY()'},F_IN,{numFmt:DATEFMT});
+    set('A5','PROMOTOR',F_LABEL); set('B5',d.cliente_nombre_completo||'',F_IN,{numFmt:'@'});
+    set('E5','CONTRATISTA',F_LABEL); set('F5',d.pro_constructor||'',F_IN,{numFmt:'@'});
+    set('A6','CIF/NIF',F_LABEL); set('B6',d.cliente_nif||'',F_IN,{numFmt:'@'});
+    set('E6','CIF/NIF',F_LABEL); set('F6',d.pro_constructor_nif||'',F_IN,{numFmt:'@'});
+    set('A7','DIRECCION',F_LABEL); set('B7',d.cliente_direccion||'',F_IN,{numFmt:'@'});
+    set('E7','DIRECCION',F_LABEL); set('F7','',F_IN,{numFmt:'@'});
+    set('A8','CODIGO POSTAL',F_LABEL); set('B8',d.cliente_cp||'',F_IN,{numFmt:'@'});
+    set('E8','CODIGO POST.',F_LABEL); set('F8','',F_IN,{numFmt:'@'});
+    set('A9','LOCALIDAD',F_LABEL); set('B9',d.cliente_municipio||'',F_IN,{numFmt:'@'});
+    set('E9','POBLACION',F_LABEL); set('F9','',F_IN,{numFmt:'@'});
+    set('A10','PROVINCIA',F_LABEL); set('B10',d.cliente_provincia||'',F_IN,{numFmt:'@'});
+    set('E10','PROVINCIA',F_LABEL); set('F10','',F_IN,{numFmt:'@'});
+    set('A11','CORREO ELCTRÓNICO',F_LABEL); set('B11',d.cliente_email||'',F_IN,{numFmt:'@'});
+    set('E11','REPRESENTANTE',F_LABEL); set('F11',d.representante_nombre||'',F_IN,{numFmt:'@'});
+    set('A12','TELÉFONO',F_LABEL); set('B12',d.cliente_telefono||'',F_IN,{numFmt:'@'});
+    set('E12','FIRMA PSS OBRA',F_LABEL); set('F12',d.pro_constructor_rep||'',F_IN,{numFmt:'@'});
+
+    // ── DATOS PROYECTO ──
+    header(15,'DATOS PROYECTO');
+    set('A16','FASE',F_LABEL); set('B16',d.pro_fase||'',F_IN,{numFmt:'@'});
+    set('D16','PEM',F_PLAIN); set('F16',parseFloat(d.pem)||0,F_CALC,{numFmt:EURBOX,align:'right'});
+    set('A17','PROYECTO',F_LABEL); set('B17',d.pro_nombre_proyecto||d.descripcion||'',F_IN,{numFmt:'@'});
+    set('D17','GG',F_PLAIN); set('E17',0,F_PLAIN,{numFmt:'0%',align:'center'});
+    set('F17',{formula:'ROUND(F16*E17,2)'},F_CALC,{numFmt:EUR});
+    set('A18','EMPLAZAMIENTO',F_LABEL); set('B18',d.direccion_proyecto||'',F_IN,{numFmt:'@'});
+    set('C18',d.ref_catastral||'',F_IN,{numFmt:'@'});
+    set('D18','BI',F_PLAIN); set('E18',0,F_PLAIN,{numFmt:'0%',align:'center'});
+    set('F18',{formula:'ROUND(F16*E18,2)'},F_CALC,{numFmt:EUR});
+    set('A19',{formula:'+A8'},F_LABEL); set('B19',d.cp_proyecto||'',F_IN,{numFmt:'@'});
+    set('F19',{formula:'SUM(F17:F18)'},F_CALC,{numFmt:EUR,align:'center'});
+    set('A20',{formula:'+A9'},F_LABEL); set('B20',d.municipio_proyecto||'',F_IN,{numFmt:'@'});
+    set('D20','SUMA',F_PLAIN); set('F20',{formula:'F19+F16'},F_CALC,{numFmt:EUR,align:'right'});
+    set('A21',{formula:'+A10'},F_LABEL); set('B21',d.provincia_proyecto||'',F_IN,{numFmt:'@'});
+    set('D21','IVA',F_PLAIN); set('E21',0.1,F_PLAIN,{numFmt:'0%',align:'center'});
+    set('F21',{formula:'ROUND(F20*E21,2)'},F_CALC,{numFmt:EUR});
+    set('D22','TOTAL',F_PLAIN); set('F22',{formula:'F20+F21'},F_CALC,{numFmt:EUR,align:'right'});
+
+    // ── DATOS DE OBRA ──
+    header(23,'DATOS DE OBRA');
+    set('A24','PROYECTISTA',F_LABEL); set('B24',d.arquitecto||'',F_IN,{numFmt:'@'});
+    set('C24','ARQUITECTO',F_IN,{numFmt:'@'}); set('D24',d.coacm||'',F_IN,{numFmt:'@'}); set('F24',CONFIG.arq_nif,F_IN,{numFmt:'@'});
+    set('A25','DIRECTOR DE OBRA',F_LABEL); set('B25',d.arquitecto||'',F_IN,{numFmt:'@'});
+    set('C25','ARQUITECTO',F_IN,{numFmt:'@'}); set('D25',d.coacm||'',F_IN,{numFmt:'@'}); set('F25',CONFIG.arq_nif,F_IN,{numFmt:'@'});
+    set('A26','DIRECTOR DE EJECUCION',F_LABEL); set('B26',d.pro_dir_ejecucion||'',F_IN,{numFmt:'@'});
+    set('C26','ARQUITECTO TÉCNICO',F_IN,{numFmt:'@'});
+    set('A27','COORDINADOR DE SEGURIDAD Y SALUD EN OBRA',F_LABEL); set('B27',d.arquitecto||'',F_IN,{numFmt:'@'});
+    set('C27','ARQUITECTO',F_IN,{numFmt:'@'}); set('D27',d.coacm||'',F_IN,{numFmt:'@'}); set('F27',CONFIG.arq_nif,F_IN,{numFmt:'@'});
+    set('A28','CONSTRUCTOR',F_LABEL); set('B28',{formula:'F5'},F_IN,{numFmt:'@'});
+    set('A29','REPRESENTANTE',F_LABEL); set('B29',{formula:'F11'},F_IN,{numFmt:'@'});
+
+    // ── SOLICITUDES / FECHAS ──
+    set('A31','SOLICITUDES',F_LABEL); set('B31','',F_IN,{numFmt:DATEFMT});
+    set('A32','LICENCIA DE OBRAS',F_LABEL); set('B32',d.licencia||'',F_IN,{numFmt:'@'});
+    set('A33','FECHA DE APROBACIÓN DEL PLAN DE SEGURIDAD Y SALUD EN OBRA',F_LABEL); set('B33','',F_IN,{numFmt:DATEFMT});
+    set('A34','COMIENZO OBRA',F_LABEL);
+    if(d.pro_fecha_inicio){
+      set('B34',toDate(d.pro_fecha_inicio),F_IN,{numFmt:DATEFMT});
+      set('C34','09:00',F_IN,{numFmt:'@'});
+      set('D34',{formula:'DAY(B34)'},F_CALC,{numFmt:'@'});
+      set('E34',{formula:'TEXT(B34,"MMMM")'},F_CALC);
+      set('F34',{formula:'YEAR(B34)'},F_CALC,{numFmt:'@'});
+    }else{
+      set('B34','',F_IN,{numFmt:DATEFMT}); set('C34','',F_IN,{numFmt:'@'});
+    }
+    set('A35','ACTA PAVIMENTO MOBILIARIO',F_LABEL); set('B35','',F_IN,{numFmt:DATEFMT}); set('C35','',F_IN,{numFmt:'@'});
+
+    set('A37','NIF EMPRESA (ANEXO V)',F_LABEL); set('B37',{formula:'F6'},F_IN,{numFmt:'@'});
+    set('A38','EMPRESA (ANEXO V)',F_LABEL); set('B38',{formula:'F5'},F_IN,{numFmt:'@'});
+    set('A39','FIN DE OBRA',F_LABEL);
+    if(d.pro_fecha_fin){
+      set('B39',toDate(d.pro_fecha_fin),F_IN,{numFmt:DATEFMT});
+      set('C39',{formula:'B39'},F_IN,{numFmt:DATEFMT});
+    }else{
+      set('B39','',F_IN,{numFmt:DATEFMT});
+    }
+    set('A40','ACTA DE RECEPCION',F_LABEL);
+    set('C40','13:00',F_IN,{numFmt:'@'});
+    if(d.pro_fecha_recepcion){
+      set('B40',toDate(d.pro_fecha_recepcion),F_IN,{numFmt:DATEFMT});
+      set('D40',{formula:'DAY(B40)'},F_CALC,{numFmt:'@'});
+      set('E40',{formula:'TEXT(B40,"MMMM")'},F_CALC);
+      set('F40',{formula:'YEAR(B40)'},F_CALC,{numFmt:'@'});
+    }else if(d.pro_fecha_fin){
+      set('B40',{formula:'B39'},F_IN,{numFmt:DATEFMT});
+      set('D40',{formula:'DAY(B40)'},F_CALC,{numFmt:'@'});
+      set('E40',{formula:'TEXT(B40,"MMMM")'},F_CALC);
+      set('F40',{formula:'YEAR(B40)'},F_CALC,{numFmt:'@'});
+    }else{
+      set('B40','',F_IN,{numFmt:DATEFMT});
+    }
+
+    // ── ACTAS DE VISITA (a rellenar manualmente) ──
+    [[44,'ACTA NUMERO'],[45,'FECHA DE ACTA'],[46,'FECHA ACTA ANTERIOR'],[47,'ANTECEDENTES'],
+     [48,'CUMPLIMIENTO DE ACUERDOS'],[49,'TEMAS TRATADOS'],[50,'SEGURIDAD Y SALUD'],
+     [51,'FOTOGRAFÍAS'],[52,'FIRMA']].forEach(([row,label])=>{
+      set(`A${row}`,label,F_LABEL);
+      set(`B${row}`,'',F_IN,{numFmt:'@'});
+    });
+
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/octet-stream'});
+    const url=URL.createObjectURL(blob);
+    const nombre=`${d.expediente} DATOS.xlsx`;
+    const a=document.createElement('a');
+    a.href=url;a.download=nombre;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    statusEl.innerHTML=`<div class="status ok">✓ Excel generado con el formato de la hoja "DATOS": <strong>${nombre}</strong>. Súbelo a la carpeta "DATOS Y TEXTO" del expediente en Drive.</div>`;
+  }catch(err){
+    statusEl.innerHTML=`<div class="status error">✗ Error generando el Excel: ${err.message}</div>`;
+  }
+}
+
+// ── Portadas (PDF) ────────────────────────────────────────────────────────────
+const TITULOS_DIPUTACION = [
+  'MEMORIA','PLIEGO DE CONDICIONES TÉCNICAS','PRESUPUESTO','MANO DE OBRA',
+  'CUADRO DE MAQUINARIA','CUADRO DE MATERIALES','CUADRO DE PRECIOS AUXILIARES',
+  'CUADRO DE DESCOMPUESTOS','CUADRO DE PRECIOS 1','CUADRO DE PRECIOS 2',
+  'ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO','PLANOS'
+];
+
+// Geometría medida píxel a píxel sobre 1216-2026-CAR_modelo_portada.docx (modelo real
+// de portada EBSS). Idéntica a la usada en el Gestor de Memorias.
+const PORT_ML = 27.5;                 // margen izquierdo de página (1560 twips)
+const PORT_MR = 17.5;                 // margen derecho de página (991 twips)
+const PORT_COL_L = PORT_ML + 60.0;    // columna de texto (tab/indent a 3402-3544 twips)
+const PORT_COL_R = PORT_ML + 52.46;   // tabulador derecho (2977 twips): fecha y firma
+const PORT_MAXW  = 210 - PORT_COL_L - PORT_MR;
+const PORT_Y_START = 184.5;           // posición vertical fija del bloque (igual en todas)
+
+function dibujarPortada(doc, d, titulo){
+  let y = PORT_Y_START;
+  doc.setLineWidth(0.15);
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text(d.fase, PORT_COL_L, y);
+  y += 5.25;
+  const proyLines = doc.splitTextToSize(d.proyecto, PORT_MAXW);
+  doc.text(proyLines, PORT_COL_L, y);
+  let blockEndY = y + (proyLines.length-1)*5.25;
+  doc.line(PORT_ML, blockEndY+1.2, 210-PORT_MR, blockEndY+1.2);
+  y = blockEndY + 4.94;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(7);
+  const sitLines = doc.splitTextToSize('SITUACIÓN: '+d.situacion, PORT_MAXW);
+  doc.text(sitLines, PORT_COL_L, y);
+  blockEndY = y + (sitLines.length-1)*3.6;
+  y = blockEndY + 3.55;
+
+  const propLines = doc.splitTextToSize('PROPIEDAD: '+d.promotor, PORT_MAXW);
+  doc.text(d.fecha, PORT_COL_R, y, {align:'right'});
+  doc.text(propLines, PORT_COL_L, y);
+  blockEndY = y + (propLines.length-1)*3.6;
+  doc.line(PORT_ML, blockEndY+1.2, 210-PORT_MR, blockEndY+1.2);
+  y = blockEndY + 4.3;
+
+  doc.text(CONFIG.arquitecto, PORT_COL_R, y, {align:'right'});
+  y += 5.0;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(13);
+  const tituloLines = doc.splitTextToSize(String(titulo).toUpperCase(), PORT_MAXW);
+  doc.text(tituloLines, PORT_COL_L, y);
+}
+
+// Mismo mapeo de campos que copiarMensajeMemorias()/copiarDatosGestorMemorias()
+function getDatosPortada(){
+  const d = expedienteActual;
+  if(!d) return null;
+  const proyecto  = (d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'').toUpperCase();
+  const situacion = ((d.direccion_proyecto||d.direccion_inmueble||'')+(d.municipio_proyecto||d.municipio?', '+(d.municipio_proyecto||d.municipio):'')+(d.provincia?', '+(d.provincia):'CUENCA')).toUpperCase();
+  const promotor  = (d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
+  const fase      = (d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
+  const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const ahora=new Date();
+  const fecha=meses[ahora.getMonth()]+' '+ahora.getFullYear();
+  return {expediente:d.expediente, proyecto, situacion, promotor, fase, fecha};
+}
+
+function generarPortadasPDF(titulos, sufijoNombre, statusElId){
+  const st=document.getElementById(statusElId);
+  const d=getDatosPortada();
+  if(!d){st.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
+  if(!d.proyecto||!d.situacion||!d.promotor){st.innerHTML=`<div class="status error">⚠ Faltan datos del proyecto (proyecto, situación o promotor) para generar la portada.</div>`;return;}
+  if(!window.jspdf){st.innerHTML=`<div class="status error">✗ No se pudo cargar la librería de PDF (jsPDF). Comprueba la conexión a internet.</div>`;return;}
+  st.innerHTML=`<div class="status loading"><div class="spinner"></div> Generando PDF…</div>`;
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    titulos.forEach((t,i)=>{ if(i>0) doc.addPage(); dibujarPortada(doc,d,t); });
+    const nombre=`${d.expediente} ${sufijoNombre}.pdf`;
+    doc.save(nombre);
+    st.innerHTML=`<div class="status ok">✓ Descargado: ${nombre}</div>`;
+  }catch(e){ st.innerHTML=`<div class="status error">✗ Error: ${e.message}</div>`; }
+}
+
+previewExpediente();
+</script>
+<!-- FAB guardar — solo visible en móvil (CSS lo oculta en escritorio) -->
+<button class="fab-guardar" onclick="guardarEnListado()" title="Guardar expediente">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+  Guardar
+</button>
+</body>
+</html>
