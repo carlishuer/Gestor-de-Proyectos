@@ -89,6 +89,7 @@ textarea{resize:vertical;min-height:70px;}
 .divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .exp-preview{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);background:var(--accent-pale);border:1px solid #B8D4C8;border-radius:var(--radius);padding:8px 12px;letter-spacing:.06em;}
+.project-list-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;touch-action:pan-x;}
 .project-list{width:100%;border-collapse:collapse;font-size:11px;}
 .project-list th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
 .project-list td{padding:8px 8px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
@@ -2071,7 +2072,7 @@ function renderTabla(lista){
       <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
     </td>
   </tr>`).join('');
-  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  container.innerHTML=`<div class="project-list-wrap"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function borrarExpediente(code){
