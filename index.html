@@ -4,12 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestor de Proyectos · Estudio Juan José Ramón Vindel</title>
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gestor">
-<meta name="theme-color" content="#2D4A3E">
-<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -89,7 +83,6 @@ textarea{resize:vertical;min-height:70px;}
 .divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .exp-preview{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);background:var(--accent-pale);border:1px solid #B8D4C8;border-radius:var(--radius);padding:8px 12px;letter-spacing:.06em;}
-.project-list-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;touch-action:pan-x;}
 .project-list{width:100%;border-collapse:collapse;font-size:11px;}
 .project-list th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;}
 .project-list td{padding:8px 8px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
@@ -1082,6 +1075,11 @@ function getDatosDoc(){
     promotor1_mun:e.cliente_municipio||'—',
     promotor1_prov:e.cliente_provincia||'—',
     promotor2:e.promotor2_nombre||'',
+    promotor2_nif:e.promotor2_nif||'',
+    promotor2_dir:e.promotor2_dir||'',
+    promotor2_cp:e.promotor2_cp||'',
+    promotor2_mun:e.promotor2_mun||'',
+    promotor2_prov:e.promotor2_prov||'',
     promotores_todos:[e.cliente_nombre_completo||e.cliente_nombre,e.promotor2_nombre,e.promotor3_nombre].filter(Boolean).join(', '),
     nifs_todos:[e.cliente_nif,e.promotor2_nif,e.promotor3_nif].filter(Boolean).join(', '),
     arq:'JUAN JOSÉ RAMÓN VINDEL',
@@ -1144,10 +1142,12 @@ function fichaObra(d){
 }
 
 function encabezadoDecl(d,dest,actuacion){
+  const p2=d.promotor2?`<p>${d.promotor2}, mayor de edad, con domicilio en ${d.promotor2_dir||'—'}, código postal ${d.promotor2_cp||'—'} de ${d.promotor2_mun||'—'}, provincia de ${d.promotor2_prov||'—'}, provisto de N.I.F número ${d.promotor2_nif||'—'}.</p>`:'';
   return`<p style="margin-bottom:14px;"><strong>${dest}</strong></p>
   <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
   <div class="cuerpo">
     <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+    ${p2}
     <p>Que quiere ${actuacion}: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
   </div>`;
 }
@@ -1350,7 +1350,7 @@ function generarTextoDoc(doc,d){
         <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
         <p>Para que realice y gestione en su nombre la solicitud de las licencias urbanísticas necesarias para realizar la actuación arriba referida.</p>
       </div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div>${d.promotor2?`<div style="margin-top:60pt;">Firmado: ${d.promotor2}</div>`:''}</div>`;}
 
     case'autorizacion-licencia-legaliz':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
@@ -1551,8 +1551,7 @@ function imprimirPDF(){
   if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
   const contenido=document.getElementById('doc-preview-container')?.innerHTML||'';
-  const w=window.open('','_blank','width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title></title>
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Documento</title>
   <style>
     @page{margin:20mm 25mm;size:A4;}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -1567,19 +1566,24 @@ function imprimirPDF(){
     .firma-lugar{margin-bottom:80pt;}
     .firma-bloque{font-weight:bold;font-size:9.5pt;}
     hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
-    @media print{
-      body{margin:0;}
-      .page{margin:0;padding:0;width:100%;}
-      .no-print{display:none!important;}
-    }
+    .no-print{display:none!important;}
+    @media print{.page{margin:0;padding:0;width:100%;}}
   </style></head><body>
   <div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#f0f0f0;padding:8px;text-align:center;font-size:12px;z-index:999;box-shadow:0 1px 4px rgba(0,0,0,.15);">
     <button onclick="window.print()" style="padding:6px 18px;background:#2d5a27;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">🖨 Imprimir / Guardar como PDF</button>
     <span style="margin-left:16px;color:#666;">Más ajustes → desactiva <strong>Encabezados y pies de página</strong> → Guardar como PDF</span>
   </div>
   <div class="page" style="margin-top:40px;">${contenido}</div>
-  </body></html>`);
-  w.document.close();
+  </body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const w=window.open(url,'_blank');
+  if(!w){
+    statusEl.innerHTML='<div class="status error">⚠ El navegador bloqueó la nueva ventana. Permite ventanas emergentes para esta página e inténtalo de nuevo.</div>';
+    URL.revokeObjectURL(url);
+    return;
+  }
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
   statusEl.innerHTML='<div class="status ok">✓ Documento abierto en nueva ventana. Usa el botón "Imprimir / Guardar como PDF" o Ctrl+P.</div>';
   setTimeout(()=>statusEl.innerHTML='',8000);
 }
@@ -1924,6 +1928,10 @@ function generarExpediente(){
     cliente_provincia:document.getElementById('cli-provincia').value.trim(),
     promotor2_nombre:[document.getElementById('cli2-nombre')?.value.trim(),document.getElementById('cli2-apellido1')?.value.trim(),document.getElementById('cli2-apellido2')?.value.trim()].filter(Boolean).join(' '),
     promotor2_nif:document.getElementById('cli2-nif')?.value.trim()||'',
+    promotor2_dir:document.getElementById('cli2-dir')?.value.trim()||'',
+    promotor2_cp:document.getElementById('cli2-cp')?.value.trim()||'',
+    promotor2_mun:document.getElementById('cli2-municipio')?.value.trim()||'',
+    promotor2_prov:document.getElementById('cli2-provincia')?.value.trim()||'',
     promotor3_nombre:[document.getElementById('cli3-nombre')?.value.trim(),document.getElementById('cli3-apellido1')?.value.trim(),document.getElementById('cli3-apellido2')?.value.trim()].filter(Boolean).join(' '),
     promotor3_nif:document.getElementById('cli3-nif')?.value.trim()||'',
     representante_nombre:[document.getElementById('rep-nombre')?.value.trim(),document.getElementById('rep-apellido1')?.value.trim(),document.getElementById('rep-apellido2')?.value.trim()].filter(Boolean).join(' '),
@@ -2060,41 +2068,19 @@ function renderTabla(lista){
     container.innerHTML=`<div class="empty-state"><svg width="40" height="40" fill="none" stroke="var(--ink3)" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No hay expedientes que coincidan con los filtros aplicados.</p></div>`;
     return;
   }
-  const isMobile=window.innerWidth<=640;
-  if(isMobile){
-    const cards=lista.map(p=>`
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-          <strong style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)">${p.expediente}</strong>
-          <span style="font-size:11px;color:var(--ink3)">${p.fecha_creacion}</span>
-        </div>
-        <div style="font-size:12px;margin-bottom:4px;">${p.cliente_nombre_completo||p.cliente_nombre}</div>
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">
-          <span style="font-size:10px;background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3);padding:2px 8px;border-radius:20px;">${p.tipo_obra}</span>
-          <span style="font-size:11px;color:var(--ink3)">${p.municipio||'—'}</span>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" style="flex:1;padding:10px;font-size:11px;justify-content:center;" onclick="verExpediente('${p.expediente}')">Ver</button>
-          <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:11px;justify-content:center;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
-          <button class="btn" style="padding:10px 12px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-        </div>
-      </div>`).join('');
-    container.innerHTML=`<div style="padding:12px;">${cards}</div>`;
-  } else {
-    const rows=lista.map(p=>`<tr>
-      <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
-      <td>${p.fecha_creacion}</td>
-      <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
-      <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
-      <td>${p.municipio||'—'}</td>
-      <td>
-        <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
-        <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
-        <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-      </td>
-    </tr>`).join('');
-    container.innerHTML=`<div class="project-list-wrap"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  }
+  const rows=lista.map(p=>`<tr>
+    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
+    <td>${p.fecha_creacion}</td>
+    <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
+    <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
+    <td>${p.municipio||'—'}</td>
+    <td>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
+      <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+    </td>
+  </tr>`).join('');
+  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function borrarExpediente(code){
@@ -2157,9 +2143,13 @@ function cargarDatosEnFormulario(p){
     }
   }
 
-  // Promotores adicionales (solo se guarda el nombre completo y el NIF)
+  // Promotores adicionales
   set('cli2-nombre',p.promotor2_nombre);
   set('cli2-nif',p.promotor2_nif);
+  set('cli2-dir',p.promotor2_dir);
+  set('cli2-cp',p.promotor2_cp);
+  set('cli2-municipio',p.promotor2_mun);
+  set('cli2-provincia',p.promotor2_prov);
   set('cli3-nombre',p.promotor3_nombre);
   set('cli3-nif',p.promotor3_nif);
 
@@ -2835,11 +2825,6 @@ function generarPortadasPDF(titulos, sufijoNombre, statusElId){
 }
 
 previewExpediente();
-
-// ── SERVICE WORKER (PWA) ──────────────────────────────
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
 </script>
 </body>
 </html>
