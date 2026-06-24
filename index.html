@@ -1343,20 +1343,20 @@ function generarTextoDoc(doc,d){
 
     case'autorizacion-licencia':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`;
-      // Capitaliza primera letra de cada palabra (para municipio en fecha)
-      const capMun=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const fechaLugarCap=fLugar(fecha,capMun(d.municipio));
-      // Párrafo EXPONE: cada propietario con su propia frase "en representación de él mismo"
-      const p1expone=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${d.promotor2_mun||d.promotor1_mun}, provincia de ${d.promotor2_prov||d.promotor1_prov}, provisto de N.I.F número ${d.promotor2_nif}. `:'';
+      const toTC=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
+      const fechaLugarCap=fLugar(fecha,toTC(d.municipio));
+      // Dirección del promotor en minúsculas (toTC), emplazamiento de la obra en MAYÚSCULAS
+      const p1expone=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierentxt=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-      const firma2=d.promotor2?`<div style="margin-top:30pt;padding-left:15mm;">${d.promotor2}</div>`:'';
+      const firma2=d.promotor2?`<div style="margin-top:80pt;padding-left:15mm;">Firmado: ${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
       <p style="font-weight:700;margin-bottom:8pt;">${dest}</p>
       <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
       <div class="cuerpo">
-        <p>${p1expone}${d.promotor2?'<br><br>'+p2expone:''}</p>
-        <p>${quierentxt} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
+        <p>${p1expone}</p>
+        ${d.promotor2?`<p>${p2expone}</p>`:''}
+        <p>${quierentxt} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${(d.emplazamiento||'').toUpperCase()}, código postal ${d.cp_obra} de ${(d.municipio||'').toUpperCase()}, provincia de ${(d.provincia||'').toUpperCase()}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
       </div>
       <p style="font-weight:700;margin:10pt 0 6pt;">POR LA PRESENTE AUTORIZA:</p>
       <div class="cuerpo">
@@ -1365,7 +1365,7 @@ function generarTextoDoc(doc,d){
       </div>
       <div class="firma">
         <div class="firma-lugar">${fechaLugarCap}</div>
-        <div style="margin-top:60pt;">Firmado: ${d.promotor1}</div>
+        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
         ${firma2}
       </div>`;}
 
@@ -1585,19 +1585,22 @@ async function descargarDOCX(){
     statusEl.innerHTML='<div class="status error">⚠ Descarga .docx disponible solo para Autorización de Licencia por ahora.</div>';
     setTimeout(()=>statusEl.innerHTML='',5000);return;
   }
-  statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
+  statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx\u2026</div>';
 
   const d=getDatosDoc();
   const fecha=gv('fecha_acta')||new Date().toISOString().split('T')[0];
 
+  // Capitaliza primera letra de cada palabra
   function toTC(s){return(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());}
+  // Escapa XML
   function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
   const dt=new Date(fecha+'T12:00:00');
   const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const fechaStr=`En ${toTC(d.municipio)}, a ${dt.getDate()} de ${meses[dt.getMonth()]} de ${dt.getFullYear()}`;
-  const dest=(gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`);
+  const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`;
 
+  // ── XML helpers (medidas en twips: 1 cm = 567 twips, 1 pt = 20 twips) ────────
   function rPrXml(sz,bold,ul){
     return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;
   }
@@ -1605,17 +1608,24 @@ async function descargarDOCX(){
     if(txt===null||txt===undefined)return'';
     return`<w:r><w:rPr>${rPrXml(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe(String(txt))}</w:t></w:r>`;
   }
-  function p(runsXml,{jc='both',before=0,after=120,line=240,indent=0,sz=22,bold=false,ul=false}={}){
-    const pPr=`<w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/><w:adjustRightInd w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>${indent?`<w:ind w:firstLine="${indent}"/>`:''}${jc?`<w:jc w:val="${jc}"/>`:''}`;
-    const rPrPPr=`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>`;
-    const r=Array.isArray(runsXml)?runsXml.join(''):runsXml;
-    return`<w:p><w:pPr>${pPr}<w:rPr>${rPrPPr}</w:rPr></w:pPr>${r}</w:p>`;
+  // jc: 'both'=justificado  'center'=centrado  ''=izquierda
+  // before/after/line: twips. indent: sangría primera línea en twips
+  function p(runsInput,{jc='both',before=0,after=120,line=240,indent=0,sz=22,bold=false,ul=false}={}){
+    const pPr=[
+      '<w:autoSpaceDE w:val="0"/>','<w:autoSpaceDN w:val="0"/>','<w:adjustRightInd w:val="0"/>',
+      `<w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>`,
+      indent?`<w:ind w:firstLine="${indent}"/>`:'',
+      jc?`<w:jc w:val="${jc}"/>`:'',
+    ].join('');
+    const rPrPara=rPrXml(sz,bold,ul);
+    const r=Array.isArray(runsInput)?runsInput.join(''):runsInput;
+    return`<w:p><w:pPr>${pPr}<w:rPr>${rPrPara}</w:rPr></w:pPr>${r}</w:p>`;
   }
   function pEmpty(before=0,after=120){return p('',{before,after});}
 
   const ps=[];
 
-  // Título: negrita, subrayado, centrado, 11pt
+  // ── Título: negrita, subrayado, centrado, 11pt ─────────────────────────────
   ps.push(p([
     run('AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN',22,true,true),
     `<w:r><w:rPr>${rPrXml(22,true,true)}</w:rPr><w:br/></w:r>`,
@@ -1623,45 +1633,48 @@ async function descargarDOCX(){
   ],{jc:'center',before:200,after:100,bold:true,ul:true}));
   ps.push(pEmpty(0,100));
 
-  // Destinatario: 10pt, negrita
+  // ── Destinatario: 10pt negrita ─────────────────────────────────────────────
   ps.push(p(run(dest,20,true),{before:0,after:120,sz:20,bold:true}));
   ps.push(pEmpty(0,120));
 
-  // EXPONE:
+  // ── EXPONE: ────────────────────────────────────────────────────────────────
   ps.push(p(run('EXPONE:',20,true),{before:0,after:120,sz:20,bold:true}));
 
-  // Propietario 1
-  const p1txt=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+  // Propietario 1: dirección en minúsculas (toTC), emplazamiento obra en MAYÚSCULAS
+  const p1txt=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
   ps.push(p(run(p1txt,22,false),{before:0,after:120}));
 
   // Propietario 2 (si existe)
   if(d.promotor2){
-    const p2txt=`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`;
+    const p2mun=toTC(d.promotor2_mun||d.promotor1_mun);
+    const p2prov=toTC(d.promotor2_prov||d.promotor1_prov);
+    const p2dir=toTC(d.promotor2_dir||d.promotor1_dir);
+    const p2cp=d.promotor2_cp||d.promotor1_cp;
+    const p2txt=`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${p2dir}, código postal ${p2cp} de ${p2mun}, provincia de ${p2prov}, provisto de N.I.F número ${d.promotor2_nif}.`;
     ps.push(p(run(p2txt,22,false),{before:0,after:120}));
   }
 
-  // Actuación
+  // Actuación: emplazamiento de la obra en MAYÚSCULAS
   const quieren=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-  const actTxt=`${quieren} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.`;
+  const actTxt=`${quieren} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${(d.emplazamiento||'').toUpperCase()}, código postal ${d.cp_obra} de ${(d.municipio||'').toUpperCase()}, provincia de ${(d.provincia||'').toUpperCase()}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.`;
   ps.push(p(run(actTxt,22,false),{before:0,after:120}));
   ps.push(pEmpty(0,120));
 
-  // POR LA PRESENTE AUTORIZA:
+  // ── POR LA PRESENTE AUTORIZA: ──────────────────────────────────────────────
   ps.push(p(run('POR LA PRESENTE AUTORIZA:',20,true),{before:0,after:120,sz:20,bold:true}));
   ps.push(p(run(`A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}`,22,false),{before:0,after:120}));
   ps.push(p(run('Para que realice y gestione en su nombre la solicitud de las licencias urbanísticas necesarias para realizar la actuación arriba referida.',22,false),{before:0,after:120}));
 
-  // Fecha
+  // ── Fecha: espacio antes ───────────────────────────────────────────────────
   ps.push(p(run(fechaStr,22,false),{before:400,after:0,jc:''}));
 
-  // Firma 1 (before=1200 ≈ 21mm para firmar)
-  ps.push(p(run(toTC(d.promotor1),22,false),{before:1200,after:0,jc:''}));
-
-  // Firma 2 (si existe, mismo espacio)
+  // ── Firmas: "Firmado: NOMBRE", 1440 twips (≈2.5cm) de espacio para firmar ─
+  ps.push(p(run(`Firmado: ${(d.promotor1||'').toUpperCase()}`,22,false),{before:1440,after:0,jc:''}));
   if(d.promotor2){
-    ps.push(p(run(toTC(d.promotor2),22,false),{before:1200,after:0,indent:851,jc:''}));
+    ps.push(p(run(`Firmado: ${(d.promotor2||'').toUpperCase()}`,22,false),{before:1440,after:0,indent:851,jc:''}));
   }
 
+  // ── document.xml ──────────────────────────────────────────────────────────
   const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <w:body>
@@ -1699,10 +1712,9 @@ ${ps.join('\n')}
     statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
     setTimeout(()=>statusEl.innerHTML='',6000);
   }catch(e){
-    statusEl.innerHTML=`<div class="status error">\u2717 Error generando .docx: ${e.message}</div>`;
+    statusEl.innerHTML=`<div class="status error">\u2717 Error: ${e.message}</div>`;
   }
 }
-
 // ============ CATASTRO ============
 async function comprobarRefCatastral(ref){
   const aviso=document.getElementById('catastral-proyectos-aviso');
