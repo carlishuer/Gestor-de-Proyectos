@@ -1581,123 +1581,91 @@ async function descargarDOCX(){
   if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
   if(!window.JSZip){statusEl.innerHTML='<div class="status error">✗ JSZip no disponible.</div>';return;}
+  if(docSeleccionado.id!=='autorizacion-licencia'){
+    statusEl.innerHTML='<div class="status error">⚠ Descarga .docx disponible solo para Autorización de Licencia por ahora.</div>';
+    setTimeout(()=>statusEl.innerHTML='',5000);return;
+  }
   statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
 
-  // ── XML helpers ──────────────────────────────────────────────────────────────
-  function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-  // Párrafo con formato idéntico al Word de referencia
-  // opts: {bold, underline, center, sz, szBody, before, after, indent, line}
-  function para(text,opts={}){
-    const sz=opts.sz||22; // 11pt=22 halfpoints
-    const szH=opts.szHeader||sz;
-    const before=opts.before!==undefined?opts.before:0;
-    const after=opts.after!==undefined?opts.after:120;
-    const line=opts.line||240;
-    const jc=opts.center?'center':'both';
-    const ind=opts.indent?`<w:ind w:firstLine="${opts.indent}"/>`:'';
-    const runPr=`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${opts.bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${opts.underline?'<w:u w:val="single"/>':''}`;
-    const runs=(opts.runs||[{text,bold:opts.bold,underline:opts.underline}]).map(r=>{
-      const rPr=`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${r.bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${r.sz||sz}"/><w:szCs w:val="${r.sz||sz}"/>${r.underline?'<w:u w:val="single"/>':''}`;
-      if(r.br) return`<w:r><w:rPr>${rPr}</w:rPr><w:br/></w:r>`;
-      if(!r.text&&r.text!=='')return'';
-      return`<w:r><w:rPr>${rPr}</w:rPr><w:t xml:space="preserve">${xe(r.text)}</w:t></w:r>`;
-    }).join('');
-    return`<w:p><w:pPr><w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/><w:adjustRightInd w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>${ind}<w:jc w:val="${jc}"/><w:rPr>${runPr}</w:rPr></w:pPr>${runs}</w:p>`;
-  }
-
-  function paraEmpty(before=0,after=120){
-    return`<w:p><w:pPr><w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/><w:adjustRightInd w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="240" w:lineRule="auto"/></w:pPr></w:p>`;
-  }
-
-  // ── Construir párrafos del documento ─────────────────────────────────────────
-  const container=document.getElementById('doc-preview-container');
   const d=getDatosDoc();
   const fecha=gv('fecha_acta')||new Date().toISOString().split('T')[0];
-  const fechaLugar=fLugar(fecha,d.municipio);
 
-  let paragraphs=[];
+  function toTC(s){return(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());}
+  function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-  // Extraer texto plano del h3 (título)
-  const h3=container.querySelector('h3');
-  if(h3){
-    const lines=h3.innerText.replace(/\n/g,'|').split('|').filter(Boolean);
-    if(lines.length===1){
-      paragraphs.push(para(lines[0],{bold:true,underline:true,center:true,sz:22,before:200,after:100}));
-    } else {
-      // Título en dos líneas dentro de un solo párrafo con <w:br/>
-      paragraphs.push(para('',{bold:true,underline:true,center:true,sz:22,before:200,after:100,
-        runs:lines.flatMap((l,i)=>i<lines.length-1?[{text:l,bold:true,underline:true,sz:22},{br:true,bold:true,underline:true,sz:22}]:[{text:l,bold:true,underline:true,sz:22}])
-      }));
-    }
-    paragraphs.push(paraEmpty(200,100));
+  const dt=new Date(fecha+'T12:00:00');
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaStr=`En ${toTC(d.municipio)}, a ${dt.getDate()} de ${meses[dt.getMonth()]} de ${dt.getFullYear()}`;
+  const dest=(gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`);
+
+  function rPrXml(sz,bold,ul){
+    return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;
+  }
+  function run(txt,sz,bold,ul){
+    if(txt===null||txt===undefined)return'';
+    return`<w:r><w:rPr>${rPrXml(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe(String(txt))}</w:t></w:r>`;
+  }
+  function p(runsXml,{jc='both',before=0,after=120,line=240,indent=0,sz=22,bold=false,ul=false}={}){
+    const pPr=`<w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/><w:adjustRightInd w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>${indent?`<w:ind w:firstLine="${indent}"/>`:''}${jc?`<w:jc w:val="${jc}"/>`:''}`;
+    const rPrPPr=`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>`;
+    const r=Array.isArray(runsXml)?runsXml.join(''):runsXml;
+    return`<w:p><w:pPr>${pPr}<w:rPr>${rPrPPr}</w:rPr></w:pPr>${r}</w:p>`;
+  }
+  function pEmpty(before=0,after=120){return p('',{before,after});}
+
+  const ps=[];
+
+  // Título: negrita, subrayado, centrado, 11pt
+  ps.push(p([
+    run('AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN',22,true,true),
+    `<w:r><w:rPr>${rPrXml(22,true,true)}</w:rPr><w:br/></w:r>`,
+    run('DE LA LICENCIA URBANÍSTICA',22,true,true)
+  ],{jc:'center',before:200,after:100,bold:true,ul:true}));
+  ps.push(pEmpty(0,100));
+
+  // Destinatario: 10pt, negrita
+  ps.push(p(run(dest,20,true),{before:0,after:120,sz:20,bold:true}));
+  ps.push(pEmpty(0,120));
+
+  // EXPONE:
+  ps.push(p(run('EXPONE:',20,true),{before:0,after:120,sz:20,bold:true}));
+
+  // Propietario 1
+  const p1txt=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+  ps.push(p(run(p1txt,22,false),{before:0,after:120}));
+
+  // Propietario 2 (si existe)
+  if(d.promotor2){
+    const p2txt=`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`;
+    ps.push(p(run(p2txt,22,false),{before:0,after:120}));
   }
 
-  // Recorrer todos los párrafos hijos del contenedor
-  function procesarNodos(parent){
-    Array.from(parent.children).forEach(el=>{
-      const tag=el.tagName.toLowerCase();
-      if(tag==='h3') return; // ya procesado
-      if(tag==='p'){
-        const style=el.getAttribute('style')||'';
-        const isBold=el.style.fontWeight==='700'||el.style.fontWeight==='600'||el.style.fontWeight==='bold'||style.includes('font-weight:7')||style.includes('font-weight:6');
-        const sz=isBold?20:22;
-        const before=style.includes('margin-top:60pt')||style.includes('margin-top:80pt')?400:(isBold?0:0);
-        // Extraer runs respetando negritas inline
-        const runs=[];
-        el.childNodes.forEach(n=>{
-          if(n.nodeType===3){if(n.textContent.trim()||n.textContent===' ')runs.push({text:n.textContent,bold:isBold,sz});}
-          else if(n.nodeType===1){
-            const nt=n.tagName.toLowerCase();
-            if(nt==='strong'||nt==='b')runs.push({text:n.innerText,bold:true,sz});
-            else runs.push({text:n.innerText||n.textContent,bold:isBold,sz});
-          }
-        });
-        if(!runs.length)runs.push({text:el.innerText,bold:isBold,sz});
-        paragraphs.push(para('',{bold:isBold,sz,before,after:120,runs}));
-      } else if(tag==='div'){
-        const cls=el.className||'';
-        if(cls.includes('ficha')){
-          // Ficha técnica: pares clave-valor
-          const fks=Array.from(el.querySelectorAll('.fk'));
-          const fvs=Array.from(el.querySelectorAll('.fv'));
-          fks.forEach((fk,i)=>{
-            const fv=fvs[i];
-            paragraphs.push(para('',{sz:20,after:40,runs:[
-              {text:(fk.innerText||'').toUpperCase()+': ',bold:true,sz:18},
-              {text:fv?.innerText||'',bold:true,sz:20}
-            ]}));
-          });
-          paragraphs.push(paraEmpty(0,120));
-        } else if(cls.includes('cuerpo')){
-          procesarNodos(el);
-        } else if(cls.includes('firma')){
-          Array.from(el.children).forEach(fc=>{
-            const fcs=fc.getAttribute('style')||'';
-            const fcls=fc.className||'';
-            const before400=fcs.includes('margin-top:60pt')||fcs.includes('margin-top:80pt')||fcs.includes('margin-top:30pt')||fcls.includes('firma-lugar')?400:120;
-            const indent=fcs.includes('padding-left:15mm')||fcs.includes('margin-left')?851:0;
-            paragraphs.push(para(fc.innerText||'',{sz:22,before:before400,after:0,indent:indent||undefined}));
-          });
-          // Fallback si no tiene children
-          if(!el.children.length){
-            paragraphs.push(para(el.innerText||'',{sz:22,before:400,after:0}));
-          }
-        } else {
-          procesarNodos(el);
-        }
-      }
-    });
-  }
-  procesarNodos(container);
+  // Actuación
+  const quieren=d.promotor2?'Que quieren realizar':'Que quiere realizar';
+  const actTxt=`${quieren} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.`;
+  ps.push(p(run(actTxt,22,false),{before:0,after:120}));
+  ps.push(pEmpty(0,120));
 
-  // ── Ensamblar document.xml ────────────────────────────────────────────────────
-  const body=paragraphs.join('\n');
+  // POR LA PRESENTE AUTORIZA:
+  ps.push(p(run('POR LA PRESENTE AUTORIZA:',20,true),{before:0,after:120,sz:20,bold:true}));
+  ps.push(p(run(`A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}`,22,false),{before:0,after:120}));
+  ps.push(p(run('Para que realice y gestione en su nombre la solicitud de las licencias urbanísticas necesarias para realizar la actuación arriba referida.',22,false),{before:0,after:120}));
+
+  // Fecha
+  ps.push(p(run(fechaStr,22,false),{before:400,after:0,jc:''}));
+
+  // Firma 1 (before=1200 ≈ 21mm para firmar)
+  ps.push(p(run(toTC(d.promotor1),22,false),{before:1200,after:0,jc:''}));
+
+  // Firma 2 (si existe, mismo espacio)
+  if(d.promotor2){
+    ps.push(p(run(toTC(d.promotor2),22,false),{before:1200,after:0,indent:851,jc:''}));
+  }
+
   const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-            xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <w:body>
-${body}
+${ps.join('\n')}
     <w:sectPr>
       <w:pgSz w:w="11906" w:h="16838"/>
       <w:pgMar w:top="1440" w:right="1800" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>
@@ -1705,51 +1673,17 @@ ${body}
   </w:body>
 </w:document>`;
 
-  const relsXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>`;
-
-  const stylesXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:docDefaults><w:rPrDefault><w:rPr>
-    <w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>
-    <w:sz w:val="22"/><w:szCs w:val="22"/>
-  </w:rPr></w:rPrDefault></w:docDefaults>
-</w:styles>`;
-
-  const appXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
-  <Application>Gestor de Proyectos</Application>
-</Properties>`;
-
-  const coreXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
-  xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <dc:creator>Juan José Ramón Vindel</dc:creator>
-</cp:coreProperties>`;
-
-  const workbookRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
-  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
-</Relationships>`;
-
-  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
-  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
-  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
-</Types>`;
+  const relsXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const stylesXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
+  const dotRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`;
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`;
+  const coreXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:creator>Juan José Ramón Vindel</dc:creator></cp:coreProperties>`;
+  const appXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Gestor de Proyectos</Application></Properties>`;
 
   try{
     const zip=new JSZip();
     zip.file('[Content_Types].xml',contentTypes);
-    zip.file('_rels/.rels',workbookRels);
+    zip.file('_rels/.rels',dotRels);
     zip.file('word/document.xml',documentXml);
     zip.file('word/styles.xml',stylesXml);
     zip.file('word/_rels/document.xml.rels',relsXml);
@@ -1760,12 +1694,12 @@ ${body}
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
-    a.download=`${docExpedienteActivo.expediente} — ${docSeleccionado.nombre.substring(0,50)}.docx`;
+    a.download=`${docExpedienteActivo.expediente} \u2014 ${docSeleccionado.nombre.substring(0,50)}.docx`;
     a.click();URL.revokeObjectURL(url);
-    statusEl.innerHTML='<div class="status ok">✓ Descargado .docx con formato Word.</div>';
+    statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
     setTimeout(()=>statusEl.innerHTML='',6000);
   }catch(e){
-    statusEl.innerHTML=`<div class="status error">✗ Error generando .docx: ${e.message}</div>`;
+    statusEl.innerHTML=`<div class="status error">\u2717 Error generando .docx: ${e.message}</div>`;
   }
 }
 
