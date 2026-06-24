@@ -1135,7 +1135,7 @@ function fichaBase(d){
     <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
     <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
     <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-    <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+    <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
     <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
   </div>`;
 }
@@ -1148,7 +1148,7 @@ function fichaObra(d){
     <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
     <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
     <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
-    <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+    <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
     <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
     <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
   </div>`;
@@ -1325,7 +1325,7 @@ function generarTextoDoc(doc,d){
         <p>Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.</p>
       </div>
       <div class="firma" style="display:flex;gap:60px;flex-wrap:wrap;">
-        <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
+        <div><div class="firma-bloque">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div></div>
         <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
       </div>`;}
 
@@ -1337,7 +1337,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Fecha</span><span class="fv">${fechaC}</span>
         <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}, ${d.cp_obra}</span>
-        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}, ARQUITECTO</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
         <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
@@ -1349,7 +1349,7 @@ function generarTextoDoc(doc,d){
       <p style="font-weight:600;">SEGURIDAD Y SALUD</p><p style="margin:6px 0 12px;">${gv('seguridad')||'—'}</p>
       <hr>
       <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
-        <div><div class="firma-bloque">${d.promotor1}</div></div>
+        <div><div class="firma-bloque">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div></div>
         <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
       </div>`;}
 
@@ -1364,7 +1364,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Provincia</span><span class="fv">${d.provincia}</span>
-        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
         <span class="fk">Coordinador S&amp;S</span><span class="fv">${d.arq}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
@@ -1383,7 +1383,7 @@ function generarTextoDoc(doc,d){
     case'autorizacion-licencia':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`;
       const toTC=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const fechaLugarCap=fLugar(fecha,toTC(d.municipio));
+      const fechaLugarCap=fLugar(fecha,(d.municipio||'').toUpperCase());
       // Dirección del promotor en minúsculas (toTC), emplazamiento de la obra en MAYÚSCULAS
       const p1expone=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
       const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
@@ -1410,36 +1410,64 @@ function generarTextoDoc(doc,d){
 
     case'autorizacion-licencia-legaliz':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
+      const toTC2=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
+      const p1leg=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC2(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC2(d.promotor1_mun)}, provincia de ${toTC2(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2leg=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC2(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC2(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC2(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const quierenleg=d.promotor2?'Que realizaron':'Que realizó';
+      const firma2leg=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
-      <p style="font-weight:600;margin-top:16pt;margin-bottom:10px;">EXPONE:</p>
+      <p style="font-weight:700;margin-top:16pt;margin-bottom:8pt;">${dest}</p>
+      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
       <div class="cuerpo">
-        <p>D. ${d.promotor1}, Mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
-        <p>Que realizó la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, para la cual obtuvo la preceptiva licencia de obra mayor.</p>
+        <p>${p1leg}</p>
+        ${d.promotor2?`<p>${p2leg}</p>`:''}
+        <p>${quierenleg} la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, para la cual obtuvo la preceptiva licencia de obra mayor.</p>
       </div>
-      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
+      <p style="font-weight:700;margin:10pt 0 6pt;">POR LA PRESENTE AUTORIZA:</p>
       <div class="cuerpo">
-        <p>A D. ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
-        <p>Para que realice y gestione en su nombre la solicitud de las licencia de primera ocupación.</p>
+        <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
+        <p>Para que realice y gestione en su nombre la solicitud de la licencia de primera ocupación.</p>
       </div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado D. ${d.promotor1}</div></div>`;}
+      <div class="firma">
+        <div class="firma-lugar">${fechaLugar}</div>
+        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
+        ${firma2leg}
+      </div>`;}
 
-    case'autorizacion-pree5000':
+    case'autorizacion-pree5000':{
+      const toTCp=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
+      const p1pree=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTCp(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCp(d.promotor1_mun)}, provincia de ${toTCp(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2pree=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTCp(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCp(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCp(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const quierenpree=d.promotor2?'Que quieren solicitar':'Que quiere solicitar';
+      const firma2pree=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN DE LA AYUDA PREE 5000</h3>
-      ${encabezadoDecl(d,'','solicitar una ayuda de la convocatoria PREE 5000 para la siguiente actuación')}
-      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
+      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
+      <div class="cuerpo">
+        <p>${p1pree}</p>
+        ${d.promotor2?`<p>${p2pree}</p>`:''}
+        <p>${quierenpree} una ayuda de la convocatoria PREE 5000 para la siguiente actuación: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}.</p>
+      </div>
+      <p style="font-weight:700;margin:10pt 0 6pt;">POR LA PRESENTE AUTORIZA:</p>
       <div class="cuerpo">
         <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
         <p>Para que realice y gestione en su nombre la ayuda de la convocatoria PREE5000 para la actuación arriba referida.</p>
       </div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;
+      <div class="firma">
+        <div class="firma-lugar">${fechaLugar}</div>
+        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
+        ${firma2pree}
+      </div>`;}
 
     case'autorizacion-cee':{
       const refCEE=gv('ref_catastral_cee')||d.ref_catastral;
       const denomCEE=gv('denominacion_cee')||d.proyecto;
+      const firma2cee=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Fdo.: </span>${d.promotor2}</div>`:'';
+      const etiqRepCee=d.promotor2?'las personas representadas':'la persona representada';
       return`<h3>ANEXO V — MODELO DE REPRESENTACIÓN EN EL PROCEDIMIENTO DE INSCRIPCIÓN DE CERTIFICADOS DE EFICIENCIA ENERGÉTICA</h3>
       <div class="cuerpo">
         <p>Don/Doña: ${d.promotor1} con NIF ${d.promotor1_nif}</p>
-        <p>Como: ✗ Propietario / promotor</p>
+        ${d.promotor2?`<p>Don/Doña: ${d.promotor2} con NIF ${d.promotor2_nif}</p>`:''}
+        <p>Como: ✗ ${d.promotor2?'Propietarios / promotores':'Propietario / promotor'}</p>
         <p style="margin-top:10px;">Autoriza a</p>
         <p>Don/Doña: ${d.arq} con NIF ${d.arq_nif}</p>
         <p>En calidad de: ✗ Técnico competente que suscribe el certificado que se pretende registrar.</p>
@@ -1451,7 +1479,8 @@ function generarTextoDoc(doc,d){
       </div>
       <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
       <div style="margin-top:80pt;">Fdo.: ${d.promotor1}</div>
-      <div style="font-size:11px;">(la persona representada)</div></div>`;}
+      ${firma2cee}
+      <div style="font-size:11px;">(${etiqRepCee})</div></div>`;}
 
     case'decl-iva':
     case'decl-titularidad':
@@ -1475,31 +1504,42 @@ function generarTextoDoc(doc,d){
       ${encabezadoDecl(d,dest,act)}
       <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE DECLARA:</p>
       <div class="cuerpo"><p>${textos[doc.id]}</p></div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>${d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:''}</div>`;}
 
     case'decl-iva-pree':{
       const ivaOpt=gv('iva_recuperable')||'NO es susceptible de recuperación o compensación total o parcial.';
       return`<h3>DECLARACIÓN RESPONSABLE SOBRE LA NATURALEZA DEL IVA</h3>
       <div class="cuerpo">
-        <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        <p>${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        ${d.promotor2?`<p>${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${d.promotor2_mun||d.promotor1_mun}, provincia de ${d.promotor2_prov||d.promotor1_prov}, provisto de N.I.F número ${d.promotor2_nif}.</p>`:''}
         <p>A los efectos previstos en la Resolución de 05/03/2024, de la Consejería de Fomento, por la que se convocan ayudas para actuaciones de rehabilitación energética en viviendas y en edificios de viviendas existentes, en ejecución del Programa de rehabilitación energética para edificios existentes en municipios de reto demográfico (Programa PREE 5000) de Castilla-La Mancha.</p>
         <p>Que el IVA soportado contenido en los justificantes de gasto presentados con ocasión de la justificación de la ayuda:</p>
       </div>
       <p style="font-weight:600;margin:12px 0 10px;">DECLARA:</p>
       <div class="cuerpo"><p>✗ ${ivaOpt}</p></div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>${d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:''}</div>`;}
 
     case'solicitud-licencia':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
+      const toTCsl=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
+      const p1sl=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTCsl(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCsl(d.promotor1_mun)}, provincia de ${toTCsl(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2sl=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTCsl(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCsl(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCsl(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const quierensl=d.promotor2?'Que quieren realizar':'Que quiere realizar';
+      const firma2sl=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>SOLICITUD DE LICENCIA DE OBRA</h3>
-      <p style="margin-bottom:14px;"><strong>${dest}</strong></p>
-      <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
+      <p style="font-weight:700;margin-top:16pt;margin-bottom:8pt;"><strong>${dest}</strong></p>
+      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
       <div class="cuerpo">
-        <p>D. ${d.promotor1}, Mayor de edad, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
-        <p>Que quiere realizar la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, que se adjunta con esta solicitud.</p>
+        <p>${p1sl}</p>
+        ${d.promotor2?`<p>${p2sl}</p>`:''}
+        <p>${quierensl} la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, que se adjunta con esta solicitud.</p>
         <p>Por todo lo expuesto, SOLICITA a V.I. que, previos los trámites e informes reglamentarios, le sea concedida la correspondiente licencia urbanística municipal.</p>
       </div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado D. ${d.promotor1}</div></div>`;}
+      <div class="firma">
+        <div class="firma-lugar">${fechaLugar}</div>
+        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
+        ${firma2sl}
+      </div>`;}
 
     case'primera-ocupacion':{
       const proms=gv('promotores_decl')||d.promotores_todos;
@@ -1551,7 +1591,7 @@ function generarTextoDoc(doc,d){
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.fase}, ${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}, ${d.cp_obra} del municipio de ${d.municipio}</span>
-        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <div class="cuerpo">
@@ -1571,7 +1611,7 @@ function generarTextoDoc(doc,d){
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.fase}, ${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.promotor1_dir}, ${d.promotor1_cp}, ${d.promotor1_mun}</span>
-        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <div class="cuerpo">
@@ -1595,7 +1635,7 @@ function generarTextoDoc(doc,d){
       <div class="ficha">
         <span class="fk">Expediente</span><span class="fv">${expA}</span>
         <span class="fk">Expediente OT</span><span class="fv">${otA}</span>
-        <span class="fk">Titular</span><span class="fv">${titA}</span>
+        <span class="fk">${d.promotor2?'Titulares':'Titular'}</span><span class="fv">${d.promotor2?`${titA}<br>${d.promotor2}`:titA}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${emplA}</span>
         <span class="fk">Agente Gestor</span><span class="fv">${d.arq}</span>
       </div>
