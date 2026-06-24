@@ -1631,9 +1631,15 @@ function imprimirPDF(){
   const pa=document.getElementById('print-area');
   pa.innerHTML=contenido;
   pa.style.display='block';
-  window.print();
-  pa.style.display='none';
-  pa.innerHTML='';
+  // setTimeout garantiza que el DOM se pinte antes de llamar window.print()
+  setTimeout(()=>{
+    window.print();
+    // Limpiar después de un delay para que el diálogo de impresión tenga tiempo
+    setTimeout(()=>{
+      pa.style.display='none';
+      pa.innerHTML='';
+    },1000);
+  },300);
 }
 
 async function descargarDOCX(){
