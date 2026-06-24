@@ -1346,10 +1346,10 @@ function generarTextoDoc(doc,d){
       const toTC=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
       const fechaLugarCap=fLugar(fecha,toTC(d.municipio));
       // Dirección del promotor en minúsculas (toTC), emplazamiento de la obra en MAYÚSCULAS
-      const p1expone=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p1expone=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
       const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierentxt=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-      const firma2=d.promotor2?`<div style="margin-top:80pt;padding-left:15mm;">Firmado: ${(d.promotor2||'').toUpperCase()}</div>`:'';
+      const firma2=d.promotor2?`<div style="margin-top:80pt;">${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
       <p style="font-weight:700;margin-bottom:8pt;">${dest}</p>
       <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
@@ -1641,7 +1641,7 @@ async function descargarDOCX(){
   ps.push(p(run('EXPONE:',20,true),{before:0,after:120,sz:20,bold:true}));
 
   // Propietario 1: dirección en minúsculas (toTC), emplazamiento obra en MAYÚSCULAS
-  const p1txt=`${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+  const p1txt=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
   ps.push(p(run(p1txt,22,false),{before:0,after:120}));
 
   // Propietario 2 (si existe)
@@ -1668,10 +1668,10 @@ async function descargarDOCX(){
   // ── Fecha: espacio antes ───────────────────────────────────────────────────
   ps.push(p(run(fechaStr,22,false),{before:400,after:0,jc:''}));
 
-  // ── Firmas: "Firmado: NOMBRE", 1440 twips (≈2.5cm) de espacio para firmar ─
+  // ── Firmas: primera con "Firmado:", segunda solo nombre — ambas alineadas izquierda ─
   ps.push(p(run(`Firmado: ${(d.promotor1||'').toUpperCase()}`,22,false),{before:1440,after:0,jc:''}));
   if(d.promotor2){
-    ps.push(p(run(`Firmado: ${(d.promotor2||'').toUpperCase()}`,22,false),{before:1440,after:0,indent:851,jc:''}));
+    ps.push(p(run((d.promotor2||'').toUpperCase(),22,false),{before:1440,after:0,jc:''}));
   }
 
   // ── document.xml ──────────────────────────────────────────────────────────
