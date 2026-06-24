@@ -1,5 +1,5 @@
 // Service Worker — Gestor de Proyectos PWA
-const CACHE = 'gestor-v2';
+const CACHE = 'gestor-v3';
 const ASSETS = [
   '/Gestor-de-Proyectos/',
   '/Gestor-de-Proyectos/index.html',
