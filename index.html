@@ -57,11 +57,10 @@ textarea{resize:vertical;min-height:70px;}
 .btn-pdf{background:#8B1A1A;color:#fff;padding:10px 20px;}
 .btn-pdf:hover{background:#a52020;}
 @media print{
-  body *{visibility:hidden;}
-  #print-area,#print-area *{visibility:visible;}
-  #print-area{position:fixed;left:0;top:0;width:100%;padding:20mm 25mm;background:#fff;font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#000;}
-  #print-area h3{font-size:12pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:normal;}
-  #print-area .ficha{display:grid;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
+  body>*:not(#print-area){display:none!important;}
+  #print-area{display:block!important;position:static!important;width:100%;background:#fff;font-family:Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#000;}
+  #print-area h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:bold;}
+  #print-area .ficha{display:grid!important;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
   #print-area .fk{font-weight:bold;text-transform:uppercase;font-size:8.5pt;}
   #print-area .fv{font-weight:bold;}
   #print-area .cuerpo p{margin-bottom:7pt;text-align:justify;}
@@ -69,6 +68,9 @@ textarea{resize:vertical;min-height:70px;}
   #print-area .firma-lugar{margin-bottom:14pt;}
   #print-area .firma-bloque{font-weight:bold;font-size:9.5pt;}
   #print-area hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
+  #print-area .firma-cols{display:grid!important;grid-template-columns:34% 42% 24%!important;grid-template-rows:auto 60pt auto!important;}
+  #print-area .firma-cols .firma-bloque{align-self:end;}
+  @page{margin:15mm 18mm;size:A4;}
 }
 .status{padding:10px 14px;border-radius:var(--radius);font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-top:12px;}
 .status.loading{background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;}
@@ -118,9 +120,12 @@ textarea{resize:vertical;min-height:70px;}
 .exp-loaded-badge{font-family:'DM Mono',monospace;font-size:16px;color:var(--accent);font-weight:500;}
 .exp-loaded-info{font-size:12px;color:var(--ink2);margin-top:4px;}
 /* PREVIEW DOC */
-.doc-preview{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:32px 36px;font-size:12.5px;line-height:1.7;color:#1C1A16;max-height:580px;overflow-y:auto;}
+.doc-preview{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px 16px;font-size:12.5px;line-height:1.7;color:#1C1A16;max-height:580px;overflow-y:auto;}
+
 .doc-preview h3{font-family:'DM Serif Display',serif;font-size:13px;font-weight:400;text-align:center;margin-bottom:18px;text-decoration:underline;letter-spacing:.02em;}
 .doc-preview .ficha{display:grid;grid-template-columns:160px 1fr;gap:2px 10px;margin-bottom:16px;font-size:11px;}
+.doc-preview>p{padding:0;}
+.doc-preview .cuerpo{padding:0;}
 .doc-preview .fk{font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.04em;padding:1px 0;}
 .doc-preview .fv{font-weight:700;padding:1px 0;}
 .doc-preview .cuerpo p{margin-bottom:8px;text-align:justify;}
@@ -128,7 +133,14 @@ textarea{resize:vertical;min-height:70px;}
 .doc-preview .firma-lugar{margin-bottom:16px;}
 .doc-preview .firma-bloque{font-weight:600;font-size:11px;margin-top:6px;}
 .doc-preview hr{border:none;border-top:.5px solid #ccc;margin:14px 0;}
-@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}.span-2,.span-3{grid-column:span 1;}.catastro-row{flex-direction:column;}header{padding:14px 16px;}.app{padding:20px 14px 48px;}.doc-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}.span-2,.span-3{grid-column:span 1;}.catastro-row{flex-direction:column;}header{padding:14px 16px;}.app{padding:20px 14px 48px;}.doc-grid{grid-template-columns:1fr;}
+.project-list thead{display:none;}
+.project-list,.project-list tbody,.project-list tr,.project-list td{display:block;width:100%;}
+.project-list tr{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;padding:10px 12px;background:var(--surface);}
+.project-list td{border:none;padding:2px 0;white-space:normal!important;}
+.project-list td:nth-child(4),.project-list td:nth-child(5){min-width:unset;}
+.project-list td:last-child{margin-top:8px;}
+}
 </style>
 </head>
 <body>
@@ -563,7 +575,6 @@ textarea{resize:vertical;min-height:70px;}
             <button class="btn btn-secondary" onclick="copiarTextoDoc()">Copiar texto</button>
           </div>
           <div id="doc-gen-status" style="margin-top:10px;"></div>
-          <div id="print-area" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -1061,6 +1072,7 @@ function getDatosDoc(){
   const e=docExpedienteActivo||{};
   return{
     expediente:e.expediente||'—',
+    tipo_obra:e.tipo_obra||'—',
     proyecto:e.pro_nombre_proyecto||e.tipo_obra||'—',
     fase:e.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN',
     emplazamiento:e.direccion_proyecto||e.direccion_inmueble||'—',
@@ -1163,16 +1175,20 @@ function generarTextoDoc(doc,d){
 
     case'cert-fin-obra-edif':{
       const tipo=gv('tipo_obra_cert')||'Edificación';
+      const etiqProm=d.promotor2?'Promotores':'Promotor';
+      const valProm=d.promotor2
+        ?`${d.promotor1}<br>${d.promotor2}`
+        :d.promotor1;
       return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
       <div class="ficha">
-        <span class="fk">Edificación</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Edificación</span><span class="fv">${d.tipo_obra||d.proyecto}</span>
         <span class="fk">Tipo de Obra</span><span class="fv">${tipo.toUpperCase()}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
-        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">${etiqProm}</span><span class="fv">${valProm}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
@@ -1182,17 +1198,21 @@ function generarTextoDoc(doc,d){
         <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
       </div>${fa}`;}
 
-    case'cert-fin-obra-demol':
+    case'cert-fin-obra-demol':{
+      const etiqPromD=d.promotor2?'Promotores':'Promotor';
+      const valPromD=d.promotor2
+        ?`${d.promotor1}<br>${d.promotor2}`
+        :d.promotor1;
       return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
       <div class="ficha">
-        <span class="fk">Edificación</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Edificación</span><span class="fv">${d.tipo_obra||d.proyecto}</span>
         <span class="fk">Tipo de Obra</span><span class="fv">DEMOLICIÓN</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
-        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">${etiqPromD}</span><span class="fv">${valPromD}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
@@ -1200,7 +1220,7 @@ function generarTextoDoc(doc,d){
         <p>${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, en calidad de Proyectista y Director de Obra de ${d.proyecto} en ${d.emplazamiento} del municipio de ${d.municipio}, provincia de ${d.provincia}.</p>
         <p>Que con fecha de ${fechaES}, la edificación reseñada ha quedado demolida bajo mi dirección de conformidad con el proyecto objeto de licencia y la documentación técnica que lo complementa, hallándose dispuesto el solar para su utilización con arreglo a las ordenanzas urbanísticas vigentes.</p>
         <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
-      </div>${fa}`;
+      </div>${fa}`;}
 
     case'cert-resistencia-cub':{
       const dest=gv('destinatario_cert')||'la Administración competente';
@@ -1226,6 +1246,11 @@ function generarTextoDoc(doc,d){
 
     case'acta-replanteo':{
       const hora=gv('hora_acta')||'09:00';
+      const etiqProm=d.promotor2?'Promotores':'Promotor';
+      const valPromFicha=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
+      const promsTxt=d.promotor2
+        ?`${d.promotor1} e ${d.promotor2}, como promotores de la obra`
+        :`${d.promotor1}, como promotor de la obra`;
       return`<h3>ACTA DE COMPROBACIÓN DEL REPLANTEO</h3>
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
@@ -1233,46 +1258,59 @@ function generarTextoDoc(doc,d){
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">${etiqProm}</span><span class="fv">${valPromFicha}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
       <div class="cuerpo">
         <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen exclusivamente los firmantes, para proceder a la comprobación del replanteo de las obras.</p>
-        <p>${d.promotor1}, como promotor de la obra, como representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>${promsTxt}, como representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
         <p>Proceden a efectuar la comprobación del replanteo de la obra con el siguiente resultado: Que aprobado el proyecto técnico de la obra cuya ejecución se pretende realizar es conforme con la memoria que considera las necesidades a satisfacer, planos de conjunto y detalles, pliego de prescripciones técnicas, presupuesto y calles afectadas. Asimismo, indica la propiedad que dispone de los terrenos, autorizaciones y concesiones precisas.</p>
         <p>Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.</p>
       </div>
-      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
-        <div><div class="firma-bloque">EL DIRECTOR DE OBRA</div><div style="margin-top:80pt;">${d.arq}</div></div>
-        <div><div class="firma-bloque">LA PROPIEDAD</div><div style="margin-top:80pt;">${d.promotor1}</div></div>
-        <div><div class="firma-bloque">EL CONTRATISTA</div></div>
+      <div class="firma firma-cols" style="display:grid;grid-template-columns:34% 42% 24%;grid-template-rows:auto 60pt auto;margin-top:28px;">
+        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">EL DIRECTOR DE OBRA</div></div>
+        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">LA PROPIEDAD</div></div>
+        <div style="align-self:end;"><div class="firma-bloque">EL CONTRATISTA</div></div>
+        <div></div><div></div><div></div>
+        <div style="align-self:start;padding-right:20px;">${d.arq}</div>
+        <div style="align-self:start;padding-right:20px;">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div>
+        <div style="align-self:start;">&nbsp;</div>
       </div>`;}
 
     case'acta-recepcion':{
       const hora=gv('hora_acta')||'13:00';
       const fechaGar=gv('fecha_fin_garantia')?fES(gv('fecha_fin_garantia')):'—';
+      const etiqProm=d.promotor2?'Promotores':'Promotor';
+      const valPromFicha=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
+      const propTxt=d.promotor2
+        ?`${d.promotor1} e ${d.promotor2}, como propietarios`
+        :`${d.promotor1} como propietario`;
       return`<h3>ACTA DE RECEPCIÓN DE OBRA</h3>
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        <span class="fk">${etiqProm}</span><span class="fv">${valPromFicha}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
       <div class="cuerpo">
-        <p>${d.promotor1} como propietario, el representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>${propTxt}, el representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
         <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen exclusivamente los firmantes, para proceder por parte de la Propiedad a su recepción.</p>
         <p>Tras el reconocimiento detallado de las obras, el Director de la obra expone que las mismas han sido ejecutadas sensiblemente de acuerdo con el proyecto y sus modificaciones aprobadas, en su caso, teniendo en cuenta todas las prescripciones en vigor, y que se encuentran en condiciones de ser recibidas.</p>
         <p>La propiedad solicita a los asistentes que manifiesten cuanto estimen conveniente en relación al acto que se está realizando y a las actuaciones llevadas a cabo, no haciéndolo ninguno de ellos.</p>
         <p>En consecuencia, y con la conformidad de los firmantes, la Propiedad da por recibida la obra, entregándola al uso o servicio correspondiente y finalizando el plazo de garantía a las ${hora} horas del día ${fechaGar}.</p>
       </div>
-      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
-        <div><div class="firma-bloque">EL PROYECTISTA Y DIRECTOR DE OBRA</div><div style="margin-top:80pt;">${d.arq}</div></div>
-        <div><div class="firma-bloque">LA PROPIEDAD</div><div style="margin-top:80pt;">${d.promotor1}</div></div>
-        <div><div class="firma-bloque">EL CONTRATISTA</div></div>
+      <div class="firma firma-cols" style="display:grid;grid-template-columns:34% 42% 24%;grid-template-rows:auto 60pt auto;margin-top:28px;">
+        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">EL PROYECTISTA Y<br>DIRECTOR DE OBRA</div></div>
+        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">LA PROPIEDAD</div></div>
+        <div style="align-self:end;"><div class="firma-bloque">EL CONTRATISTA</div></div>
+        <div></div><div></div><div></div>
+        <div style="align-self:start;padding-right:20px;">${d.arq}</div>
+        <div style="align-self:start;padding-right:20px;">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div>
+        <div style="align-self:start;">&nbsp;</div>
       </div>`;}
 
     case'acta-pavimento':{
@@ -1350,8 +1388,8 @@ function generarTextoDoc(doc,d){
       const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierentxt=d.promotor2?'Que quieren realizar':'Que quiere realizar';
       const firma2=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
-      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
-      <p style="font-weight:700;margin-bottom:8pt;">${dest}</p>
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
+      <p style="font-weight:700;margin-top:16pt;margin-bottom:8pt;">${dest}</p>
       <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
       <div class="cuerpo">
         <p>${p1expone}</p>
@@ -1371,8 +1409,8 @@ function generarTextoDoc(doc,d){
 
     case'autorizacion-licencia-legaliz':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
-      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
-      <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
+      <p style="font-weight:600;margin-top:16pt;margin-bottom:10px;">EXPONE:</p>
       <div class="cuerpo">
         <p>D. ${d.promotor1}, Mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
         <p>Que realizó la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, para la cual obtuvo la preceptiva licencia de obra mayor.</p>
@@ -1464,24 +1502,46 @@ function generarTextoDoc(doc,d){
 
     case'primera-ocupacion':{
       const proms=gv('promotores_decl')||d.promotores_todos;
-      return`<h3>PRIMERA OCUPACIÓN DE VIVIENDA — DECLARACIÓN RESPONSABLE</h3>
+      // Promotores con "y" en vez de coma, y en mayúsculas
+      const promsList=[d.promotor1,d.promotor2].filter(Boolean);
+      const promsY=promsList.map(p=>(p||'').toUpperCase()).join(' y ');
+      const nifsY=[d.promotor1_nif,d.promotor2_nif].filter(Boolean).join(', ');
+      const etiqProm=d.promotor2?'Promotores':'Promotor';
+      // Localidad en mayúsculas
+      const locMay=(d.promotor1_mun||'').toUpperCase();
+      const provMay=(d.promotor1_prov||'').toUpperCase();
+      // Ficha edificación con promotor/promotores alineados igual que certificado
+      const valPromEdif=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
+      // Texto declaran: singular o plural
+      const declaranTxt=d.promotor2?`${promsY} declaran`:`${(d.promotor1||'').toUpperCase()} declara`;
+      return`<h3>PRIMERA OCUPACIÓN DE VIVIENDA<br>DECLARACIÓN RESPONSABLE</h3>
       <p style="font-weight:600;margin-bottom:8px;">DATOS DEL DECLARANTE</p>
       <div class="ficha">
-        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
-        <span class="fk">CIF/NIF</span><span class="fv">${d.nifs_todos}</span>
+        <span class="fk">${etiqProm}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+        <span class="fk">CIF/NIF</span><span class="fv">${nifsY}</span>
         <span class="fk">Dirección</span><span class="fv">${d.promotor1_dir}</span>
         <span class="fk">C.P.</span><span class="fv">${d.promotor1_cp}</span>
-        <span class="fk">Localidad</span><span class="fv">${d.promotor1_mun}</span>
-        <span class="fk">Provincia</span><span class="fv">${d.promotor1_prov}</span>
+        <span class="fk">Localidad</span><span class="fv">${locMay}</span>
+        <span class="fk">Provincia</span><span class="fv">${provMay}</span>
       </div>
       <p style="font-weight:600;margin-bottom:8px;">DATOS DE LA EDIFICACIÓN</p>
-      ${fichaBase(d)}
-      <div class="cuerpo">
-        <p>${proms} declaran, bajo su responsabilidad, que el inmueble construido arriba referido es acorde con la licencia de obras en su momento concedida, habiéndose cumplido las condiciones en ella impuestas, y todo ello a los efectos de la primera ocupación o utilización de la edificación.</p>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">${etiqProm}</span><span class="fv">${valPromEdif}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
-      <div style="margin-top:8px;">SR. ALCALDE-PRESIDENTE del Excmo. Ayuntamiento de ${d.municipio}</div>
-      <div style="margin-top:20px;">Firmado: ${proms}</div></div>`;}
+      <div class="cuerpo">
+        <p>${declaranTxt}, bajo su responsabilidad, que el inmueble construido arriba referido es acorde con la licencia de obras en su momento concedida, habiéndose cumplido las condiciones en ella impuestas, y todo ello a los efectos de la primera ocupación o utilización de la edificación.</p>
+      </div>
+      <div class="firma">
+        <div class="firma-lugar">${fechaLugar}</div>
+        <div style="margin-top:80pt;">SR. ALCALDE-PRESIDENTE del Excmo. Ayuntamiento de ${d.municipio}</div>
+        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}${d.promotor2?` y ${(d.promotor2||'').toUpperCase()}`:''}</div>
+      </div>`;}
 
     case'modificado':{
       const numMod=gv('num_modificado')||'1';
@@ -1582,8 +1642,129 @@ async function descargarDOCX(){
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
   if(!window.JSZip){statusEl.innerHTML='<div class="status error">✗ JSZip no disponible.</div>';return;}
   if(docSeleccionado.id!=='autorizacion-licencia'){
-    statusEl.innerHTML='<div class="status error">⚠ Descarga .docx disponible solo para Autorización de Licencia por ahora.</div>';
-    setTimeout(()=>statusEl.innerHTML='',5000);return;
+    const isReplanteo=docSeleccionado.id==='acta-replanteo';
+    const isRecepcion=docSeleccionado.id==='acta-recepcion';
+    if(!isReplanteo&&!isRecepcion){
+      statusEl.innerHTML='<div class="status error">⚠ Descarga .docx no disponible para este documento todavía.</div>';
+      setTimeout(()=>statusEl.innerHTML='',5000);return;
+    }
+    statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
+    try{
+      // ── Usar exactamente los mismos helpers que la autorización ──────────────
+      const d2=getDatosDoc();
+      const fecha2=gv('fecha_acta')||new Date().toISOString().split('T')[0];
+      const hora2=gv('hora_acta')||(isReplanteo?'09:00':'13:00');
+      const dt2=new Date(fecha2+'T12:00:00');
+      const meses2=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const fechaES2=`${dt2.getDate()} de ${meses2[dt2.getMonth()]} del año ${dt2.getFullYear()}`;
+      const xe2=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      function rX2(sz,bold,ul){return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;}
+      function r2(txt,sz,bold,ul){if(!txt&&txt!=='')return'';return`<w:r><w:rPr>${rX2(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe2(String(txt))}</w:t></w:r>`;}
+      function p2(runs,{jc='both',before=0,after=120,sz=22,bold=false,ul=false}={}){
+        const pPr=`<w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/><w:adjustRightInd w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="240" w:lineRule="auto"/>${jc?`<w:jc w:val="${jc}"/>`:''}`;
+        const rs=Array.isArray(runs)?runs.join(''):runs;
+        return`<w:p><w:pPr>${pPr}<w:rPr>${rX2(sz,bold,ul)}</w:rPr></w:pPr>${rs}</w:p>`;
+      }
+      function pE2(before=0,after=120){return p2('',{before,after});}
+
+      const etiqProm2=d2.promotor2?'PROMOTORES':'PROMOTOR';
+      const ps2=[];
+
+      // Título centrado, negrita, subrayado
+      ps2.push(p2(r2(isReplanteo?'ACTA DE COMPROBACIÓN DEL REPLANTEO':'ACTA DE RECEPCIÓN DE OBRA',22,true,true),{jc:'center',before:200,after:200,bold:true,ul:true}));
+      ps2.push(pE2(0,120));
+
+      // Ficha con grid real (misma estructura que autorización)
+      // Ficha con tabla invisible 2 columnas — etiqueta fija 2200 twips, valor resto
+      const FW=9864,FC1=2200,FC2=FW-FC1;
+      const tcBf=`<w:tcBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/></w:tcBorders>`;
+      const tblBf=`<w:tblBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideH w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideV w:val="none" w:color="FFFFFF" w:sz="0"/></w:tblBorders>`;
+      const gridF=`<w:tblGrid><w:gridCol w:w="${FC1}"/><w:gridCol w:w="${FC2}"/></w:tblGrid>`;
+      function pFicha(txt,bold,sz){return`<w:p><w:pPr><w:spacing w:after="40" w:before="0" w:line="240"/></w:pPr><w:r><w:rPr>${rX2(sz||20,bold)}</w:rPr><w:t xml:space="preserve">${xe2(txt||'')}</w:t></w:r></w:p>`;}
+      function tcF(w,content){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBf}</w:tcPr>${content}</w:tc>`;}
+      function filaFicha2(lbl,val){
+        return`<w:tr>${tcF(FC1,pFicha(lbl,true,18))}${tcF(FC2,pFicha(val,true,20))}</w:tr>`;
+      }
+      function filaFichaVal(val){
+        // Segunda línea de promotores: celda etiqueta vacía
+        return`<w:tr>${tcF(FC1,pFicha('',false,18))}${tcF(FC2,pFicha(val,true,20))}</w:tr>`;
+      }
+      const fichaRows=[];
+      fichaRows.push(filaFicha2('PROYECTO',d2.proyecto));
+      fichaRows.push(filaFicha2('EMPLAZAMIENTO',d2.emplazamiento));
+      if(isReplanteo)fichaRows.push(filaFicha2('CÓDIGO POSTAL',d2.cp_obra));
+      fichaRows.push(filaFicha2('LOCALIDAD',d2.municipio));
+      fichaRows.push(filaFicha2('REF. CATASTRAL',d2.ref_catastral));
+      fichaRows.push(filaFicha2(etiqProm2,d2.promotor1));
+      if(d2.promotor2)fichaRows.push(filaFichaVal(d2.promotor2));
+      fichaRows.push(filaFicha2('DIRECTOR DE OBRA',d2.arq));
+      ps2.push(`<w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="${FW}"/>${tblBf}</w:tblPr>${gridF}${fichaRows.join('')}</w:tbl>`);
+      ps2.push(pE2(0,120));
+
+      // ACTA:
+      ps2.push(p2(r2('ACTA:',20,true),{before:0,after:120,sz:20,bold:true}));
+
+      // Texto del acta
+      if(isReplanteo){
+        const pTxt=d2.promotor2?`${d2.promotor1} e ${d2.promotor2}, como promotores de la obra`:`${d2.promotor1}, como promotor de la obra`;
+        ps2.push(p2(r2(`En el lugar de emplazamiento de las obras, siendo las ${hora2} horas del día ${fechaES2}, se reúnen exclusivamente los firmantes, para proceder a la comprobación del replanteo de las obras.`,22,false),{after:120}));
+        ps2.push(p2(r2(`${pTxt}, como representante de la empresa constructora ${d2.constructor}, y ${d2.arq}, ARQUITECTO, en calidad de Director de Obra.`,22,false),{after:120}));
+        ps2.push(p2(r2('Proceden a efectuar la comprobación del replanteo de la obra con el siguiente resultado: Que aprobado el proyecto técnico de la obra cuya ejecución se pretende realizar es conforme con la memoria que considera las necesidades a satisfacer, planos de conjunto y detalles, pliego de prescripciones técnicas, presupuesto y calles afectadas. Asimismo, indica la propiedad que dispone de los terrenos, autorizaciones y concesiones precisas.',22,false),{after:120}));
+        ps2.push(p2(r2('Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.',22,false),{after:120}));
+      } else {
+        const fechaGar2=gv('fecha_fin_garantia')?`${new Date(gv('fecha_fin_garantia')+'T12:00:00').getDate()} de ${meses2[new Date(gv('fecha_fin_garantia')+'T12:00:00').getMonth()]} de ${new Date(gv('fecha_fin_garantia')+'T12:00:00').getFullYear()}`:'—';
+        const pTxt=d2.promotor2?`${d2.promotor1} e ${d2.promotor2}, como propietarios`:`${d2.promotor1} como propietario`;
+        ps2.push(p2(r2(`${pTxt}, el representante de la empresa constructora ${d2.constructor}, y ${d2.arq}, ARQUITECTO, en calidad de Director de Obra.`,22,false),{after:120}));
+        ps2.push(p2(r2(`En el lugar de emplazamiento de las obras, siendo las ${hora2} horas del día ${fechaES2}, se reúnen exclusivamente los firmantes, para proceder por parte de la Propiedad a su recepción.`,22,false),{after:120}));
+        ps2.push(p2(r2('Tras el reconocimiento detallado de las obras, el Director de la obra expone que las mismas han sido ejecutadas sensiblemente de acuerdo con el proyecto y sus modificaciones aprobadas, en su caso, teniendo en cuenta todas las prescripciones en vigor, y que se encuentran en condiciones de ser recibidas.',22,false),{after:120}));
+        ps2.push(p2(r2('La propiedad solicita a los asistentes que manifiesten cuanto estimen conveniente en relación al acto que se está realizando y a las actuaciones llevadas a cabo, no haciéndolo ninguno de ellos.',22,false),{after:120}));
+        ps2.push(p2(r2(`En consecuencia, y con la conformidad de los firmantes, la Propiedad da por recibida la obra, entregándola al uso o servicio correspondiente y finalizando el plazo de garantía a las ${hora2} horas del día ${fechaGar2}.`,22,false),{after:120}));
+      }
+
+      // Firmas: tabla invisible 3 columnas igual que la ficha
+      const col1t=isReplanteo?'EL DIRECTOR DE OBRA':'EL PROYECTISTA Y DIRECTOR DE OBRA';
+      // Para recepción: título en dos líneas dentro de la celda
+      function pSCol1(bold,before,after){
+        if(isReplanteo)return pS(col1t,bold,before,after);
+        return`<w:p><w:pPr><w:spacing w:before="${before||0}" w:after="${after||0}" w:line="240"/></w:pPr><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:t xml:space="preserve">EL PROYECTISTA Y</w:t></w:r><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:br/></w:r><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:t xml:space="preserve">DIRECTOR DE OBRA</w:t></w:r></w:p>`;
+      }
+      const SW=9864,SC1=Math.round(SW*0.34),SC2=Math.round(SW*0.42),SC3=SW-SC1-SC2;
+      const tcBs=`<w:tcBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/></w:tcBorders>`;
+      const tblBs=`<w:tblBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideH w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideV w:val="none" w:color="FFFFFF" w:sz="0"/></w:tblBorders>`;
+      const gridS=`<w:tblGrid><w:gridCol w:w="${SC1}"/><w:gridCol w:w="${SC2}"/><w:gridCol w:w="${SC3}"/></w:tblGrid>`;
+      function pS(txt,bold,before,after){return`<w:p><w:pPr><w:spacing w:before="${before||0}" w:after="${after||0}" w:line="240"/></w:pPr><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:t xml:space="preserve">${xe2(txt||'')}</w:t></w:r></w:p>`;}
+      function tcS(w,content){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBs}</w:tcPr>${content}</w:tc>`;}
+      // Fila 1: títulos (with before=400 para separar del texto)
+      const rowST=`<w:tr>${tcS(SC1,pSCol1(true,400,0))}${tcS(SC2,pS('LA PROPIEDAD',true,400,0))}${tcS(SC3,pS('EL CONTRATISTA',true,400,0))}</w:tr>`;
+      // Fila 2: espacio vacío ~4cm
+      function tcSe(w){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBs}</w:tcPr><w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p></w:tc>`;}
+      const rowSE=`<w:tr><w:trPr><w:trHeight w:val="1400" w:hRule="exact"/></w:trPr>${tcSe(SC1)}${tcSe(SC2)}${tcSe(SC3)}</w:tr>`;
+      // Fila 3: nombres
+      const cell2s=d2.promotor2?pS(d2.promotor1,false,0,0)+pS(d2.promotor2,false,0,0):pS(d2.promotor1,false,0,0);
+      const rowSN=`<w:tr>${tcS(SC1,pS(d2.arq,false,0,0))}${tcS(SC2,cell2s)}${tcS(SC3,pS('',false,0,0))}</w:tr>`;
+      ps2.push(`<w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="${SW}"/>${tblBs}</w:tblPr>${gridS}${rowST}${rowSE}${rowSN}</w:tbl>`);
+
+      // Ensamblar — mismo ZIP que autorización
+      const sectPr2=`<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="851" w:right="1021" w:bottom="851" w:left="1021" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>`;
+      const docXml2=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${ps2.join('')}${sectPr2}</w:body></w:document>`;
+      const rX=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+      const sX=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
+      const dR=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+      const cT=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`;
+      const zip2=new JSZip();
+      zip2.file('[Content_Types].xml',cT);zip2.file('_rels/.rels',dR);
+      zip2.file('word/document.xml',docXml2);zip2.file('word/styles.xml',sX);
+      zip2.file('word/_rels/document.xml.rels',rX);
+      const buf2=await zip2.generateAsync({type:'arraybuffer',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      const blob2=new Blob([buf2],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      const url2=URL.createObjectURL(blob2);
+      const a2=document.createElement('a');a2.href=url2;
+      a2.download=`${docExpedienteActivo.expediente} \u2014 ${docSeleccionado.nombre.substring(0,50)}.docx`;
+      a2.click();URL.revokeObjectURL(url2);
+      statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
+      setTimeout(()=>statusEl.innerHTML='',6000);
+    }catch(e){statusEl.innerHTML=`<div class="status error">\u2717 Error: ${e.message}</div>`;}
+    return;
   }
   statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx\u2026</div>';
 
@@ -1627,15 +1808,15 @@ async function descargarDOCX(){
 
   // ── Título: negrita, subrayado, centrado, 11pt ─────────────────────────────
   ps.push(p([
-    run('AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN',22,true,true),
+    run('AUTORIZACIÓN DE REPRESENTACIÓN',22,true,true),
     `<w:r><w:rPr>${rPrXml(22,true,true)}</w:rPr><w:br/></w:r>`,
-    run('DE LA LICENCIA URBANÍSTICA',22,true,true)
-  ],{jc:'center',before:200,after:100,bold:true,ul:true}));
-  ps.push(pEmpty(0,100));
+    run('PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA',22,true,true)
+  ],{jc:'center',before:200,after:400,bold:true,ul:true}));
+  ps.push(pEmpty(0,240));
 
   // ── Destinatario: 10pt negrita ─────────────────────────────────────────────
-  ps.push(p(run(dest,20,true),{before:0,after:120,sz:20,bold:true}));
-  ps.push(pEmpty(0,120));
+  ps.push(p(run(dest,20,true),{before:0,after:280,sz:20,bold:true}));
+  ps.push(pEmpty(0,160));
 
   // ── EXPONE: ────────────────────────────────────────────────────────────────
   ps.push(p(run('EXPONE:',20,true),{before:0,after:120,sz:20,bold:true}));
@@ -2129,18 +2310,17 @@ function renderTabla(lista){
     return;
   }
   const rows=lista.map(p=>`<tr>
-    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
-    <td>${p.fecha_creacion}</td>
+    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong> <span style="font-size:10px;color:var(--ink3);">${p.fecha_creacion}</span></td>
     <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
     <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
-    <td>${p.municipio||'—'}</td>
+    <td style="color:var(--ink3);font-size:11px;">${p.municipio||'—'}</td>
     <td>
       <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
       <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
       <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
     </td>
   </tr>`).join('');
-  container.innerHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function borrarExpediente(code){
@@ -2886,5 +3066,6 @@ function generarPortadasPDF(titulos, sufijoNombre, statusElId){
 
 previewExpediente();
 </script>
+<div id="print-area" style="display:none;"></div>
 </body>
 </html>
