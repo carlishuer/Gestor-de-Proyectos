@@ -1349,7 +1349,7 @@ function generarTextoDoc(doc,d){
       const p1expone=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
       const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierentxt=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-      const firma2=d.promotor2?`<div style="margin-top:80pt;">${(d.promotor2||'').toUpperCase()}</div>`:'';
+      const firma2=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
       <p style="font-weight:700;margin-bottom:8pt;">${dest}</p>
       <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
@@ -1668,10 +1668,13 @@ async function descargarDOCX(){
   // ── Fecha: espacio antes ───────────────────────────────────────────────────
   ps.push(p(run(fechaStr,22,false),{before:400,after:0,jc:''}));
 
-  // ── Firmas: primera con "Firmado:", segunda solo nombre — ambas alineadas izquierda ─
+  // ── Firmas: "Firmado: NOMBRE1" y debajo "        NOMBRE2" alineado ─────────
   ps.push(p(run(`Firmado: ${(d.promotor1||'').toUpperCase()}`,22,false),{before:1440,after:0,jc:''}));
   if(d.promotor2){
-    ps.push(p(run((d.promotor2||'').toUpperCase(),22,false),{before:1440,after:0,jc:''}));
+    // Run invisible "Firmado: " (color blanco) para alinear el nombre con el de arriba
+    const runInvis=`<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:color w:val="FFFFFF"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr><w:t xml:space="preserve">Firmado: </w:t></w:r>`;
+    const runNombre=run((d.promotor2||'').toUpperCase(),22,false);
+    ps.push(p([runInvis,runNombre],{before:1440,after:0,jc:''}));
   }
 
   // ── document.xml ──────────────────────────────────────────────────────────
@@ -2137,7 +2140,7 @@ function renderTabla(lista){
       <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
     </td>
   </tr>`).join('');
-  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  container.innerHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function borrarExpediente(code){
