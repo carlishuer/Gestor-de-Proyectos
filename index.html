@@ -429,9 +429,6 @@ textarea{resize:vertical;min-height:70px;}
           <button class="btn btn-primary btn-lg" onclick="generarExpediente()">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Generar Expediente
           </button>
-          <button class="btn btn-secondary" onclick="generarExcelDatos()" id="btn-excel">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar Excel (DATOS)
-          </button>
           <button class="btn btn-secondary" onclick="copiarDatosGestorMemorias()" id="btn-datos-memorias" style="background:#1a4e8a;color:#fff;border-color:#1a4e8a;">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar datos → Gestor de Memorias
           </button>
@@ -443,19 +440,22 @@ textarea{resize:vertical;min-height:70px;}
 
         <hr class="divider">
         <p style="color:var(--ink2);font-size:13px;margin-bottom:10px;">Portadas en PDF con los datos de este expediente (mismo formato que el Gestor de Memorias).</p>
-        <div class="actions" style="flex-wrap:wrap;gap:8px;">
-          <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')">
+        <div class="actions" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')" style="width:100%;">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PORTADAS DIPUTACIÓN
           </button>
+        </div>
+        <div class="actions" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['MEMORIA'],'portada memoria','portada-status')">↓ Memoria</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['FOTOGRAFÍAS'],'portada fotografías','portada-status')">↓ Fotografías</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">↓ Anexos ahorro energía</button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
-          <div style="display:flex;gap:6px;align-items:center;margin-top:4px;width:100%;">
-            <input type="text" id="portada-titulo-custom" placeholder="Título personalizado…" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;"/>
-            <button class="btn btn-secondary" onclick="const t=document.getElementById('portada-titulo-custom').value.trim();if(t)generarPortadasPDF([t],'portada '+t.toLowerCase(),'portada-status');else document.getElementById('portada-status').innerHTML='<span style=color:var(--err)>Escribe un título primero</span>';">↓ Personalizada</button>
-          </div>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="text" id="portada-titulo-custom" placeholder="Título personalizado…" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;"/>
+          <button class="btn btn-secondary" onclick="const t=document.getElementById('portada-titulo-custom').value.trim();if(t)generarPortadasPDF([t],'portada '+t.toLowerCase(),'portada-status');else document.getElementById('portada-status').innerHTML='<span style=color:var(--err)>Escribe un título primero</span>';">↓ Personalizada</button>
+        </div>
         </div>
         <div id="portada-status" style="margin-top:6px;"></div>
       </div>
@@ -2522,14 +2522,23 @@ function cargarDatosEnFormulario(p){
     }
   }
 
-  // Promotores adicionales
-  set('cli2-nombre',p.promotor2_nombre);
+  // Promotores adicionales — separar nombre completo en sus campos
+  function separarNombre(nombreCompleto,prefijo){
+    const partes=(nombreCompleto||'').trim().split(/\s+/);
+    const el1=document.getElementById(prefijo+'-nombre');
+    const el2=document.getElementById(prefijo+'-apellido1');
+    const el3=document.getElementById(prefijo+'-apellido2');
+    if(el1)el1.value=partes[0]||'';
+    if(el2)el2.value=partes[1]||'';
+    if(el3)el3.value=partes.slice(2).join(' ')||'';
+  }
+  separarNombre(p.promotor2_nombre,'cli2');
   set('cli2-nif',p.promotor2_nif);
   set('cli2-dir',p.promotor2_dir);
   set('cli2-cp',p.promotor2_cp);
   set('cli2-municipio',p.promotor2_mun);
   set('cli2-provincia',p.promotor2_prov);
-  set('cli3-nombre',p.promotor3_nombre);
+  separarNombre(p.promotor3_nombre,'cli3');
   set('cli3-nif',p.promotor3_nif);
   // Abrir secciones si tienen datos
   const sec2=document.getElementById('sec-promotor2');
@@ -2789,6 +2798,24 @@ async function descargarExcelPresupuesto(){
       {key:'cpPro',   val:(d.cp_proyecto||'').trim()},
       {key:'email',   val:d.cliente_email||''},
       {key:'tel',     val:d.cliente_tel||d.cliente_telefono||''},
+      // Promotor 2
+      {key:'p2nom',   val:(d.promotor2_nombre||'').toUpperCase()},
+      {key:'p2nif',   val:d.promotor2_nif||''},
+      {key:'p2dir',   val:(d.promotor2_dir||'').toUpperCase()},
+      {key:'p2cp',    val:d.promotor2_cp||''},
+      {key:'p2mun',   val:(d.promotor2_mun||'').toUpperCase()},
+      {key:'p2prov',  val:(d.promotor2_prov||'').toUpperCase()},
+      {key:'p2email', val:d.promotor2_email||''},
+      {key:'p2tel',   val:d.promotor2_tel||d.promotor2_telefono||''},
+      // Promotor 3
+      {key:'p3nom',   val:(d.promotor3_nombre||'').toUpperCase()},
+      {key:'p3nif',   val:d.promotor3_nif||''},
+      {key:'p3dir',   val:(d.promotor3_dir||'').toUpperCase()},
+      {key:'p3cp',    val:d.promotor3_cp||''},
+      {key:'p3mun',   val:(d.promotor3_mun||'').toUpperCase()},
+      {key:'p3prov',  val:(d.promotor3_prov||'').toUpperCase()},
+      {key:'p3email', val:d.promotor3_email||''},
+      {key:'p3tel',   val:d.promotor3_tel||d.promotor3_telefono||''},
     ];
     const newIdx={};
     let baseIdx=(ss.match(/<si>/g)||[]).length;
@@ -2816,7 +2843,21 @@ async function descargarExcelPresupuesto(){
         return cr+cleanAttrs+' t="s"><v>'+idx+'</v></c>';
       });
     }
-    // cellNum: escribe número, o limpia si vacío
+    // cellTxtInsert: igual que cellTxt pero inserta la celda si no existe en la fila
+    function cellTxtInsert(s1,ref,idx,val){
+      if(!val||idx===null||idx===undefined)return s1;
+      // Si la celda ya existe, usar cellTxt normal
+      if(s1.includes('"'+ref+'"'))return cellTxt(s1,ref,idx,val);
+      // Si no existe, insertarla al final de la fila correspondiente
+      const rowNum=ref.replace(/[A-Z]+/,'');
+      const rowPat=new RegExp('(<row r="'+rowNum+'"[^>]*>)(.*?)(</row>)','s');
+      const cellXml=`<c r="${ref}" t="s"><v>${idx}</v></c>`;
+      if(rowPat.test(s1)){
+        return s1.replace(rowPat,(m,open,content,close)=>open+content+cellXml+close);
+      }
+      // Si la fila tampoco existe, insertarla antes de </sheetData>
+      return s1.replace('</sheetData>',`<row r="${rowNum}">${cellXml}</row></sheetData>`);
+    }
     function cellNum(s1,ref,val){
       const pat=new RegExp('(<c r="'+ref+'")((?:\\s+[^>]*)?)(?:>(?:<f>[^<]*</f>)?(?:<v>[^<]*</v>)?</c>|/>)');
       if(!val&&val!==0){
@@ -2845,6 +2886,29 @@ async function descargarExcelPresupuesto(){
       });
     }
     s1=cellTxt(s1,'B12',newIdx['tel'],d.cliente_tel||d.cliente_telefono||'');
+
+    // Promotor 2 — columna C, filas 5-12
+    if(d.promotor2_nombre){
+      s1=cellTxtInsert(s1,'C5',newIdx['p2nom'],(d.promotor2_nombre||'').toUpperCase());
+      s1=cellTxtInsert(s1,'C6',newIdx['p2nif'],d.promotor2_nif||'');
+      s1=cellTxtInsert(s1,'C7',newIdx['p2dir'],(d.promotor2_dir||'').toUpperCase());
+      s1=cellTxtInsert(s1,'C8',newIdx['p2cp'],d.promotor2_cp||'');
+      s1=cellTxtInsert(s1,'C9',newIdx['p2mun'],(d.promotor2_mun||'').toUpperCase());
+      s1=cellTxtInsert(s1,'C10',newIdx['p2prov'],(d.promotor2_prov||'').toUpperCase());
+      s1=cellTxtInsert(s1,'C11',newIdx['p2email'],d.promotor2_email||'');
+      s1=cellTxtInsert(s1,'C12',newIdx['p2tel'],d.promotor2_tel||d.promotor2_telefono||'');
+    }
+    // Promotor 3 — columna D, filas 5-12
+    if(d.promotor3_nombre){
+      s1=cellTxtInsert(s1,'D5',newIdx['p3nom'],(d.promotor3_nombre||'').toUpperCase());
+      s1=cellTxtInsert(s1,'D6',newIdx['p3nif'],d.promotor3_nif||'');
+      s1=cellTxtInsert(s1,'D7',newIdx['p3dir'],(d.promotor3_dir||'').toUpperCase());
+      s1=cellTxtInsert(s1,'D8',newIdx['p3cp'],d.promotor3_cp||'');
+      s1=cellTxtInsert(s1,'D9',newIdx['p3mun'],(d.promotor3_mun||'').toUpperCase());
+      s1=cellTxtInsert(s1,'D10',newIdx['p3prov'],(d.promotor3_prov||'').toUpperCase());
+      s1=cellTxtInsert(s1,'D11',newIdx['p3email'],d.promotor3_email||'');
+      s1=cellTxtInsert(s1,'D12',newIdx['p3tel'],d.promotor3_tel||d.promotor3_telefono||'');
+    }
     s1=cellTxt(s1,'B16',newIdx['fase'],(d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase());
     const pem=parseFloat((d.pem||'0').toString().replace(/[^0-9.,]/g,'').replace(',','.'));
     s1=cellNum(s1,'F16',pem||'');
@@ -3017,21 +3081,50 @@ async function generarExcelDatos(){
     set('A3','FECHA INICIAL',F_LABEL);
     set('B3',d.fecha_iso?toDate(d.fecha_iso):'',F_IN,{numFmt:DATEFMT});
     set('A4','FECHA',F_LABEL); set('B4',{formula:'TODAY()'},F_IN,{numFmt:DATEFMT});
-    set('A5','PROMOTOR',F_LABEL); set('B5',d.cliente_nombre_completo||'',F_IN,{numFmt:'@'});
-    set('E5','CONTRATISTA',F_LABEL); set('F5',d.pro_constructor||'',F_IN,{numFmt:'@'});
-    set('A6','CIF/NIF',F_LABEL); set('B6',d.cliente_nif||'',F_IN,{numFmt:'@'});
-    set('E6','CIF/NIF',F_LABEL); set('F6',d.pro_constructor_nif||'',F_IN,{numFmt:'@'});
-    set('A7','DIRECCION',F_LABEL); set('B7',d.cliente_direccion||'',F_IN,{numFmt:'@'});
-    set('E7','DIRECCION',F_LABEL); set('F7','',F_IN,{numFmt:'@'});
-    set('A8','CODIGO POSTAL',F_LABEL); set('B8',d.cliente_cp||'',F_IN,{numFmt:'@'});
-    set('E8','CODIGO POST.',F_LABEL); set('F8','',F_IN,{numFmt:'@'});
-    set('A9','LOCALIDAD',F_LABEL); set('B9',d.cliente_municipio||'',F_IN,{numFmt:'@'});
-    set('E9','POBLACION',F_LABEL); set('F9','',F_IN,{numFmt:'@'});
-    set('A10','PROVINCIA',F_LABEL); set('B10',d.cliente_provincia||'',F_IN,{numFmt:'@'});
-    set('E10','PROVINCIA',F_LABEL); set('F10','',F_IN,{numFmt:'@'});
-    set('A11','CORREO ELCTRÓNICO',F_LABEL); set('B11',d.cliente_email||'',F_IN,{numFmt:'@'});
-    set('E11','REPRESENTANTE',F_LABEL); set('F11',d.representante_nombre||'',F_IN,{numFmt:'@'});
-    set('A12','TELÉFONO',F_LABEL); set('B12',d.cliente_telefono||'',F_IN,{numFmt:'@'});
+    // Promotor 1 — columna B, filas 5-12
+    set('A5','PROMOTOR',F_LABEL);        set('B5',d.cliente_nombre_completo||'',F_IN,{numFmt:'@'});
+    set('A6','CIF/NIF',F_LABEL);         set('B6',d.cliente_nif||'',F_IN,{numFmt:'@'});
+    set('A7','DIRECCION',F_LABEL);       set('B7',d.cliente_direccion||'',F_IN,{numFmt:'@'});
+    set('A8','CODIGO POSTAL',F_LABEL);   set('B8',d.cliente_cp||'',F_IN,{numFmt:'@'});
+    set('A9','LOCALIDAD',F_LABEL);       set('B9',d.cliente_municipio||'',F_IN,{numFmt:'@'});
+    set('A10','PROVINCIA',F_LABEL);      set('B10',d.cliente_provincia||'',F_IN,{numFmt:'@'});
+    set('A11','CORREO ELCTRÓNICO',F_LABEL);set('B11',d.cliente_email||'',F_IN,{numFmt:'@'});
+    set('A12','TELÉFONO',F_LABEL);       set('B12',d.cliente_telefono||'',F_IN,{numFmt:'@'});
+    // Promotor 2 — columna C, filas 5-12
+    // Leer de expedienteActual O del formulario si está abierto
+    const p2nom=d.promotor2_nombre||[document.getElementById('cli2-nombre')?.value,document.getElementById('cli2-apellido1')?.value,document.getElementById('cli2-apellido2')?.value].filter(v=>v&&v.trim()).map(v=>v.trim()).join(' ')||'';
+    const p2nif=d.promotor2_nif||document.getElementById('cli2-nif')?.value||'';
+    const p2dir=d.promotor2_dir||document.getElementById('cli2-dir')?.value||'';
+    const p2cp=d.promotor2_cp||document.getElementById('cli2-cp')?.value||'';
+    const p2mun=d.promotor2_mun||document.getElementById('cli2-municipio')?.value||'';
+    const p2prov=d.promotor2_prov||document.getElementById('cli2-provincia')?.value||'';
+    if(p2nom.trim()){
+      set('C5',p2nom,F_IN,{numFmt:'@'});
+      set('C6',p2nif,F_IN,{numFmt:'@'});
+      set('C7',p2dir,F_IN,{numFmt:'@'});
+      set('C8',p2cp,F_IN,{numFmt:'@'});
+      set('C9',p2mun,F_IN,{numFmt:'@'});
+      set('C10',p2prov,F_IN,{numFmt:'@'});
+      set('C11','',F_IN,{numFmt:'@'});
+      set('C12','',F_IN,{numFmt:'@'});
+    }
+    // Promotor 3 — columna D, filas 5-12
+    const p3nom=d.promotor3_nombre||[document.getElementById('cli3-nombre')?.value,document.getElementById('cli3-apellido1')?.value,document.getElementById('cli3-apellido2')?.value].filter(Boolean).join(' ')||'';
+    const p3nif=d.promotor3_nif||document.getElementById('cli3-nif')?.value||'';
+    if(p3nom){
+      set('D5',p3nom,F_IN,{numFmt:'@'});
+      set('D6',p3nif,F_IN,{numFmt:'@'});
+      set('D7','',F_IN,{numFmt:'@'});set('D8','',F_IN,{numFmt:'@'});
+      set('D9','',F_IN,{numFmt:'@'});set('D10','',F_IN,{numFmt:'@'});
+      set('D11','',F_IN,{numFmt:'@'});set('D12','',F_IN,{numFmt:'@'});
+    }
+    set('E5','CONTRATISTA',F_LABEL);     set('F5',d.pro_constructor||'',F_IN,{numFmt:'@'});
+    set('E6','CIF/NIF',F_LABEL);         set('F6',d.pro_constructor_nif||'',F_IN,{numFmt:'@'});
+    set('E7','DIRECCION',F_LABEL);       set('F7','',F_IN,{numFmt:'@'});
+    set('E8','CODIGO POST.',F_LABEL);    set('F8','',F_IN,{numFmt:'@'});
+    set('E9','POBLACION',F_LABEL);       set('F9','',F_IN,{numFmt:'@'});
+    set('E10','PROVINCIA',F_LABEL);      set('F10','',F_IN,{numFmt:'@'});
+    set('E11','REPRESENTANTE',F_LABEL);  set('F11',d.representante_nombre||'',F_IN,{numFmt:'@'});
     set('E12','FIRMA PSS OBRA',F_LABEL); set('F12',d.pro_constructor_rep||'',F_IN,{numFmt:'@'});
 
     // ── DATOS PROYECTO ──
@@ -3166,7 +3259,13 @@ function dibujarPortada(doc, d, titulo){
   blockEndY = y + (sitLines.length-1)*3.6;
   y = blockEndY + 3.55;
 
-  const propLines = doc.splitTextToSize('PROPIEDAD: '+d.promotor, PORT_MAXW);
+  const prefix='PROPIEDAD: ';
+  const prefixW=doc.getTextWidth(prefix);
+  const propFirstLine=doc.splitTextToSize(prefix+d.promotor, PORT_MAXW);
+  // Si hay más de una línea, las de continuación llevan sangría = ancho del prefijo
+  const propLines=propFirstLine.length>1
+    ? [propFirstLine[0], ...doc.splitTextToSize(d.promotor, PORT_MAXW-prefixW).slice(1).map(l=>(' ').repeat(Math.round(prefixW/doc.getTextWidth(' ')))+l)]
+    : propFirstLine;
   doc.text(d.fecha, PORT_COL_R, y, {align:'right'});
   doc.text(propLines, PORT_COL_L, y);
   blockEndY = y + (propLines.length-1)*3.6;
@@ -3190,7 +3289,12 @@ function getDatosPortada(){
   const p1=(d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
   const p2=(d.promotor2_nombre||'').toUpperCase();
   const p3=(d.promotor3_nombre||'').toUpperCase();
-  const promotor=[p1,p2,p3].filter(Boolean).join('\n');
+  const promotores=[p1,p2,p3].filter(Boolean);
+  const promotor=promotores.reduce((acc,p,i)=>{
+    if(i===0)return p;
+    const conj=/^[IÍ]/i.test(p)?'E':'Y';
+    return acc+' '+conj+' '+p;
+  },'');
   const fase      = (d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
   const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const ahora=new Date();
