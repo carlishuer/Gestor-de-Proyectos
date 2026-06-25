@@ -3187,7 +3187,10 @@ function getDatosPortada(){
   if(!d) return null;
   const proyecto  = (d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'').toUpperCase();
   const situacion = ((d.direccion_proyecto||d.direccion_inmueble||'')+(d.municipio_proyecto||d.municipio?', '+(d.municipio_proyecto||d.municipio):'')+(d.provincia?', '+(d.provincia):'CUENCA')).toUpperCase();
-  const promotor  = (d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
+  const p1=(d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
+  const p2=(d.promotor2_nombre||'').toUpperCase();
+  const p3=(d.promotor3_nombre||'').toUpperCase();
+  const promotor=[p1,p2,p3].filter(Boolean).join('\n');
   const fase      = (d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
   const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const ahora=new Date();
