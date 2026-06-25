@@ -1159,7 +1159,7 @@ function encabezadoDecl(d,dest,actuacion){
   return`<p style="margin-bottom:14px;"><strong>${dest}</strong></p>
   <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
   <div class="cuerpo">
-    <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+    <p>${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
     ${p2}
     <p>Que quiere ${actuacion}: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
   </div>`;
@@ -1385,8 +1385,8 @@ function generarTextoDoc(doc,d){
       const toTC=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
       const fechaLugarCap=fLugar(fecha,(d.municipio||'').toUpperCase());
       // Dirección del promotor en minúsculas (toTC), emplazamiento de la obra en MAYÚSCULAS
-      const p1expone=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2expone=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const p1expone=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2expone=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierentxt=d.promotor2?'Que quieren realizar':'Que quiere realizar';
       const firma2=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
@@ -1411,8 +1411,8 @@ function generarTextoDoc(doc,d){
     case'autorizacion-licencia-legaliz':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
       const toTC2=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const p1leg=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC2(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC2(d.promotor1_mun)}, provincia de ${toTC2(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2leg=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTC2(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC2(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC2(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const p1leg=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTC2(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC2(d.promotor1_mun)}, provincia de ${toTC2(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2leg=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTC2(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC2(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC2(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierenleg=d.promotor2?'Que realizaron':'Que realizó';
       const firma2leg=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
@@ -1436,8 +1436,8 @@ function generarTextoDoc(doc,d){
 
     case'autorizacion-pree5000':{
       const toTCp=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const p1pree=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTCp(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCp(d.promotor1_mun)}, provincia de ${toTCp(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2pree=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTCp(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCp(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCp(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const p1pree=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTCp(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCp(d.promotor1_mun)}, provincia de ${toTCp(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2pree=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTCp(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCp(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCp(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierenpree=d.promotor2?'Que quieren solicitar':'Que quiere solicitar';
       const firma2pree=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN DE LA AYUDA PREE 5000</h3>
@@ -1510,8 +1510,8 @@ function generarTextoDoc(doc,d){
       const ivaOpt=gv('iva_recuperable')||'NO es susceptible de recuperación o compensación total o parcial.';
       return`<h3>DECLARACIÓN RESPONSABLE SOBRE LA NATURALEZA DEL IVA</h3>
       <div class="cuerpo">
-        <p>${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
-        ${d.promotor2?`<p>${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${d.promotor2_mun||d.promotor1_mun}, provincia de ${d.promotor2_prov||d.promotor1_prov}, provisto de N.I.F número ${d.promotor2_nif}.</p>`:''}
+        <p>${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        ${d.promotor2?`<p>${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${d.promotor2_mun||d.promotor1_mun}, provincia de ${d.promotor2_prov||d.promotor1_prov}, provisto de N.I.F número ${d.promotor2_nif}.</p>`:''}
         <p>A los efectos previstos en la Resolución de 05/03/2024, de la Consejería de Fomento, por la que se convocan ayudas para actuaciones de rehabilitación energética en viviendas y en edificios de viviendas existentes, en ejecución del Programa de rehabilitación energética para edificios existentes en municipios de reto demográfico (Programa PREE 5000) de Castilla-La Mancha.</p>
         <p>Que el IVA soportado contenido en los justificantes de gasto presentados con ocasión de la justificación de la ayuda:</p>
       </div>
@@ -1522,8 +1522,8 @@ function generarTextoDoc(doc,d){
     case'solicitud-licencia':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
       const toTCsl=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const p1sl=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTCsl(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCsl(d.promotor1_mun)}, provincia de ${toTCsl(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2sl=d.promotor2?`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${toTCsl(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCsl(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCsl(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
+      const p1sl=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTCsl(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCsl(d.promotor1_mun)}, provincia de ${toTCsl(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+      const p2sl=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTCsl(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCsl(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCsl(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
       const quierensl=d.promotor2?'Que quieren realizar':'Que quiere realizar';
       const firma2sl=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>SOLICITUD DE LICENCIA DE OBRA</h3>
@@ -1961,7 +1961,7 @@ async function descargarDOCX(){
   ps.push(p(run('EXPONE:',20,true),{before:0,after:120,sz:20,bold:true}));
 
   // Propietario 1: dirección en minúsculas (toTC), emplazamiento obra en MAYÚSCULAS
-  const p1txt=`${d.promotor1}, mayor de edad, en representación de él mismo, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
+  const p1txt=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
   ps.push(p(run(p1txt,22,false),{before:0,after:120}));
 
   // Propietario 2 (si existe)
@@ -1970,7 +1970,7 @@ async function descargarDOCX(){
     const p2prov=toTC(d.promotor2_prov||d.promotor1_prov);
     const p2dir=toTC(d.promotor2_dir||d.promotor1_dir);
     const p2cp=d.promotor2_cp||d.promotor1_cp;
-    const p2txt=`${d.promotor2}, mayor de edad, en representación de él mismo, con domicilio en ${p2dir}, código postal ${p2cp} de ${p2mun}, provincia de ${p2prov}, provisto de N.I.F número ${d.promotor2_nif}.`;
+    const p2txt=`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${p2dir}, código postal ${p2cp} de ${p2mun}, provincia de ${p2prov}, provisto de N.I.F número ${d.promotor2_nif}.`;
     ps.push(p(run(p2txt,22,false),{before:0,after:120}));
   }
 
