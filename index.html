@@ -1669,17 +1669,35 @@ function imprimirPDF(){
   if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
   const contenido=document.getElementById('doc-preview-container')?.innerHTML||'';
-  const pa=document.getElementById('print-area');
-  pa.innerHTML=contenido;
-  // Mover a posición visible (no display:none — impide impresión en móvil)
-  pa.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;';
-  function cleanup(){
-    pa.style.cssText='display:none;';
-    pa.innerHTML='';
-    window.removeEventListener('afterprint',cleanup);
-  }
-  window.addEventListener('afterprint',cleanup);
-  setTimeout(()=>window.print(),600);
+  // Crear iframe oculto con el contenido y estilos
+  const iframe=document.createElement('iframe');
+  iframe.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0;';
+  document.body.appendChild(iframe);
+  const doc=iframe.contentDocument||iframe.contentWindow.document;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    @page{margin:15mm 18mm;size:A4;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#000;background:#fff;}
+    h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:bold;}
+    .ficha{display:grid;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
+    .fk{font-weight:bold;text-transform:uppercase;font-size:8.5pt;}
+    .fv{font-weight:bold;}
+    .cuerpo p{margin-bottom:7pt;text-align:justify;}
+    .firma{margin-top:24pt;}
+    .firma-lugar{margin-bottom:14pt;}
+    .firma-bloque{font-weight:bold;font-size:9.5pt;}
+    hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
+    .firma-cols{display:grid;grid-template-columns:34% 42% 24%;grid-template-rows:auto 60pt auto;}
+    .firma-cols .firma-bloque{align-self:end;}
+    p[style*="font-weight:700"],p[style*="font-weight:600"]{font-weight:bold;}
+  </style></head><body>${contenido}</body></html>`);
+  doc.close();
+  setTimeout(()=>{
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(()=>document.body.removeChild(iframe),2000);
+  },500);
 }
 
 async function descargarDOCX(){
@@ -1719,11 +1737,22 @@ async function descargarDOCX(){
             if(cls.includes('ficha')){
               const fks=el.querySelectorAll('.fk');
               const fvs=el.querySelectorAll('.fv');
+              // Tabla invisible 2 columnas: 2200 etiqueta + resto valor
+              const FWg=9006,FC1g=2200,FC2g=FWg-FC1g;
+              const tcBg=`<w:tcBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/></w:tcBorders>`;
+              const tblBg=`<w:tblBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideH w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideV w:val="none" w:color="FFFFFF" w:sz="0"/></w:tblBorders>`;
+              const gridg=`<w:tblGrid><w:gridCol w:w="${FC1g}"/><w:gridCol w:w="${FC2g}"/></w:tblGrid>`;
+              function pfg(txt,bold){return`<w:p><w:pPr><w:spacing w:after="40" w:before="0" w:line="240"/></w:pPr><w:r><w:rPr>${rPrG(bold?18:20,bold)}</w:rPr><w:t xml:space="preserve">${xe3(txt||'')}</w:t></w:r></w:p>`;}
+              function tcg(w,p){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBg}</w:tcPr>${p}</w:tc>`;}
+              const rows=[];
               fks.forEach((fk,i)=>{
                 const lbl=(fk.innerText||'').trim();
-                const val=(fvs[i]?.innerText||'').trim();
-                ps3.push(pG([runG(lbl,18,true),runG('    ',18,false),runG(val,20,true)],{before:0,after:40,jc:'',sz:20,bold:true}));
+                // val puede tener múltiples líneas (promotor2)
+                const valLines=(fvs[i]?.innerText||'').trim().split('\n').map(l=>l.trim()).filter(Boolean);
+                const valContent=valLines.map(l=>pfg(l,true)).join('');
+                rows.push(`<w:tr>${tcg(FC1g,pfg(lbl,true))}${tcg(FC2g,valContent||pfg('',true))}</w:tr>`);
               });
+              ps3.push(`<w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="${FWg}"/>${tblBg}</w:tblPr>${gridg}${rows.join('')}</w:tbl>`);
               ps3.push(pG('',{before:0,after:120}));
             } else if(cls.includes('firma-bloque')){
               ps3.push(pG(runG(txt,20,true),{before:280,after:0,jc:'',bold:true}));
