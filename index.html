@@ -58,7 +58,7 @@ textarea{resize:vertical;min-height:70px;}
 .btn-pdf:hover{background:#a52020;}
 @media print{
   body{visibility:hidden!important;}
-  #print-area{visibility:visible!important;position:absolute!important;left:0!important;top:0!important;width:100%!important;padding:15mm 18mm!important;box-sizing:border-box!important;font-family:Arial,sans-serif!important;font-size:10.5pt!important;line-height:1.6!important;color:#000!important;background:#fff!important;}
+  #print-area{visibility:visible!important;position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;padding:15mm 18mm!important;box-sizing:border-box!important;font-family:Arial,sans-serif!important;font-size:10.5pt!important;line-height:1.6!important;color:#000!important;background:#fff!important;overflow:visible!important;}
   #print-area *{visibility:visible!important;}
   #print-area h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:bold;}
   #print-area .ficha{display:grid!important;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
@@ -1671,15 +1671,14 @@ function imprimirPDF(){
   const contenido=document.getElementById('doc-preview-container')?.innerHTML||'';
   const pa=document.getElementById('print-area');
   pa.innerHTML=contenido;
-  pa.style.display='block';
-  // Usar afterprint para limpiar — más fiable que setTimeout
+  // Mover a posición visible (no display:none — impide impresión en móvil)
+  pa.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;';
   function cleanup(){
-    pa.style.display='none';
+    pa.style.cssText='display:none;';
     pa.innerHTML='';
     window.removeEventListener('afterprint',cleanup);
   }
   window.addEventListener('afterprint',cleanup);
-  // Delay generoso para que el DOM renderice en móvil
   setTimeout(()=>window.print(),600);
 }
 
@@ -1692,8 +1691,72 @@ async function descargarDOCX(){
     const isReplanteo=docSeleccionado.id==='acta-replanteo';
     const isRecepcion=docSeleccionado.id==='acta-recepcion';
     if(!isReplanteo&&!isRecepcion){
-      statusEl.innerHTML='<div class="status error">⚠ Descarga .docx no disponible para este documento todavía.</div>';
-      setTimeout(()=>statusEl.innerHTML='',5000);return;
+      // Generador genérico para todos los demás documentos
+      statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
+      try{
+        const xe3=s=>(s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const container=document.getElementById('doc-preview-container');
+        function rPrG(sz,bold,ul){return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;}
+        function runG(txt,sz,bold,ul){return`<w:r><w:rPr>${rPrG(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe3(String(txt||''))}</w:t></w:r>`;}
+        function pG(r,{jc='both',before=0,after=120,sz=22,bold=false,ul=false}={}){
+          return`<w:p><w:pPr><w:autoSpaceDE w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="240" w:lineRule="auto"/>${jc?`<w:jc w:val="${jc}"/>`:''}
+<w:rPr>${rPrG(sz,bold,ul)}</w:rPr></w:pPr>${Array.isArray(r)?r.join(''):r}</w:p>`;
+        }
+        const ps3=[];
+        // Recorrer nodos del preview
+        function nodeToDocx(el){
+          if(!el)return;
+          const tag=(el.tagName||'').toLowerCase();
+          const txt=(el.innerText||el.textContent||'').trim();
+          if(tag==='h3'){
+            ps3.push(pG(runG(txt,22,true,true),{jc:'center',before:200,after:200,bold:true,ul:true}));
+          } else if(tag==='p'){
+            if(!txt)return;
+            const bold=el.style.fontWeight==='700'||el.style.fontWeight==='600'||el.style.fontWeight==='bold';
+            ps3.push(pG(runG(txt,bold?20:22,bold),{before:0,after:bold?160:120,sz:bold?20:22,bold}));
+          } else if(tag==='div'){
+            const cls=el.className||'';
+            if(cls.includes('ficha')){
+              const fks=el.querySelectorAll('.fk');
+              const fvs=el.querySelectorAll('.fv');
+              fks.forEach((fk,i)=>{
+                const lbl=(fk.innerText||'').trim();
+                const val=(fvs[i]?.innerText||'').trim();
+                ps3.push(pG([runG(lbl,18,true),runG('    ',18,false),runG(val,20,true)],{before:0,after:40,jc:'',sz:20,bold:true}));
+              });
+              ps3.push(pG('',{before:0,after:120}));
+            } else if(cls.includes('firma-bloque')){
+              ps3.push(pG(runG(txt,20,true),{before:280,after:0,jc:'',bold:true}));
+            } else if(cls.includes('firma-lugar')){
+              ps3.push(pG(runG(txt,22,false),{before:400,after:0,jc:''}));
+            } else {
+              Array.from(el.children).forEach(nodeToDocx);
+            }
+          } else {
+            Array.from(el.children||[]).forEach(nodeToDocx);
+          }
+        }
+        Array.from(container.children).forEach(nodeToDocx);
+        const sectPr3=`<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1800" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>`;
+        const docXml3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${ps3.join('')}${sectPr3}</w:body></w:document>`;
+        const rX3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+        const sX3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
+        const dR3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+        const cT3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`;
+        const zip3=new JSZip();
+        zip3.file('[Content_Types].xml',cT3);zip3.file('_rels/.rels',dR3);
+        zip3.file('word/document.xml',docXml3);zip3.file('word/styles.xml',sX3);
+        zip3.file('word/_rels/document.xml.rels',rX3);
+        const buf3=await zip3.generateAsync({type:'arraybuffer',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+        const blob3=new Blob([buf3],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+        const url3=URL.createObjectURL(blob3);
+        const a3=document.createElement('a');a3.href=url3;
+        a3.download=`${docExpedienteActivo.expediente} \u2014 ${docSeleccionado.nombre.substring(0,50)}.docx`;
+        a3.click();URL.revokeObjectURL(url3);
+        statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
+        setTimeout(()=>statusEl.innerHTML='',6000);
+      }catch(e){statusEl.innerHTML=`<div class="status error">\u2717 Error: ${e.message}</div>`;}
+      return;
     }
     statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
     try{
