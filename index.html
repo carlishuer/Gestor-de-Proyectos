@@ -2532,6 +2532,16 @@ function cargarDatosEnFormulario(p){
     if(el2)el2.value=partes[1]||'';
     if(el3)el3.value=partes.slice(2).join(' ')||'';
   }
+  // Abrir secciones ANTES de rellenar (necesario en móvil)
+  const sec2=document.getElementById('sec-promotor2');
+  const btn2=sec2?.previousElementSibling?.querySelector('button');
+  const sec3=document.getElementById('sec-promotor3');
+  const btn3=sec3?.previousElementSibling?.querySelector('button');
+  if(p.promotor2_nombre&&sec2){sec2.style.display='block';if(btn2)btn2.textContent=btn2.textContent.replace('+ Añadir','− Ocultar');}
+  else if(!p.promotor2_nombre&&sec2){sec2.style.display='none';if(btn2)btn2.textContent=btn2.textContent.replace('− Ocultar','+ Añadir');}
+  if(p.promotor3_nombre&&sec3){sec3.style.display='block';if(btn3)btn3.textContent=btn3.textContent.replace('+ Añadir','− Ocultar');}
+  else if(!p.promotor3_nombre&&sec3){sec3.style.display='none';if(btn3)btn3.textContent=btn3.textContent.replace('− Ocultar','+ Añadir');}
+
   separarNombre(p.promotor2_nombre,'cli2');
   set('cli2-nif',p.promotor2_nif);
   set('cli2-dir',p.promotor2_dir);
@@ -2540,15 +2550,6 @@ function cargarDatosEnFormulario(p){
   set('cli2-provincia',p.promotor2_prov);
   separarNombre(p.promotor3_nombre,'cli3');
   set('cli3-nif',p.promotor3_nif);
-  // Abrir secciones si tienen datos
-  const sec2=document.getElementById('sec-promotor2');
-  const btn2=sec2?.previousElementSibling?.querySelector('button');
-  if(p.promotor2_nombre&&sec2&&sec2.style.display==='none'){sec2.style.display='block';if(btn2)btn2.textContent=btn2.textContent.replace('+ Añadir','− Ocultar');}
-  else if(!p.promotor2_nombre&&sec2&&sec2.style.display!=='none'){sec2.style.display='none';if(btn2)btn2.textContent=btn2.textContent.replace('− Ocultar','+ Añadir');}
-  const sec3=document.getElementById('sec-promotor3');
-  const btn3=sec3?.previousElementSibling?.querySelector('button');
-  if(p.promotor3_nombre&&sec3&&sec3.style.display==='none'){sec3.style.display='block';if(btn3)btn3.textContent=btn3.textContent.replace('+ Añadir','− Ocultar');}
-  else if(!p.promotor3_nombre&&sec3&&sec3.style.display!=='none'){sec3.style.display='none';if(btn3)btn3.textContent=btn3.textContent.replace('− Ocultar','+ Añadir');}
 
   // Representante
   set('rep-nombre',p.representante_nombre);
@@ -2789,7 +2790,16 @@ async function descargarExcelPresupuesto(){
     });
 
     // ── Añadir strings extra (municipio cli, provincias, fase, CPs, email, tel) ──
-    const extras=[
+    // Leer promotor2/3 de expedienteActual o formulario activo (para móvil)
+    const _p2nom=d.promotor2_nombre||[document.getElementById('cli2-nombre')?.value,document.getElementById('cli2-apellido1')?.value,document.getElementById('cli2-apellido2')?.value].filter(v=>v&&v.trim()).map(v=>v.trim()).join(' ')||'';
+    const _p2nif=d.promotor2_nif||document.getElementById('cli2-nif')?.value||'';
+    const _p2dir=d.promotor2_dir||document.getElementById('cli2-dir')?.value||'';
+    const _p2cp=d.promotor2_cp||document.getElementById('cli2-cp')?.value||'';
+    const _p2mun=d.promotor2_mun||document.getElementById('cli2-municipio')?.value||'';
+    const _p2prov=d.promotor2_prov||document.getElementById('cli2-provincia')?.value||'';
+    const _p3nom=d.promotor3_nombre||[document.getElementById('cli3-nombre')?.value,document.getElementById('cli3-apellido1')?.value,document.getElementById('cli3-apellido2')?.value].filter(v=>v&&v.trim()).map(v=>v.trim()).join(' ')||'';
+    const _p3nif=d.promotor3_nif||document.getElementById('cli3-nif')?.value||'';
+        const extras=[
       {key:'munCli',  val:(d.cliente_municipio||'').toUpperCase()},
       {key:'provCli', val:(d.cliente_provincia||'').toUpperCase()},
       {key:'provPro', val:(d.provincia_proyecto||d.provincia||'').toUpperCase()},
@@ -2799,17 +2809,17 @@ async function descargarExcelPresupuesto(){
       {key:'email',   val:d.cliente_email||''},
       {key:'tel',     val:d.cliente_tel||d.cliente_telefono||''},
       // Promotor 2
-      {key:'p2nom',   val:(d.promotor2_nombre||'').toUpperCase()},
-      {key:'p2nif',   val:d.promotor2_nif||''},
-      {key:'p2dir',   val:(d.promotor2_dir||'').toUpperCase()},
-      {key:'p2cp',    val:d.promotor2_cp||''},
-      {key:'p2mun',   val:(d.promotor2_mun||'').toUpperCase()},
-      {key:'p2prov',  val:(d.promotor2_prov||'').toUpperCase()},
+      {key:'p2nom',   val:(_p2nom||'').toUpperCase()},
+      {key:'p2nif',   val:_p2nif||''},
+      {key:'p2dir',   val:(_p2dir||'').toUpperCase()},
+      {key:'p2cp',    val:_p2cp||''},
+      {key:'p2mun',   val:(_p2mun||'').toUpperCase()},
+      {key:'p2prov',  val:(_p2prov||'').toUpperCase()},
       {key:'p2email', val:d.promotor2_email||''},
       {key:'p2tel',   val:d.promotor2_tel||d.promotor2_telefono||''},
       // Promotor 3
-      {key:'p3nom',   val:(d.promotor3_nombre||'').toUpperCase()},
-      {key:'p3nif',   val:d.promotor3_nif||''},
+      {key:'p3nom',   val:(_p3nom||'').toUpperCase()},
+      {key:'p3nif',   val:_p3nif||''},
       {key:'p3dir',   val:(d.promotor3_dir||'').toUpperCase()},
       {key:'p3cp',    val:d.promotor3_cp||''},
       {key:'p3mun',   val:(d.promotor3_mun||'').toUpperCase()},
@@ -2887,21 +2897,22 @@ async function descargarExcelPresupuesto(){
     }
     s1=cellTxt(s1,'B12',newIdx['tel'],d.cliente_tel||d.cliente_telefono||'');
 
+
     // Promotor 2 — columna C, filas 5-12
-    if(d.promotor2_nombre){
-      s1=cellTxtInsert(s1,'C5',newIdx['p2nom'],(d.promotor2_nombre||'').toUpperCase());
-      s1=cellTxtInsert(s1,'C6',newIdx['p2nif'],d.promotor2_nif||'');
-      s1=cellTxtInsert(s1,'C7',newIdx['p2dir'],(d.promotor2_dir||'').toUpperCase());
-      s1=cellTxtInsert(s1,'C8',newIdx['p2cp'],d.promotor2_cp||'');
-      s1=cellTxtInsert(s1,'C9',newIdx['p2mun'],(d.promotor2_mun||'').toUpperCase());
-      s1=cellTxtInsert(s1,'C10',newIdx['p2prov'],(d.promotor2_prov||'').toUpperCase());
+    if(_p2nom.trim()){
+      s1=cellTxtInsert(s1,'C5',newIdx['p2nom'],_p2nom.toUpperCase());
+      s1=cellTxtInsert(s1,'C6',newIdx['p2nif'],_p2nif);
+      s1=cellTxtInsert(s1,'C7',newIdx['p2dir'],_p2dir.toUpperCase());
+      s1=cellTxtInsert(s1,'C8',newIdx['p2cp'],_p2cp);
+      s1=cellTxtInsert(s1,'C9',newIdx['p2mun'],_p2mun.toUpperCase());
+      s1=cellTxtInsert(s1,'C10',newIdx['p2prov'],_p2prov.toUpperCase());
       s1=cellTxtInsert(s1,'C11',newIdx['p2email'],d.promotor2_email||'');
       s1=cellTxtInsert(s1,'C12',newIdx['p2tel'],d.promotor2_tel||d.promotor2_telefono||'');
     }
     // Promotor 3 — columna D, filas 5-12
-    if(d.promotor3_nombre){
-      s1=cellTxtInsert(s1,'D5',newIdx['p3nom'],(d.promotor3_nombre||'').toUpperCase());
-      s1=cellTxtInsert(s1,'D6',newIdx['p3nif'],d.promotor3_nif||'');
+    if(_p3nom.trim()){
+      s1=cellTxtInsert(s1,'D5',newIdx['p3nom'],_p3nom.toUpperCase());
+      s1=cellTxtInsert(s1,'D6',newIdx['p3nif'],_p3nif);
       s1=cellTxtInsert(s1,'D7',newIdx['p3dir'],(d.promotor3_dir||'').toUpperCase());
       s1=cellTxtInsert(s1,'D8',newIdx['p3cp'],d.promotor3_cp||'');
       s1=cellTxtInsert(s1,'D9',newIdx['p3mun'],(d.promotor3_mun||'').toUpperCase());
