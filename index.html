@@ -452,6 +452,10 @@ textarea{resize:vertical;min-height:70px;}
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">↓ Anexos ahorro energía</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:4px;width:100%;">
+            <input type="text" id="portada-titulo-custom" placeholder="Título personalizado…" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;"/>
+            <button class="btn btn-secondary" onclick="const t=document.getElementById('portada-titulo-custom').value.trim();if(t)generarPortadasPDF([t],'portada '+t.toLowerCase(),'portada-status');else document.getElementById('portada-status').innerHTML='<span style=color:var(--err)>Escribe un título primero</span>';">↓ Personalizada</button>
+          </div>
         </div>
         <div id="portada-status" style="margin-top:6px;"></div>
       </div>
@@ -929,16 +933,12 @@ async function buscarMunicipioPorCP(prefix,val){
     const munEl=document.getElementById(prefix+'-municipio');
     const provEl=document.getElementById(prefix+'-provincia');
     if(!munEl||!provEl)return;
-
-    // Provincia siempre por prefijo (instantáneo, sin datos embebidos)
+    // Provincia por prefijo (instantáneo)
     const pref=val.substring(0,2);
     const provincia=CP_PROVINCIA[pref]||'';
-    if(provincia&&!provEl.value.trim()){provEl.value=provincia;flashEl(provEl);}
-
+    if(provincia){provEl.value=provincia;flashEl(provEl);}
     // Municipio desde datos embebidos
-    // Limpiar municipio/provincia para que se actualicen al cambiar el CP
     munEl.value='';
-    if(provEl)provEl.value='';
     const cpData=await getCpDataAsync();
     if(cpData&&cpData[val]){
       munEl.value=cpData[val];
@@ -2531,6 +2531,15 @@ function cargarDatosEnFormulario(p){
   set('cli2-provincia',p.promotor2_prov);
   set('cli3-nombre',p.promotor3_nombre);
   set('cli3-nif',p.promotor3_nif);
+  // Abrir secciones si tienen datos
+  const sec2=document.getElementById('sec-promotor2');
+  const btn2=sec2?.previousElementSibling?.querySelector('button');
+  if(p.promotor2_nombre&&sec2&&sec2.style.display==='none'){sec2.style.display='block';if(btn2)btn2.textContent=btn2.textContent.replace('+ Añadir','− Ocultar');}
+  else if(!p.promotor2_nombre&&sec2&&sec2.style.display!=='none'){sec2.style.display='none';if(btn2)btn2.textContent=btn2.textContent.replace('− Ocultar','+ Añadir');}
+  const sec3=document.getElementById('sec-promotor3');
+  const btn3=sec3?.previousElementSibling?.querySelector('button');
+  if(p.promotor3_nombre&&sec3&&sec3.style.display==='none'){sec3.style.display='block';if(btn3)btn3.textContent=btn3.textContent.replace('+ Añadir','− Ocultar');}
+  else if(!p.promotor3_nombre&&sec3&&sec3.style.display!=='none'){sec3.style.display='none';if(btn3)btn3.textContent=btn3.textContent.replace('− Ocultar','+ Añadir');}
 
   // Representante
   set('rep-nombre',p.representante_nombre);
