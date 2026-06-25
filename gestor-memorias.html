@@ -179,7 +179,7 @@
       <input type="text" id="portada-titulo-custom" placeholder="Título personalizado…" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;"/>
       <button class="btn btn-secondary btn-sm" onclick="const t=document.getElementById('portada-titulo-custom').value.trim();if(t)generarPortadasPDF([t],'portada '+t.toLowerCase(),'portada-status');else document.getElementById('portada-status').innerHTML='<span style=color:var(--err)>Escribe un título primero</span>';">↓ Personalizada</button>
     </div>
-</div>
+  </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
