@@ -1,8 +1,9 @@
 // Service Worker — Gestor de Proyectos PWA
-const CACHE = 'gestor-v3';
+const CACHE = 'gestor-v4';
 const ASSETS = [
   '/Gestor-de-Proyectos/',
   '/Gestor-de-Proyectos/index.html',
+  '/Gestor-de-Proyectos/gestor-memorias.html',
   'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
