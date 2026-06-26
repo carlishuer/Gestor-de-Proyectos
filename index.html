@@ -644,6 +644,7 @@ textarea{resize:vertical;min-height:70px;}
 <script>
 const CATALOGO=[
   {id:'cert-fin-obra-edif',cat:'Certificados',nombre:'Certificado Final de Obra — Edificación',desc:'Certifica que la edificación ha quedado terminada bajo dirección del arquitecto.',vars:['fecha_acta','tipo_obra_cert']},
+  {id:'cert-fin-obra-fotos',cat:'Certificados',nombre:'Certificado Final de Obra - Fotografias del Edificio',desc:'Certificado con titulo y ficha tecnica seguido de 1 a 4 fotografias del edificio.',vars:['fotos_cert']},
   {id:'cert-fin-obra-demol',cat:'Certificados',nombre:'Certificado Final de Obra — Demolición',desc:'Certifica que la demolición ha quedado ejecutada conforme al proyecto.',vars:['fecha_acta']},
   {id:'cert-resistencia-cub',cat:'Certificados',nombre:'Certificado Resistencia de Cubierta (placas solares)',desc:'Certifica que la cubierta soporta la instalación de placas fotovoltaicas.',vars:['fecha_acta','destinatario_cert']},
   {id:'cert-libro-ordenes',cat:'Certificados',nombre:'Comunicado Libro de Órdenes (verbal)',desc:'Informa al Colegio que las órdenes se comunicaron verbalmente.',vars:['fecha_acta']},
@@ -672,6 +673,7 @@ const CATALOGO=[
 
 const VARS_CFG={
   fecha_acta:{label:'Fecha del documento',type:'date',default:()=>new Date().toISOString().split('T')[0]},
+  fotos_cert:{label:'Fotografías del edificio (1-4 fotos)',type:'photos'},
   hora_acta:{label:'Hora',type:'text',placeholder:'Ej: 09:00'},
   tipo_obra_cert:{label:'Tipo de obra (para certificado)',type:'select',opciones:['Edificación','Demolición','Reforma','Rehabilitación','Ampliación']},
   destinatario_cert:{label:'Destinatario del certificado',type:'text',placeholder:'Ej: Ayuntamiento de Landete'},
@@ -1060,11 +1062,87 @@ function renderVariablesExtra(doc){
     if(c.type==='date'){html+=`<input type="date" id="docvar-${vId}" value="${c.default?c.default():''}" onchange="actualizarPreview()"/>`;}
     else if(c.type==='select'){html+=`<select id="docvar-${vId}" onchange="actualizarPreview()">`;c.opciones.forEach(o=>html+=`<option value="${o}">${o}</option>`);html+='</select>';}
     else if(c.type==='textarea'){html+=`<textarea id="docvar-${vId}" placeholder="${c.placeholder||''}" rows="3" oninput="actualizarPreview()"></textarea>`;}
+    else if(c.type==='photos'){
+      html+=`<div class="span-2">`;
+      html+=`<input type="file" id="docvar-${vId}" accept="image/*" multiple style="margin-bottom:8px;" onchange="cargarFotosCert(this)"/>`;
+      html+=`<div id="fotos-preview-thumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;"></div>`;
+      html+=`</div>`;
+    }
     else{html+=`<input type="text" id="docvar-${vId}" placeholder="${c.placeholder||''}" oninput="actualizarPreview()"/>`;}
     html+='</div>';
   });
   html+='</div></div>';
   container.innerHTML=html;
+  if(doc.id==='cert-fin-obra-fotos')renderThumbsFotos();
+}
+
+// ── Gestión de fotos para certificado ────────────────────────────────────────
+let _fotosCert=[]; // Array de {dataUrl, name, wide} (wide=true si horizontal)
+function cargarFotosCert(input){
+  const files=Array.from(input.files).slice(0,4);
+  _fotosCert=[];
+  const promises=files.map(f=>new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        _fotosCert.push({dataUrl:e.target.result,name:f.name,wide:img.width>=img.height});
+        res();
+      };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(f);
+  }));
+  Promise.all(promises).then(()=>{renderThumbsFotos();actualizarPreview();});
+}
+function renderThumbsFotos(){
+  const el=document.getElementById('fotos-preview-thumbs');
+  if(!el)return;
+  let h='';
+  _fotosCert.forEach(function(f,i){
+    h+='<div style="position:relative;">';
+    h+='<img src="'+f.dataUrl+'" style="height:60px;border-radius:4px;border:1px solid var(--border);" title="'+f.name+'"/>';
+    h+='<button onclick="eliminarFotoCert('+i+')" style="position:absolute;top:-6px;right:-6px;background:#e55;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;line-height:1;">×</button>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+function eliminarFotoCert(i){_fotosCert.splice(i,1);renderThumbsFotos();actualizarPreview();}
+function renderFotosLayout(){
+  const n=_fotosCert.length;
+  if(n===0)return'<div style="border:2px dashed #ccc;border-radius:8px;padding:40px;text-align:center;color:#888;">Sube las fotografías usando el panel de la izquierda (1-4 fotos)</div>';
+  const px=mm=>Math.round(mm*3.78);
+  // Espacio libre A4: 297mm - márgenes(30) - ficha(72) - hr(4) = 191mm para fotos
+  const LIBRE=191;
+  const imgS=(h)=>'width:100%;height:'+px(h)+'px;object-fit:contain;border-radius:4px;display:block;';
+  if(n===1){
+    return'<div style="height:'+px(LIBRE)+'px;"><img src="'+_fotosCert[0].dataUrl+'" style="'+imgS(LIBRE)+'"/></div>';
+  }
+  if(n===2){
+    const allWide=_fotosCert.every(f=>f.wide);
+    const allTall=_fotosCert.every(f=>!f.wide);
+    if(allTall){
+      // 2 verticales: lado a lado
+      const h=LIBRE;
+      const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+      return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'+imgs.join('')+'</div>';
+    } else {
+      // 2 horizontales (o mixtas): una encima de otra
+      const h=Math.round(LIBRE/2)-6;
+      const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+      return'<div style="display:grid;grid-template-columns:1fr;gap:12px;">'+imgs.join('')+'</div>';
+    }
+  }
+  if(n===3){
+    const h=Math.round(LIBRE/2)-6;
+    const top=_fotosCert.slice(0,2).map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+    const bot='<div style="height:'+px(h)+'px;grid-column:span 2;"><img src="'+_fotosCert[2].dataUrl+'" style="'+imgS(h)+'"/></div>';
+    return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+top.join('')+bot+'</div>';
+  }
+  // 4 fotos: cuadrícula 2×2
+  const h=Math.round(LIBRE/2)-6;
+  const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+  return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+imgs.join('')+'</div>';
 }
 
 function gv(id){const el=document.getElementById('docvar-'+id);return el?el.value.trim():'';}
@@ -1173,6 +1251,22 @@ function generarTextoDoc(doc,d){
   const fa=firmaArq(d,fecha);
 
   switch(doc.id){
+
+    case'cert-fin-obra-fotos':{
+      const etiqPromF=d.promotor2?'Promotores':'Promotor';
+      const valPromF=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
+      return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA<br><em>FOTOGRAFÍA DEL EDIFICIO</em></h3>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">${etiqPromF}</span><span class="fv">${valPromF}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+      </div>
+      <hr style="border:none;border-top:1px solid #ccc;margin:12px 0;"/>
+      ${renderFotosLayout()}`;}
 
     case'cert-fin-obra-edif':{
       const tipo=gv('tipo_obra_cert')||'Edificación';
