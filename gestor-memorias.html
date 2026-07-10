@@ -93,7 +93,7 @@
     <div class="card-title">Datos del expediente</div>
     <div class="grid3">
       <div><label>Expediente</label><input type="text" id="d-expediente" placeholder="1216-2026-CAR"></div>
-      <div><label>Fecha</label><input type="text" id="d-fecha" placeholder="JUNIO 2026"></div>
+      <div><label>Fecha</label><input type="text" id="d-fecha" placeholder="JUNIO 2026"><input type="date" id="d-fecha-cal" style="margin-top:6px;" title="Elegir fecha (rellena Fecha y Día)"></div>
       <div><label>Fase</label><input type="text" id="d-fase" placeholder="PROYECTO BÁSICO Y DE EJECUCIÓN"></div>
     </div>
     <label>Proyecto</label>
@@ -744,6 +744,15 @@ function generarPortadasPDF(titulos, sufijoNombre, statusElId){
 // ── Init ──────────────────────────────────────────────────────────────────────
 const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 document.getElementById('d-fecha').value=meses[new Date().getMonth()]+' '+new Date().getFullYear();
+
+// Calendario: al elegir una fecha, rellena Fecha (mes y año) y Día automáticamente
+document.getElementById('d-fecha-cal').value = new Date().toISOString().slice(0,10);
+document.getElementById('d-fecha-cal').addEventListener('change', e=>{
+  if(!e.target.value) return;
+  const [y,m,d] = e.target.value.split('-').map(Number);
+  document.getElementById('d-fecha').value = meses[m-1]+' '+y;
+  document.getElementById('d-dia').value = String(d);
+});
 </script>
 </body>
 </html>

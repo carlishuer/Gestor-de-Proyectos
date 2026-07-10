@@ -403,7 +403,7 @@ textarea{resize:vertical;min-height:70px;}
           </div>
           <div class="field"><label>Presupuesto de Ejecución Material (€)</label><input type="number" id="pro-pem" placeholder="0.00" step="0.01"/></div>
           <div class="field"><label>Honorarios (€)</label><input type="number" id="pro-honorarios" placeholder="0.00" step="0.01"/></div>
-          <div class="field"><label>Licencia de Obras</label><input type="text" id="pro-licencia" placeholder="Fecha o nº de licencia"/></div>
+          <div class="field"><label>Licencia de Obras</label><input type="text" id="pro-licencia" placeholder="Fecha o nº de licencia"/><input type="date" id="pro-licencia-cal" style="max-width:160px;" title="Elegir fecha de licencia"/></div>
           <div class="field"><label>Fecha Comienzo de Obra</label><input type="date" id="pro-fecha-inicio"/></div>
           <div class="field"><label>Fecha Fin de Obra</label><input type="date" id="pro-fecha-fin"/></div>
           <div class="field"><label>Fecha Acta de Recepción</label><input type="date" id="pro-fecha-recepcion"/></div>
@@ -2237,6 +2237,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('pro-tipo-otro')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
   const saved=localStorage.getItem('make_webhook_url')||'https://hook.eu1.make.com/rmj9ywkfh38kalhvji1kxy9llaqjru4e';
   if(saved){const el=document.getElementById('make-webhook-url');if(el)el.value=saved;}
+  // Calendario opcional para "Licencia de Obras": rellena el texto en DD/MM/AAAA sin impedir escribir un nº de licencia
+  document.getElementById('pro-licencia-cal')?.addEventListener('change',e=>{
+    if(!e.target.value)return;
+    const [y,m,d]=e.target.value.split('-');
+    const campo=document.getElementById('pro-licencia');
+    campo.value=`${d}/${m}/${y}`;
+    campo.dispatchEvent(new Event('input'));
+  });
 });
 
 function getCorrelativo(){const y=new Date().getFullYear();const ex=proyectos.filter(p=>p.anio==y);return ex.reduce((m,p)=>{const n=parseInt(p.numero_seq||0);return n>m?n:m;},1199)+1;}
