@@ -57,11 +57,11 @@ textarea{resize:vertical;min-height:70px;}
 .btn-pdf{background:#8B1A1A;color:#fff;padding:10px 20px;}
 .btn-pdf:hover{background:#a52020;}
 @media print{
-  body{visibility:hidden!important;}
-  #print-area{visibility:visible!important;position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;padding:15mm 18mm!important;box-sizing:border-box!important;font-family:Arial,sans-serif!important;font-size:10.5pt!important;line-height:1.6!important;color:#000!important;background:#fff!important;overflow:visible!important;}
-  #print-area *{visibility:visible!important;}
-  #print-area h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:bold;}
-  #print-area .ficha{display:grid!important;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
+  body *{visibility:hidden;}
+  #print-area,#print-area *{visibility:visible;}
+  #print-area{position:fixed;left:0;top:0;width:100%;padding:20mm 25mm;background:#fff;font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#000;}
+  #print-area h3{font-size:12pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:normal;}
+  #print-area .ficha{display:grid;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
   #print-area .fk{font-weight:bold;text-transform:uppercase;font-size:8.5pt;}
   #print-area .fv{font-weight:bold;}
   #print-area .cuerpo p{margin-bottom:7pt;text-align:justify;}
@@ -69,9 +69,6 @@ textarea{resize:vertical;min-height:70px;}
   #print-area .firma-lugar{margin-bottom:14pt;}
   #print-area .firma-bloque{font-weight:bold;font-size:9.5pt;}
   #print-area hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
-  #print-area .firma-cols{display:grid!important;grid-template-columns:34% 42% 24%!important;grid-template-rows:auto 60pt auto!important;}
-  #print-area .firma-cols .firma-bloque{align-self:end;}
-  @page{margin:0;size:A4;}
 }
 .status{padding:10px 14px;border-radius:var(--radius);font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-top:12px;}
 .status.loading{background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;}
@@ -121,12 +118,9 @@ textarea{resize:vertical;min-height:70px;}
 .exp-loaded-badge{font-family:'DM Mono',monospace;font-size:16px;color:var(--accent);font-weight:500;}
 .exp-loaded-info{font-size:12px;color:var(--ink2);margin-top:4px;}
 /* PREVIEW DOC */
-.doc-preview{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px 16px;font-size:12.5px;line-height:1.7;color:#1C1A16;max-height:580px;overflow-y:auto;}
-
+.doc-preview{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:32px 36px;font-size:12.5px;line-height:1.7;color:#1C1A16;max-height:580px;overflow-y:auto;}
 .doc-preview h3{font-family:'DM Serif Display',serif;font-size:13px;font-weight:400;text-align:center;margin-bottom:18px;text-decoration:underline;letter-spacing:.02em;}
 .doc-preview .ficha{display:grid;grid-template-columns:160px 1fr;gap:2px 10px;margin-bottom:16px;font-size:11px;}
-.doc-preview>p{padding:0;}
-.doc-preview .cuerpo{padding:0;}
 .doc-preview .fk{font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:.04em;padding:1px 0;}
 .doc-preview .fv{font-weight:700;padding:1px 0;}
 .doc-preview .cuerpo p{margin-bottom:8px;text-align:justify;}
@@ -134,14 +128,7 @@ textarea{resize:vertical;min-height:70px;}
 .doc-preview .firma-lugar{margin-bottom:16px;}
 .doc-preview .firma-bloque{font-weight:600;font-size:11px;margin-top:6px;}
 .doc-preview hr{border:none;border-top:.5px solid #ccc;margin:14px 0;}
-@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}.span-2,.span-3{grid-column:span 1;}.catastro-row{flex-direction:column;}header{padding:14px 16px;}.app{padding:20px 14px 48px;}.doc-grid{grid-template-columns:1fr;}
-.project-list thead{display:none;}
-.project-list,.project-list tbody,.project-list tr,.project-list td{display:block;width:100%;}
-.project-list tr{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;padding:10px 12px;background:var(--surface);}
-.project-list td{border:none;padding:2px 0;white-space:normal!important;}
-.project-list td:nth-child(4),.project-list td:nth-child(5){min-width:unset;}
-.project-list td:last-child{margin-top:8px;}
-}
+@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}.span-2,.span-3{grid-column:span 1;}.catastro-row{flex-direction:column;}header{padding:14px 16px;}.app{padding:20px 14px 48px;}.doc-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -403,7 +390,7 @@ textarea{resize:vertical;min-height:70px;}
           </div>
           <div class="field"><label>Presupuesto de Ejecución Material (€)</label><input type="number" id="pro-pem" placeholder="0.00" step="0.01"/></div>
           <div class="field"><label>Honorarios (€)</label><input type="number" id="pro-honorarios" placeholder="0.00" step="0.01"/></div>
-          <div class="field"><label>Licencia de Obras</label><input type="text" id="pro-licencia" placeholder="Fecha o nº de licencia"/><input type="date" id="pro-licencia-cal" style="max-width:160px;" title="Elegir fecha de licencia"/></div>
+          <div class="field"><label>Licencia de Obras</label><input type="text" id="pro-licencia" placeholder="Fecha o nº de licencia"/></div>
           <div class="field"><label>Fecha Comienzo de Obra</label><input type="date" id="pro-fecha-inicio"/></div>
           <div class="field"><label>Fecha Fin de Obra</label><input type="date" id="pro-fecha-fin"/></div>
           <div class="field"><label>Fecha Acta de Recepción</label><input type="date" id="pro-fecha-recepcion"/></div>
@@ -429,6 +416,9 @@ textarea{resize:vertical;min-height:70px;}
           <button class="btn btn-primary btn-lg" onclick="generarExpediente()">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Generar Expediente
           </button>
+          <button class="btn btn-secondary" onclick="generarExcelDatos()" id="btn-excel">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar Excel (DATOS)
+          </button>
           <button class="btn btn-secondary" onclick="copiarDatosGestorMemorias()" id="btn-datos-memorias" style="background:#1a4e8a;color:#fff;border-color:#1a4e8a;">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar datos → Gestor de Memorias
           </button>
@@ -440,22 +430,15 @@ textarea{resize:vertical;min-height:70px;}
 
         <hr class="divider">
         <p style="color:var(--ink2);font-size:13px;margin-bottom:10px;">Portadas en PDF con los datos de este expediente (mismo formato que el Gestor de Memorias).</p>
-        <div class="actions" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-          <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')" style="width:100%;">
+        <div class="actions" style="flex-wrap:wrap;gap:8px;">
+          <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PORTADAS DIPUTACIÓN
           </button>
-        </div>
-        <div class="actions" style="flex-wrap:wrap;gap:8px;margin-bottom:8px;">
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['MEMORIA'],'portada memoria','portada-status')">↓ Memoria</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['FOTOGRAFÍAS'],'portada fotografías','portada-status')">↓ Fotografías</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">↓ Anexos ahorro energía</button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
           <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input type="text" id="portada-titulo-custom" placeholder="Título personalizado…" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;"/>
-          <button class="btn btn-secondary" onclick="const t=document.getElementById('portada-titulo-custom').value.trim();if(t)generarPortadasPDF([t],'portada '+t.toLowerCase(),'portada-status');else document.getElementById('portada-status').innerHTML='<span style=color:var(--err)>Escribe un título primero</span>';">↓ Personalizada</button>
-        </div>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
         </div>
         <div id="portada-status" style="margin-top:6px;"></div>
       </div>
@@ -571,8 +554,8 @@ textarea{resize:vertical;min-height:70px;}
           <div id="doc-preview-container" class="doc-preview"></div>
           <hr class="divider">
           <div class="actions" style="margin-top:4px;">
-            <button class="btn btn-word" onclick="descargarDOCX()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar .DOCX
+            <button class="btn btn-word" onclick="descargarRTF()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar .RTF (Word)
             </button>
             <button class="btn btn-pdf" onclick="imprimirPDF()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir / PDF
@@ -580,6 +563,7 @@ textarea{resize:vertical;min-height:70px;}
             <button class="btn btn-secondary" onclick="copiarTextoDoc()">Copiar texto</button>
           </div>
           <div id="doc-gen-status" style="margin-top:10px;"></div>
+          <div id="print-area" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -644,10 +628,10 @@ textarea{resize:vertical;min-height:70px;}
 <script>
 const CATALOGO=[
   {id:'cert-fin-obra-edif',cat:'Certificados',nombre:'Certificado Final de Obra — Edificación',desc:'Certifica que la edificación ha quedado terminada bajo dirección del arquitecto.',vars:['fecha_acta','tipo_obra_cert']},
-  {id:'cert-fin-obra-fotos',cat:'Certificados',nombre:'Certificado Final de Obra - Fotografias del Edificio',desc:'Certificado con titulo y ficha tecnica seguido de 1 a 4 fotografias del edificio.',vars:['fotos_cert']},
   {id:'cert-fin-obra-demol',cat:'Certificados',nombre:'Certificado Final de Obra — Demolición',desc:'Certifica que la demolición ha quedado ejecutada conforme al proyecto.',vars:['fecha_acta']},
   {id:'cert-resistencia-cub',cat:'Certificados',nombre:'Certificado Resistencia de Cubierta (placas solares)',desc:'Certifica que la cubierta soporta la instalación de placas fotovoltaicas.',vars:['fecha_acta','destinatario_cert']},
   {id:'cert-libro-ordenes',cat:'Certificados',nombre:'Comunicado Libro de Órdenes (verbal)',desc:'Informa al Colegio que las órdenes se comunicaron verbalmente.',vars:['fecha_acta']},
+  {id:'oficio-direccion-obra',cat:'Oficios',nombre:'Oficio de Dirección de Obra',desc:'Comunica la aceptación del encargo de dirección facultativa de las obras (réplica exacta del modelo COACM).',vars:['fecha_acta','lugar_firma','redactado_por'],exact:true},
   {id:'acta-replanteo',cat:'Actas',nombre:'Acta de Comprobación del Replanteo',desc:'Constata la comprobación del replanteo por los agentes de la obra.',vars:['fecha_acta','hora_acta']},
   {id:'acta-recepcion',cat:'Actas',nombre:'Acta de Recepción de Obra',desc:'Formaliza la recepción de la obra por la propiedad.',vars:['fecha_acta','hora_acta','fecha_fin_garantia']},
   {id:'acta-pavimento',cat:'Actas',nombre:'Acta Comprobación Pavimento y Mobiliario',desc:'Documenta el estado del pavimento y mobiliario urbano antes del inicio.',vars:['fecha_acta','hora_acta']},
@@ -671,10 +655,13 @@ const CATALOGO=[
   {id:'subsanacion',cat:'Modificados y Anexos',nombre:'Subsanación de Solicitud de Ayuda',desc:'Contesta a un requerimiento de subsanación de solicitud de ayuda.',vars:['fecha_acta','exp_admin','ot_admin','titular_admin','emplaz_admin','texto_subsanacion','docs_lista']},
 ];
 
+const OFICIO_LOGO_B64='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';
+const OFICIO_FIRMA_B64='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';
 const VARS_CFG={
   fecha_acta:{label:'Fecha del documento',type:'date',default:()=>new Date().toISOString().split('T')[0]},
-  fotos_cert:{label:'Fotografías del edificio (1-4 fotos)',type:'photos'},
   hora_acta:{label:'Hora',type:'text',placeholder:'Ej: 09:00'},
+  lugar_firma:{label:'Lugar de la firma (si es distinto del municipio de la obra)',type:'text',placeholder:'Ej: CUENCA'},
+  redactado_por:{label:'Proyecto redactado por (si es distinto del director de obra)',type:'text',placeholder:'Dejar en blanco si coincide con el director de obra'},
   tipo_obra_cert:{label:'Tipo de obra (para certificado)',type:'select',opciones:['Edificación','Demolición','Reforma','Rehabilitación','Ampliación']},
   destinatario_cert:{label:'Destinatario del certificado',type:'text',placeholder:'Ej: Ayuntamiento de Landete'},
   destinatario_ayto:{label:'Destinatario (alcalde/municipio)',type:'text',placeholder:'Ej: ILMO. ALCALDE DEL MUNICIPIO DE LANDETE'},
@@ -935,12 +922,16 @@ async function buscarMunicipioPorCP(prefix,val){
     const munEl=document.getElementById(prefix+'-municipio');
     const provEl=document.getElementById(prefix+'-provincia');
     if(!munEl||!provEl)return;
-    // Provincia por prefijo (instantáneo)
+
+    // Provincia siempre por prefijo (instantáneo, sin datos embebidos)
     const pref=val.substring(0,2);
     const provincia=CP_PROVINCIA[pref]||'';
-    if(provincia){provEl.value=provincia;flashEl(provEl);}
+    if(provincia&&!provEl.value.trim()){provEl.value=provincia;flashEl(provEl);}
+
     // Municipio desde datos embebidos
+    // Limpiar municipio/provincia para que se actualicen al cambiar el CP
     munEl.value='';
+    if(provEl)provEl.value='';
     const cpData=await getCpDataAsync();
     if(cpData&&cpData[val]){
       munEl.value=cpData[val];
@@ -1062,87 +1053,11 @@ function renderVariablesExtra(doc){
     if(c.type==='date'){html+=`<input type="date" id="docvar-${vId}" value="${c.default?c.default():''}" onchange="actualizarPreview()"/>`;}
     else if(c.type==='select'){html+=`<select id="docvar-${vId}" onchange="actualizarPreview()">`;c.opciones.forEach(o=>html+=`<option value="${o}">${o}</option>`);html+='</select>';}
     else if(c.type==='textarea'){html+=`<textarea id="docvar-${vId}" placeholder="${c.placeholder||''}" rows="3" oninput="actualizarPreview()"></textarea>`;}
-    else if(c.type==='photos'){
-      html+=`<div class="span-2">`;
-      html+=`<input type="file" id="docvar-${vId}" accept="image/*" multiple style="margin-bottom:8px;" onchange="cargarFotosCert(this)"/>`;
-      html+=`<div id="fotos-preview-thumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;"></div>`;
-      html+=`</div>`;
-    }
     else{html+=`<input type="text" id="docvar-${vId}" placeholder="${c.placeholder||''}" oninput="actualizarPreview()"/>`;}
     html+='</div>';
   });
   html+='</div></div>';
   container.innerHTML=html;
-  if(doc.id==='cert-fin-obra-fotos')renderThumbsFotos();
-}
-
-// ── Gestión de fotos para certificado ────────────────────────────────────────
-let _fotosCert=[]; // Array de {dataUrl, name, wide} (wide=true si horizontal)
-function cargarFotosCert(input){
-  const files=Array.from(input.files).slice(0,4);
-  _fotosCert=[];
-  const promises=files.map(f=>new Promise(res=>{
-    const r=new FileReader();
-    r.onload=e=>{
-      const img=new Image();
-      img.onload=()=>{
-        _fotosCert.push({dataUrl:e.target.result,name:f.name,wide:img.width>=img.height});
-        res();
-      };
-      img.src=e.target.result;
-    };
-    r.readAsDataURL(f);
-  }));
-  Promise.all(promises).then(()=>{renderThumbsFotos();actualizarPreview();});
-}
-function renderThumbsFotos(){
-  const el=document.getElementById('fotos-preview-thumbs');
-  if(!el)return;
-  let h='';
-  _fotosCert.forEach(function(f,i){
-    h+='<div style="position:relative;">';
-    h+='<img src="'+f.dataUrl+'" style="height:60px;border-radius:4px;border:1px solid var(--border);" title="'+f.name+'"/>';
-    h+='<button onclick="eliminarFotoCert('+i+')" style="position:absolute;top:-6px;right:-6px;background:#e55;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;line-height:1;">×</button>';
-    h+='</div>';
-  });
-  el.innerHTML=h;
-}
-function eliminarFotoCert(i){_fotosCert.splice(i,1);renderThumbsFotos();actualizarPreview();}
-function renderFotosLayout(){
-  const n=_fotosCert.length;
-  if(n===0)return'<div style="border:2px dashed #ccc;border-radius:8px;padding:40px;text-align:center;color:#888;">Sube las fotografías usando el panel de la izquierda (1-4 fotos)</div>';
-  const px=mm=>Math.round(mm*3.78);
-  // Espacio libre A4: 297mm - márgenes(30) - ficha(72) - hr(4) = 191mm para fotos
-  const LIBRE=191;
-  const imgS=(h)=>'width:100%;height:'+px(h)+'px;object-fit:contain;border-radius:4px;display:block;';
-  if(n===1){
-    return'<div style="height:'+px(LIBRE)+'px;"><img src="'+_fotosCert[0].dataUrl+'" style="'+imgS(LIBRE)+'"/></div>';
-  }
-  if(n===2){
-    const allWide=_fotosCert.every(f=>f.wide);
-    const allTall=_fotosCert.every(f=>!f.wide);
-    if(allTall){
-      // 2 verticales: lado a lado
-      const h=LIBRE;
-      const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
-      return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'+imgs.join('')+'</div>';
-    } else {
-      // 2 horizontales (o mixtas): una encima de otra
-      const h=Math.round(LIBRE/2)-6;
-      const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
-      return'<div style="display:grid;grid-template-columns:1fr;gap:12px;">'+imgs.join('')+'</div>';
-    }
-  }
-  if(n===3){
-    const h=Math.round(LIBRE/2)-6;
-    const top=_fotosCert.slice(0,2).map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
-    const bot='<div style="height:'+px(h)+'px;grid-column:span 2;"><img src="'+_fotosCert[2].dataUrl+'" style="'+imgS(h)+'"/></div>';
-    return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+top.join('')+bot+'</div>';
-  }
-  // 4 fotos: cuadrícula 2×2
-  const h=Math.round(LIBRE/2)-6;
-  const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
-  return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+imgs.join('')+'</div>';
 }
 
 function gv(id){const el=document.getElementById('docvar-'+id);return el?el.value.trim():'';}
@@ -1151,7 +1066,6 @@ function getDatosDoc(){
   const e=docExpedienteActivo||{};
   return{
     expediente:e.expediente||'—',
-    tipo_obra:e.tipo_obra||'—',
     proyecto:e.pro_nombre_proyecto||e.tipo_obra||'—',
     fase:e.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN',
     emplazamiento:e.direccion_proyecto||e.direccion_inmueble||'—',
@@ -1166,11 +1080,6 @@ function getDatosDoc(){
     promotor1_mun:e.cliente_municipio||'—',
     promotor1_prov:e.cliente_provincia||'—',
     promotor2:e.promotor2_nombre||'',
-    promotor2_nif:e.promotor2_nif||'',
-    promotor2_dir:e.promotor2_dir||'',
-    promotor2_cp:e.promotor2_cp||'',
-    promotor2_mun:e.promotor2_mun||'',
-    promotor2_prov:e.promotor2_prov||'',
     promotores_todos:[e.cliente_nombre_completo||e.cliente_nombre,e.promotor2_nombre,e.promotor3_nombre].filter(Boolean).join(', '),
     nifs_todos:[e.cliente_nif,e.promotor2_nif,e.promotor3_nif].filter(Boolean).join(', '),
     arq:'JUAN JOSÉ RAMÓN VINDEL',
@@ -1213,7 +1122,7 @@ function fichaBase(d){
     <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
     <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
     <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-    <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+    <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
     <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
   </div>`;
 }
@@ -1226,19 +1135,17 @@ function fichaObra(d){
     <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
     <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
     <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
-    <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+    <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
     <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
     <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
   </div>`;
 }
 
 function encabezadoDecl(d,dest,actuacion){
-  const p2=d.promotor2?`<p>${d.promotor2}, mayor de edad, con domicilio en ${d.promotor2_dir||'—'}, código postal ${d.promotor2_cp||'—'} de ${d.promotor2_mun||'—'}, provincia de ${d.promotor2_prov||'—'}, provisto de N.I.F número ${d.promotor2_nif||'—'}.</p>`:'';
   return`<p style="margin-bottom:14px;"><strong>${dest}</strong></p>
   <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
   <div class="cuerpo">
-    <p>${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
-    ${p2}
+    <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
     <p>Que quiere ${actuacion}: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
   </div>`;
 }
@@ -1252,38 +1159,18 @@ function generarTextoDoc(doc,d){
 
   switch(doc.id){
 
-    case'cert-fin-obra-fotos':{
-      const etiqPromF=d.promotor2?'Promotores':'Promotor';
-      const valPromF=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
-      return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA<br><em>FOTOGRAFÍA DEL EDIFICIO</em></h3>
-      <div class="ficha">
-        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
-        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
-        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
-        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
-        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-        <span class="fk">${etiqPromF}</span><span class="fv">${valPromF}</span>
-        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
-      </div>
-      <hr style="border:none;border-top:1px solid #ccc;margin:12px 0;"/>
-      ${renderFotosLayout()}`;}
-
     case'cert-fin-obra-edif':{
       const tipo=gv('tipo_obra_cert')||'Edificación';
-      const etiqProm=d.promotor2?'Promotores':'Promotor';
-      const valProm=d.promotor2
-        ?`${d.promotor1}<br>${d.promotor2}`
-        :d.promotor1;
       return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
       <div class="ficha">
-        <span class="fk">Edificación</span><span class="fv">${d.tipo_obra||d.proyecto}</span>
+        <span class="fk">Edificación</span><span class="fv">${d.proyecto}</span>
         <span class="fk">Tipo de Obra</span><span class="fv">${tipo.toUpperCase()}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
-        <span class="fk">${etiqProm}</span><span class="fv">${valProm}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
@@ -1293,21 +1180,17 @@ function generarTextoDoc(doc,d){
         <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
       </div>${fa}`;}
 
-    case'cert-fin-obra-demol':{
-      const etiqPromD=d.promotor2?'Promotores':'Promotor';
-      const valPromD=d.promotor2
-        ?`${d.promotor1}<br>${d.promotor2}`
-        :d.promotor1;
+    case'cert-fin-obra-demol':
       return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
       <div class="ficha">
-        <span class="fk">Edificación</span><span class="fv">${d.tipo_obra||d.proyecto}</span>
+        <span class="fk">Edificación</span><span class="fv">${d.proyecto}</span>
         <span class="fk">Tipo de Obra</span><span class="fv">DEMOLICIÓN</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
-        <span class="fk">${etiqPromD}</span><span class="fv">${valPromD}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
@@ -1315,7 +1198,7 @@ function generarTextoDoc(doc,d){
         <p>${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, en calidad de Proyectista y Director de Obra de ${d.proyecto} en ${d.emplazamiento} del municipio de ${d.municipio}, provincia de ${d.provincia}.</p>
         <p>Que con fecha de ${fechaES}, la edificación reseñada ha quedado demolida bajo mi dirección de conformidad con el proyecto objeto de licencia y la documentación técnica que lo complementa, hallándose dispuesto el solar para su utilización con arreglo a las ordenanzas urbanísticas vigentes.</p>
         <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
-      </div>${fa}`;}
+      </div>${fa}`;
 
     case'cert-resistencia-cub':{
       const dest=gv('destinatario_cert')||'la Administración competente';
@@ -1339,13 +1222,83 @@ function generarTextoDoc(doc,d){
       <div style="font-size:11px;margin-top:8px;">Fdo.: D. ${d.arq}</div>
       <div style="font-size:11px;">Colegiado ${d.arq_num} COACM</div></div>`;
 
+    case'oficio-direccion-obra':{
+      const lugarFirma=gv('lugar_firma')||'CUENCA';
+      const redactor=gv('redactado_por')||d.arq;
+      const splitDir=(str)=>{
+        if(!str)return{calle:'',num:''};
+        const s=String(str).trim();
+        const m=s.match(/^(.*?)[,]?\s*(?:N[ºª°.]?\s*)?(\d+)\s*$/i);
+        if(m)return{calle:m[1].trim().replace(/,$/,''),num:m[2]};
+        return{calle:s,num:''};
+      };
+      const promDir=splitDir(d.promotor1_dir);
+      const obraDir=splitDir(d.emplazamiento);
+      const fd=new Date((fecha||new Date().toISOString().split('T')[0])+'T12:00:00');
+      const MESES_UC=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+      const diaF=fd.getDate();
+      const mesF=MESES_UC[fd.getMonth()];
+      const anioF=String(fd.getFullYear()).slice(-2);
+      const L=(left,top,size,text,extra)=>`<span style="position:absolute;left:${left}pt;top:${top}pt;font-size:${size}pt;font-family:Arial,Helvetica,sans-serif;white-space:nowrap;line-height:1;color:#000;${extra||''}">${text}</span>`;
+      const U=(v)=>String(v==null?'':v).toUpperCase();
+      // Promotor 1 + Promotor 2 (si existe) en la línea "que por D." — con autoajuste de tamaño para que quepa en el ancho disponible
+      const conectorY=(nombre)=>{
+        const n=(nombre||'').trim();
+        if(/^hie/i.test(n))return'Y'; // excepción: diptongo "hie" (Hierro, Hiedra) mantiene "y"
+        if(/^(i|hi)/i.test(n))return'E'; // "y"→"e" ante sonido /i/ (Isabel, Hilario, Hidalgo...)
+        return'Y';
+      };
+      const promotorFull=d.promotor2?`${d.promotor1} ${conectorY(d.promotor2)} ${d.promotor2}`:d.promotor1;
+      const PROM_MAXW=390; // pt disponibles desde x=148.5 hasta el margen derecho (~538pt)
+      let promSize=11;
+      if(promotorFull.length*promSize*0.56>PROM_MAXW){
+        promSize=Math.max(7,Math.round((PROM_MAXW/(promotorFull.length*0.56))*10)/10);
+      }
+      return`<div style="overflow-x:auto;">
+      <div style="position:relative;width:595pt;height:842pt;background:#fff;margin:0 auto;box-shadow:0 0 0 1px #ddd;">
+        <img src="data:image/png;base64,${OFICIO_LOGO_B64}" style="position:absolute;left:85.08pt;top:36pt;width:391.5pt;height:65.28pt;">
+        ${L(85.1,114.2,13,'D.')}
+        ${L(85.1,136.6,13,'Arquitecto colegiado/habilitado nº')}
+        ${L(326.7,136.6,13,'en el Colegio Oficial')}
+        ${L(85.1,159.2,13,'de Arquitectos de')}
+        ${L(189.5,159.2,12,'Castilla-La Mancha')}
+        ${L(297.8,159.2,13,'pone en conocimiento de V.I.')}
+        ${L(85.1,181.4,13,'que por D.')}
+        ${L(85.1,203.9,13,'domiciliado en')}
+        ${L(297.8,203.9,13,'calle')}
+        ${L(85.1,226.3,13,'nº')}
+        ${L(156.0,226.3,13,', le ha sido encomendada la dirección facultativa de las')}
+        ${L(85.1,248.7,13,'obras que se van a ejecutar en la finca de su propiedad, situada en la')}
+        ${L(297.8,271.1,13,'nº')}
+        ${L(368.7,271.1,13,'de')}
+        ${L(85.1,293.6,13,'Dichas obras consisten en:')}
+        ${L(85.1,518.4,13,'Según proyecto redactado por')}
+        ${L(108.5,593.2,13,'En')}
+        ${L(285.7,593.2,13,',a')}
+        ${L(321.2,593.2,13,'de')}
+        ${L(462.8,593.3,13,'20')}
+        ${L(366.8,623.1,13,'El arquitecto')}
+        <img src="data:image/png;base64,${OFICIO_FIRMA_B64}" style="position:absolute;left:349.79pt;top:622.09pt;width:100pt;height:61pt;">
+
+        ${L(102.9,113.8,11,U(d.arq))}
+        ${L(282.1,136.5,11,U(d.arq_num))}
+        ${L(148.5,179.7,promSize,U(promotorFull))}
+        ${L(176.2,206.0,9,U(d.promotor1_mun))}
+        ${L(335.9,204.1,11,U(promDir.calle))}
+        ${L(105.2,227.5,11,U(promDir.num))}
+        ${L(86.8,268.1,11,U(obraDir.calle))}
+        ${L(320.3,270.4,11,U(obraDir.num))}
+        ${L(395.3,270.4,11,U(d.municipio))}
+        ${L(85.3,315.7,11,U(d.proyecto))}
+        ${L(270,518.4,11,U(redactor))}
+        ${L(136.4,591.9,11,U(lugarFirma))}
+        ${L(303.5,593.0,11,U(diaF))}
+        ${L(361.5,592.9,11,U(mesF))}
+        ${L(478.0,592.6,11,U(anioF))}
+      </div></div>`;}
+
     case'acta-replanteo':{
       const hora=gv('hora_acta')||'09:00';
-      const etiqProm=d.promotor2?'Promotores':'Promotor';
-      const valPromFicha=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
-      const promsTxt=d.promotor2
-        ?`${d.promotor1} e ${d.promotor2}, como promotores de la obra`
-        :`${d.promotor1}, como promotor de la obra`;
       return`<h3>ACTA DE COMPROBACIÓN DEL REPLANTEO</h3>
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
@@ -1353,59 +1306,46 @@ function generarTextoDoc(doc,d){
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-        <span class="fk">${etiqProm}</span><span class="fv">${valPromFicha}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
       <div class="cuerpo">
         <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen exclusivamente los firmantes, para proceder a la comprobación del replanteo de las obras.</p>
-        <p>${promsTxt}, como representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>${d.promotor1}, como promotor de la obra, como representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
         <p>Proceden a efectuar la comprobación del replanteo de la obra con el siguiente resultado: Que aprobado el proyecto técnico de la obra cuya ejecución se pretende realizar es conforme con la memoria que considera las necesidades a satisfacer, planos de conjunto y detalles, pliego de prescripciones técnicas, presupuesto y calles afectadas. Asimismo, indica la propiedad que dispone de los terrenos, autorizaciones y concesiones precisas.</p>
         <p>Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.</p>
       </div>
-      <div class="firma firma-cols" style="display:grid;grid-template-columns:34% 42% 24%;grid-template-rows:auto 60pt auto;margin-top:28px;">
-        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">EL DIRECTOR DE OBRA</div></div>
-        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">LA PROPIEDAD</div></div>
-        <div style="align-self:end;"><div class="firma-bloque">EL CONTRATISTA</div></div>
-        <div></div><div></div><div></div>
-        <div style="align-self:start;padding-right:20px;">${d.arq}</div>
-        <div style="align-self:start;padding-right:20px;">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div>
-        <div style="align-self:start;">&nbsp;</div>
+      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
+        <div><div class="firma-bloque">EL DIRECTOR DE OBRA</div><div style="margin-top:80pt;">${d.arq}</div></div>
+        <div><div class="firma-bloque">LA PROPIEDAD</div><div style="margin-top:80pt;">${d.promotor1}</div></div>
+        <div><div class="firma-bloque">EL CONTRATISTA</div></div>
       </div>`;}
 
     case'acta-recepcion':{
       const hora=gv('hora_acta')||'13:00';
       const fechaGar=gv('fecha_fin_garantia')?fES(gv('fecha_fin_garantia')):'—';
-      const etiqProm=d.promotor2?'Promotores':'Promotor';
-      const valPromFicha=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
-      const propTxt=d.promotor2
-        ?`${d.promotor1} e ${d.promotor2}, como propietarios`
-        :`${d.promotor1} como propietario`;
       return`<h3>ACTA DE RECEPCIÓN DE OBRA</h3>
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-        <span class="fk">${etiqProm}</span><span class="fv">${valPromFicha}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
       <div class="cuerpo">
-        <p>${propTxt}, el representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
+        <p>${d.promotor1} como propietario, el representante de la empresa constructora ${d.constructor}, y ${d.arq}, ARQUITECTO, en calidad de Director de Obra.</p>
         <p>En el lugar de emplazamiento de las obras, siendo las ${hora} horas del día ${fechaES}, se reúnen exclusivamente los firmantes, para proceder por parte de la Propiedad a su recepción.</p>
         <p>Tras el reconocimiento detallado de las obras, el Director de la obra expone que las mismas han sido ejecutadas sensiblemente de acuerdo con el proyecto y sus modificaciones aprobadas, en su caso, teniendo en cuenta todas las prescripciones en vigor, y que se encuentran en condiciones de ser recibidas.</p>
         <p>La propiedad solicita a los asistentes que manifiesten cuanto estimen conveniente en relación al acto que se está realizando y a las actuaciones llevadas a cabo, no haciéndolo ninguno de ellos.</p>
         <p>En consecuencia, y con la conformidad de los firmantes, la Propiedad da por recibida la obra, entregándola al uso o servicio correspondiente y finalizando el plazo de garantía a las ${hora} horas del día ${fechaGar}.</p>
       </div>
-      <div class="firma firma-cols" style="display:grid;grid-template-columns:34% 42% 24%;grid-template-rows:auto 60pt auto;margin-top:28px;">
-        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">EL PROYECTISTA Y<br>DIRECTOR DE OBRA</div></div>
-        <div style="align-self:end;padding-right:20px;"><div class="firma-bloque">LA PROPIEDAD</div></div>
-        <div style="align-self:end;"><div class="firma-bloque">EL CONTRATISTA</div></div>
-        <div></div><div></div><div></div>
-        <div style="align-self:start;padding-right:20px;">${d.arq}</div>
-        <div style="align-self:start;padding-right:20px;">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div>
-        <div style="align-self:start;">&nbsp;</div>
+      <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
+        <div><div class="firma-bloque">EL PROYECTISTA Y DIRECTOR DE OBRA</div><div style="margin-top:80pt;">${d.arq}</div></div>
+        <div><div class="firma-bloque">LA PROPIEDAD</div><div style="margin-top:80pt;">${d.promotor1}</div></div>
+        <div><div class="firma-bloque">EL CONTRATISTA</div></div>
       </div>`;}
 
     case'acta-pavimento':{
@@ -1419,7 +1359,7 @@ function generarTextoDoc(doc,d){
         <p>Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.</p>
       </div>
       <div class="firma" style="display:flex;gap:60px;flex-wrap:wrap;">
-        <div><div class="firma-bloque">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div></div>
+        <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
         <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
       </div>`;}
 
@@ -1431,7 +1371,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Fecha</span><span class="fv">${fechaC}</span>
         <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}, ${d.cp_obra}</span>
-        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}, ARQUITECTO</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
         <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
@@ -1443,7 +1383,7 @@ function generarTextoDoc(doc,d){
       <p style="font-weight:600;">SEGURIDAD Y SALUD</p><p style="margin:6px 0 12px;">${gv('seguridad')||'—'}</p>
       <hr>
       <div class="firma" style="display:flex;gap:40px;flex-wrap:wrap;">
-        <div><div class="firma-bloque">${d.promotor1}${d.promotor2?`<br>${d.promotor2}`:''}</div></div>
+        <div><div class="firma-bloque">${d.promotor1}</div></div>
         <div><div class="firma-bloque">${d.arq}<br>ARQUITECTO</div></div>
       </div>`;}
 
@@ -1458,7 +1398,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Provincia</span><span class="fv">${d.provincia}</span>
-        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
         <span class="fk">Coordinador S&amp;S</span><span class="fv">${d.arq}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
@@ -1475,93 +1415,48 @@ function generarTextoDoc(doc,d){
       <div style="font-size:11px;">Colegio Oficial de Arquitectos de Cuenca</div></div>`;}
 
     case'autorizacion-licencia':{
-      const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`;
-      const toTC=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const fechaLugarCap=fLugar(fecha,(d.municipio||'').toUpperCase());
-      // Dirección del promotor en minúsculas (toTC), emplazamiento de la obra en MAYÚSCULAS
-      const p1expone=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2expone=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTC(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
-      const quierentxt=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-      const firma2=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
-      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
-      <p style="font-weight:700;margin-top:16pt;margin-bottom:8pt;">${dest}</p>
-      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
-      <div class="cuerpo">
-        <p>${p1expone}</p>
-        ${d.promotor2?`<p>${p2expone}</p>`:''}
-        <p>${quierentxt} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${(d.emplazamiento||'').toUpperCase()}, código postal ${d.cp_obra} de ${(d.municipio||'').toUpperCase()}, provincia de ${(d.provincia||'').toUpperCase()}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.</p>
-      </div>
-      <p style="font-weight:700;margin:10pt 0 6pt;">POR LA PRESENTE AUTORIZA:</p>
+      const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
+      ${encabezadoDecl(d,dest,'realizar la siguiente actuación urbanística')}
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
       <div class="cuerpo">
         <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
         <p>Para que realice y gestione en su nombre la solicitud de las licencias urbanísticas necesarias para realizar la actuación arriba referida.</p>
       </div>
-      <div class="firma">
-        <div class="firma-lugar">${fechaLugarCap}</div>
-        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
-        ${firma2}
-      </div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
 
     case'autorizacion-licencia-legaliz':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
-      const toTC2=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const p1leg=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTC2(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC2(d.promotor1_mun)}, provincia de ${toTC2(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2leg=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTC2(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTC2(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTC2(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
-      const quierenleg=d.promotor2?'Que realizaron':'Que realizó';
-      const firma2leg=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
-      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN<br>PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA</h3>
-      <p style="font-weight:700;margin-top:16pt;margin-bottom:8pt;">${dest}</p>
-      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
+      return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN<br>DE LA LICENCIA URBANÍSTICA</h3>
+      <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
       <div class="cuerpo">
-        <p>${p1leg}</p>
-        ${d.promotor2?`<p>${p2leg}</p>`:''}
-        <p>${quierenleg} la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, para la cual obtuvo la preceptiva licencia de obra mayor.</p>
+        <p>D. ${d.promotor1}, Mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        <p>Que realizó la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, para la cual obtuvo la preceptiva licencia de obra mayor.</p>
       </div>
-      <p style="font-weight:700;margin:10pt 0 6pt;">POR LA PRESENTE AUTORIZA:</p>
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
       <div class="cuerpo">
-        <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
-        <p>Para que realice y gestione en su nombre la solicitud de la licencia de primera ocupación.</p>
+        <p>A D. ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
+        <p>Para que realice y gestione en su nombre la solicitud de las licencia de primera ocupación.</p>
       </div>
-      <div class="firma">
-        <div class="firma-lugar">${fechaLugar}</div>
-        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
-        ${firma2leg}
-      </div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado D. ${d.promotor1}</div></div>`;}
 
-    case'autorizacion-pree5000':{
-      const toTCp=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const p1pree=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTCp(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCp(d.promotor1_mun)}, provincia de ${toTCp(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2pree=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTCp(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCp(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCp(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
-      const quierenpree=d.promotor2?'Que quieren solicitar':'Que quiere solicitar';
-      const firma2pree=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
+    case'autorizacion-pree5000':
       return`<h3>AUTORIZACIÓN DE REPRESENTACIÓN PARA LA GESTIÓN DE LA AYUDA PREE 5000</h3>
-      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
-      <div class="cuerpo">
-        <p>${p1pree}</p>
-        ${d.promotor2?`<p>${p2pree}</p>`:''}
-        <p>${quierenpree} una ayuda de la convocatoria PREE 5000 para la siguiente actuación: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}.</p>
-      </div>
-      <p style="font-weight:700;margin:10pt 0 6pt;">POR LA PRESENTE AUTORIZA:</p>
+      ${encabezadoDecl(d,'','solicitar una ayuda de la convocatoria PREE 5000 para la siguiente actuación')}
+      <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE AUTORIZA:</p>
       <div class="cuerpo">
         <p>A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}</p>
         <p>Para que realice y gestione en su nombre la ayuda de la convocatoria PREE5000 para la actuación arriba referida.</p>
       </div>
-      <div class="firma">
-        <div class="firma-lugar">${fechaLugar}</div>
-        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
-        ${firma2pree}
-      </div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;
 
     case'autorizacion-cee':{
       const refCEE=gv('ref_catastral_cee')||d.ref_catastral;
       const denomCEE=gv('denominacion_cee')||d.proyecto;
-      const firma2cee=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Fdo.: </span>${d.promotor2}</div>`:'';
-      const etiqRepCee=d.promotor2?'las personas representadas':'la persona representada';
       return`<h3>ANEXO V — MODELO DE REPRESENTACIÓN EN EL PROCEDIMIENTO DE INSCRIPCIÓN DE CERTIFICADOS DE EFICIENCIA ENERGÉTICA</h3>
       <div class="cuerpo">
         <p>Don/Doña: ${d.promotor1} con NIF ${d.promotor1_nif}</p>
-        ${d.promotor2?`<p>Don/Doña: ${d.promotor2} con NIF ${d.promotor2_nif}</p>`:''}
-        <p>Como: ✗ ${d.promotor2?'Propietarios / promotores':'Propietario / promotor'}</p>
+        <p>Como: ✗ Propietario / promotor</p>
         <p style="margin-top:10px;">Autoriza a</p>
         <p>Don/Doña: ${d.arq} con NIF ${d.arq_nif}</p>
         <p>En calidad de: ✗ Técnico competente que suscribe el certificado que se pretende registrar.</p>
@@ -1573,8 +1468,7 @@ function generarTextoDoc(doc,d){
       </div>
       <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
       <div style="margin-top:80pt;">Fdo.: ${d.promotor1}</div>
-      ${firma2cee}
-      <div style="font-size:11px;">(${etiqRepCee})</div></div>`;}
+      <div style="font-size:11px;">(la persona representada)</div></div>`;}
 
     case'decl-iva':
     case'decl-titularidad':
@@ -1598,85 +1492,52 @@ function generarTextoDoc(doc,d){
       ${encabezadoDecl(d,dest,act)}
       <p style="font-weight:600;margin:12px 0 10px;">POR LA PRESENTE DECLARA:</p>
       <div class="cuerpo"><p>${textos[doc.id]}</p></div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>${d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:''}</div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
 
     case'decl-iva-pree':{
       const ivaOpt=gv('iva_recuperable')||'NO es susceptible de recuperación o compensación total o parcial.';
       return`<h3>DECLARACIÓN RESPONSABLE SOBRE LA NATURALEZA DEL IVA</h3>
       <div class="cuerpo">
-        <p>${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
-        ${d.promotor2?`<p>${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${d.promotor2_dir||d.promotor1_dir}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${d.promotor2_mun||d.promotor1_mun}, provincia de ${d.promotor2_prov||d.promotor1_prov}, provisto de N.I.F número ${d.promotor2_nif}.</p>`:''}
+        <p>${d.promotor1}, mayor de edad, en representación del mismo, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
         <p>A los efectos previstos en la Resolución de 05/03/2024, de la Consejería de Fomento, por la que se convocan ayudas para actuaciones de rehabilitación energética en viviendas y en edificios de viviendas existentes, en ejecución del Programa de rehabilitación energética para edificios existentes en municipios de reto demográfico (Programa PREE 5000) de Castilla-La Mancha.</p>
         <p>Que el IVA soportado contenido en los justificantes de gasto presentados con ocasión de la justificación de la ayuda:</p>
       </div>
       <p style="font-weight:600;margin:12px 0 10px;">DECLARA:</p>
       <div class="cuerpo"><p>✗ ${ivaOpt}</p></div>
-      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>${d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:''}</div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado: ${d.promotor1}</div></div>`;}
 
     case'solicitud-licencia':{
       const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${d.municipio}`;
-      const toTCsl=s=>(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
-      const p1sl=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTCsl(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTCsl(d.promotor1_mun)}, provincia de ${toTCsl(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-      const p2sl=d.promotor2?`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${toTCsl(d.promotor2_dir||d.promotor1_dir)}, código postal ${d.promotor2_cp||d.promotor1_cp} de ${toTCsl(d.promotor2_mun||d.promotor1_mun)}, provincia de ${toTCsl(d.promotor2_prov||d.promotor1_prov)}, provisto de N.I.F número ${d.promotor2_nif}.`:'';
-      const quierensl=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-      const firma2sl=d.promotor2?`<div style="margin-top:80pt;"><span style="visibility:hidden;">Firmado: </span>${(d.promotor2||'').toUpperCase()}</div>`:'';
       return`<h3>SOLICITUD DE LICENCIA DE OBRA</h3>
-      <p style="font-weight:700;margin-top:16pt;margin-bottom:8pt;"><strong>${dest}</strong></p>
-      <p style="font-weight:700;margin:10pt 0 6pt;">EXPONE:</p>
+      <p style="margin-bottom:14px;"><strong>${dest}</strong></p>
+      <p style="font-weight:600;margin-bottom:10px;">EXPONE:</p>
       <div class="cuerpo">
-        <p>${p1sl}</p>
-        ${d.promotor2?`<p>${p2sl}</p>`:''}
-        <p>${quierensl} la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, que se adjunta con esta solicitud.</p>
+        <p>D. ${d.promotor1}, Mayor de edad, con domicilio en ${d.promotor1_dir}, código postal ${d.promotor1_cp} de ${d.promotor1_mun}, provincia de ${d.promotor1_prov}, provisto de N.I.F número ${d.promotor1_nif}.</p>
+        <p>Que quiere realizar la siguiente actuación urbanística: ${d.proyecto}, en ${d.emplazamiento}, código postal ${d.cp_obra} de ${d.municipio}, provincia de ${d.provincia}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por D. ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha, que se adjunta con esta solicitud.</p>
         <p>Por todo lo expuesto, SOLICITA a V.I. que, previos los trámites e informes reglamentarios, le sea concedida la correspondiente licencia urbanística municipal.</p>
       </div>
-      <div class="firma">
-        <div class="firma-lugar">${fechaLugar}</div>
-        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}</div>
-        ${firma2sl}
-      </div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div><div style="margin-top:80pt;">Firmado D. ${d.promotor1}</div></div>`;}
 
     case'primera-ocupacion':{
       const proms=gv('promotores_decl')||d.promotores_todos;
-      // Promotores con "y" en vez de coma, y en mayúsculas
-      const promsList=[d.promotor1,d.promotor2].filter(Boolean);
-      const promsY=promsList.map(p=>(p||'').toUpperCase()).join(' y ');
-      const nifsY=[d.promotor1_nif,d.promotor2_nif].filter(Boolean).join(', ');
-      const etiqProm=d.promotor2?'Promotores':'Promotor';
-      // Localidad en mayúsculas
-      const locMay=(d.promotor1_mun||'').toUpperCase();
-      const provMay=(d.promotor1_prov||'').toUpperCase();
-      // Ficha edificación con promotor/promotores alineados igual que certificado
-      const valPromEdif=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
-      // Texto declaran: singular o plural
-      const declaranTxt=d.promotor2?`${promsY} declaran`:`${(d.promotor1||'').toUpperCase()} declara`;
-      return`<h3>PRIMERA OCUPACIÓN DE VIVIENDA<br>DECLARACIÓN RESPONSABLE</h3>
+      return`<h3>PRIMERA OCUPACIÓN DE VIVIENDA — DECLARACIÓN RESPONSABLE</h3>
       <p style="font-weight:600;margin-bottom:8px;">DATOS DEL DECLARANTE</p>
       <div class="ficha">
-        <span class="fk">${etiqProm}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
-        <span class="fk">CIF/NIF</span><span class="fv">${nifsY}</span>
+        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        <span class="fk">CIF/NIF</span><span class="fv">${d.nifs_todos}</span>
         <span class="fk">Dirección</span><span class="fv">${d.promotor1_dir}</span>
         <span class="fk">C.P.</span><span class="fv">${d.promotor1_cp}</span>
-        <span class="fk">Localidad</span><span class="fv">${locMay}</span>
-        <span class="fk">Provincia</span><span class="fv">${provMay}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.promotor1_mun}</span>
+        <span class="fk">Provincia</span><span class="fv">${d.promotor1_prov}</span>
       </div>
       <p style="font-weight:600;margin-bottom:8px;">DATOS DE LA EDIFICACIÓN</p>
-      <div class="ficha">
-        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
-        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
-        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
-        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
-        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
-        <span class="fk">${etiqProm}</span><span class="fv">${valPromEdif}</span>
-        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
-      </div>
+      ${fichaBase(d)}
       <div class="cuerpo">
-        <p>${declaranTxt}, bajo su responsabilidad, que el inmueble construido arriba referido es acorde con la licencia de obras en su momento concedida, habiéndose cumplido las condiciones en ella impuestas, y todo ello a los efectos de la primera ocupación o utilización de la edificación.</p>
+        <p>${proms} declaran, bajo su responsabilidad, que el inmueble construido arriba referido es acorde con la licencia de obras en su momento concedida, habiéndose cumplido las condiciones en ella impuestas, y todo ello a los efectos de la primera ocupación o utilización de la edificación.</p>
       </div>
-      <div class="firma">
-        <div class="firma-lugar">${fechaLugar}</div>
-        <div style="margin-top:80pt;">SR. ALCALDE-PRESIDENTE del Excmo. Ayuntamiento de ${d.municipio}</div>
-        <div style="margin-top:80pt;">Firmado: ${(d.promotor1||'').toUpperCase()}${d.promotor2?` y ${(d.promotor2||'').toUpperCase()}`:''}</div>
-      </div>`;}
+      <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
+      <div style="margin-top:8px;">SR. ALCALDE-PRESIDENTE del Excmo. Ayuntamiento de ${d.municipio}</div>
+      <div style="margin-top:20px;">Firmado: ${proms}</div></div>`;}
 
     case'modificado':{
       const numMod=gv('num_modificado')||'1';
@@ -1685,7 +1546,7 @@ function generarTextoDoc(doc,d){
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.fase}, ${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}, ${d.cp_obra} del municipio de ${d.municipio}</span>
-        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+        <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <div class="cuerpo">
@@ -1705,7 +1566,7 @@ function generarTextoDoc(doc,d){
       <div class="ficha">
         <span class="fk">Proyecto</span><span class="fv">${d.fase}, ${d.proyecto}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${d.promotor1_dir}, ${d.promotor1_cp}, ${d.promotor1_mun}</span>
-        <span class="fk">${d.promotor2?'Promotores':'Promotor'}</span><span class="fv">${d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1}</span>
+        <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <div class="cuerpo">
@@ -1729,7 +1590,7 @@ function generarTextoDoc(doc,d){
       <div class="ficha">
         <span class="fk">Expediente</span><span class="fv">${expA}</span>
         <span class="fk">Expediente OT</span><span class="fv">${otA}</span>
-        <span class="fk">${d.promotor2?'Titulares':'Titular'}</span><span class="fv">${d.promotor2?`${titA}<br>${d.promotor2}`:titA}</span>
+        <span class="fk">Titular</span><span class="fv">${titA}</span>
         <span class="fk">Emplazamiento</span><span class="fv">${emplA}</span>
         <span class="fk">Agente Gestor</span><span class="fv">${d.arq}</span>
       </div>
@@ -1763,375 +1624,137 @@ function imprimirPDF(){
   if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
   const contenido=document.getElementById('doc-preview-container')?.innerHTML||'';
-  // Crear iframe oculto con el contenido y estilos
-  const iframe=document.createElement('iframe');
-  iframe.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0;';
-  document.body.appendChild(iframe);
-  const doc=iframe.contentDocument||iframe.contentWindow.document;
-  doc.open();
-  doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-    @page{margin:15mm 18mm;size:A4;}
+  const w=window.open('','_blank','width=900,height=700');
+
+  if(docSeleccionado.exact){
+    // Réplica exacta de un formulario oficial (posicionamiento absoluto, sin márgenes de página añadidos)
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title></title>
+    <style>
+      @page{margin:0;size:A4;}
+      *{box-sizing:border-box;margin:0;padding:0;}
+      body{background:#fff;}
+      .exact-page-wrap{margin-top:40px;}
+      @media print{
+        body{margin:0;}
+        .no-print{display:none!important;}
+        .exact-wrap{box-shadow:none!important;}
+        .exact-page-wrap{margin-top:0!important;}
+      }
+    </style></head><body>
+    <div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#f0f0f0;padding:8px;text-align:center;font-size:12px;z-index:999;box-shadow:0 1px 4px rgba(0,0,0,.15);">
+      <button onclick="window.print()" style="padding:6px 18px;background:#2d5a27;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">🖨 Imprimir / Guardar como PDF</button>
+      <span style="margin-left:16px;color:#666;">Más ajustes → desactiva <strong>Encabezados y pies de página</strong> y <strong>Escala 100%</strong> → Guardar como PDF</span>
+    </div>
+    <div class="exact-page-wrap">${contenido}</div>
+    </body></html>`);
+    w.document.close();
+    statusEl.innerHTML='<div class="status ok">✓ Documento abierto en nueva ventana. Usa el botón "Imprimir / Guardar como PDF" o Ctrl+P.</div>';
+    setTimeout(()=>statusEl.innerHTML='',8000);
+    return;
+  }
+
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title></title>
+  <style>
+    @page{margin:20mm 25mm;size:A4;}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:Arial,sans-serif;font-size:10.5pt;line-height:1.6;color:#000;background:#fff;}
-    h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:14pt;font-weight:bold;}
+    body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#000;background:#fff;}
+    .page{width:210mm;margin:0 auto;padding:15mm 0;}
+    h3{font-size:11pt;text-align:center;text-decoration:underline;margin-bottom:16pt;font-weight:bold;}
     .ficha{display:grid;grid-template-columns:140px 1fr;gap:2px 8px;margin-bottom:14pt;font-size:9.5pt;}
     .fk{font-weight:bold;text-transform:uppercase;font-size:8.5pt;}
     .fv{font-weight:bold;}
-    .cuerpo p{margin-bottom:7pt;text-align:justify;}
-    .firma{margin-top:24pt;}
-    .firma-lugar{margin-bottom:14pt;}
+    .cuerpo p{margin-bottom:8pt;text-align:justify;}
+    .firma{margin-top:20pt;}
+    .firma-lugar{margin-bottom:80pt;}
     .firma-bloque{font-weight:bold;font-size:9.5pt;}
     hr{border:none;border-top:.5px solid #999;margin:10pt 0;}
-    .firma-cols{display:grid;grid-template-columns:34% 42% 24%;grid-template-rows:auto 60pt auto;}
-    .firma-cols .firma-bloque{align-self:end;}
-    p[style*="font-weight:700"],p[style*="font-weight:600"]{font-weight:bold;}
-  </style></head><body>${contenido}</body></html>`);
-  doc.close();
-  setTimeout(()=>{
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(()=>document.body.removeChild(iframe),2000);
-  },500);
+    @media print{
+      body{margin:0;}
+      .page{margin:0;padding:0;width:100%;}
+      .no-print{display:none!important;}
+    }
+  </style></head><body>
+  <div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#f0f0f0;padding:8px;text-align:center;font-size:12px;z-index:999;box-shadow:0 1px 4px rgba(0,0,0,.15);">
+    <button onclick="window.print()" style="padding:6px 18px;background:#2d5a27;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">🖨 Imprimir / Guardar como PDF</button>
+    <span style="margin-left:16px;color:#666;">Más ajustes → desactiva <strong>Encabezados y pies de página</strong> → Guardar como PDF</span>
+  </div>
+  <div class="page" style="margin-top:40px;">${contenido}</div>
+  </body></html>`);
+  w.document.close();
+  statusEl.innerHTML='<div class="status ok">✓ Documento abierto en nueva ventana. Usa el botón "Imprimir / Guardar como PDF" o Ctrl+P.</div>';
+  setTimeout(()=>statusEl.innerHTML='',8000);
 }
 
-async function descargarDOCX(){
+function descargarRTF(){
   const statusEl=document.getElementById('doc-gen-status');
   if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
-  if(!window.JSZip){statusEl.innerHTML='<div class="status error">✗ JSZip no disponible.</div>';return;}
-  if(docSeleccionado.id!=='autorizacion-licencia'){
-    const isReplanteo=docSeleccionado.id==='acta-replanteo';
-    const isRecepcion=docSeleccionado.id==='acta-recepcion';
-    if(!isReplanteo&&!isRecepcion){
-      // Generador genérico para todos los demás documentos
-      statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
-      try{
-        const xe3=s=>(s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        const container=document.getElementById('doc-preview-container');
-        function rPrG(sz,bold,ul){return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;}
-        function runG(txt,sz,bold,ul){return`<w:r><w:rPr>${rPrG(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe3(String(txt||''))}</w:t></w:r>`;}
-        function pG(r,{jc='both',before=0,after=120,sz=22,bold=false,ul=false}={}){
-          return`<w:p><w:pPr><w:autoSpaceDE w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="240" w:lineRule="auto"/>${jc?`<w:jc w:val="${jc}"/>`:''}
-<w:rPr>${rPrG(sz,bold,ul)}</w:rPr></w:pPr>${Array.isArray(r)?r.join(''):r}</w:p>`;
-        }
-        const ps3=[];
-        // Recorrer nodos del preview
-        function nodeToDocx(el){
-          if(!el)return;
-          const tag=(el.tagName||'').toLowerCase();
-          const txt=(el.innerText||el.textContent||'').trim();
-          if(tag==='h3'){
-            ps3.push(pG(runG(txt,22,true,true),{jc:'center',before:200,after:200,bold:true,ul:true}));
-          } else if(tag==='p'){
-            if(!txt)return;
-            const bold=el.style.fontWeight==='700'||el.style.fontWeight==='600'||el.style.fontWeight==='bold';
-            ps3.push(pG(runG(txt,bold?20:22,bold),{before:0,after:bold?160:120,sz:bold?20:22,bold}));
-          } else if(tag==='div'){
-            const cls=el.className||'';
-            if(cls.includes('ficha')){
-              const fks=el.querySelectorAll('.fk');
-              const fvs=el.querySelectorAll('.fv');
-              // Tabla invisible 2 columnas: 2200 etiqueta + resto valor
-              const FWg=9006,FC1g=2200,FC2g=FWg-FC1g;
-              const tcBg=`<w:tcBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/></w:tcBorders>`;
-              const tblBg=`<w:tblBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideH w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideV w:val="none" w:color="FFFFFF" w:sz="0"/></w:tblBorders>`;
-              const gridg=`<w:tblGrid><w:gridCol w:w="${FC1g}"/><w:gridCol w:w="${FC2g}"/></w:tblGrid>`;
-              function pfg(txt,bold){return`<w:p><w:pPr><w:spacing w:after="40" w:before="0" w:line="240"/></w:pPr><w:r><w:rPr>${rPrG(bold?18:20,bold)}</w:rPr><w:t xml:space="preserve">${xe3(txt||'')}</w:t></w:r></w:p>`;}
-              function tcg(w,p){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBg}</w:tcPr>${p}</w:tc>`;}
-              const rows=[];
-              fks.forEach((fk,i)=>{
-                const lbl=(fk.innerText||'').trim();
-                // val puede tener múltiples líneas (promotor2)
-                const valLines=(fvs[i]?.innerText||'').trim().split('\n').map(l=>l.trim()).filter(Boolean);
-                const valContent=valLines.map(l=>pfg(l,true)).join('');
-                rows.push(`<w:tr>${tcg(FC1g,pfg(lbl,true))}${tcg(FC2g,valContent||pfg('',true))}</w:tr>`);
-              });
-              ps3.push(`<w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="${FWg}"/>${tblBg}</w:tblPr>${gridg}${rows.join('')}</w:tbl>`);
-              ps3.push(pG('',{before:0,after:120}));
-            } else if(cls.includes('firma-bloque')){
-              ps3.push(pG(runG(txt,20,true),{before:280,after:0,jc:'',bold:true}));
-            } else if(cls.includes('firma-lugar')){
-              ps3.push(pG(runG(txt,22,false),{before:400,after:0,jc:''}));
-            } else {
-              Array.from(el.children).forEach(nodeToDocx);
-            }
-          } else {
-            Array.from(el.children||[]).forEach(nodeToDocx);
-          }
-        }
-        Array.from(container.children).forEach(nodeToDocx);
-        const sectPr3=`<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1800" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>`;
-        const docXml3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${ps3.join('')}${sectPr3}</w:body></w:document>`;
-        const rX3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
-        const sX3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
-        const dR3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
-        const cT3=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`;
-        const zip3=new JSZip();
-        zip3.file('[Content_Types].xml',cT3);zip3.file('_rels/.rels',dR3);
-        zip3.file('word/document.xml',docXml3);zip3.file('word/styles.xml',sX3);
-        zip3.file('word/_rels/document.xml.rels',rX3);
-        const buf3=await zip3.generateAsync({type:'arraybuffer',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-        const blob3=new Blob([buf3],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-        const url3=URL.createObjectURL(blob3);
-        const a3=document.createElement('a');a3.href=url3;
-        a3.download=`${docExpedienteActivo.expediente} \u2014 ${docSeleccionado.nombre.substring(0,50)}.docx`;
-        a3.click();URL.revokeObjectURL(url3);
-        statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
-        setTimeout(()=>statusEl.innerHTML='',6000);
-      }catch(e){statusEl.innerHTML=`<div class="status error">\u2717 Error: ${e.message}</div>`;}
-      return;
+  const container=document.getElementById('doc-preview-container');
+  if(!container){return;}
+
+  // Convertir HTML a RTF preservando formato
+  function esc(s){
+    return (s||'').replace(/\\/g,'\\\\').replace(/\{/g,'\\{').replace(/\}/g,'\\}')
+      .replace(/[^\x00-\x7F]/g,c=>{
+        const code=c.charCodeAt(0);
+        return code<256?`\\'${code.toString(16).padStart(2,'0')}`:`\\u${code}?`;
+      });
+  }
+  function nodeToRtf(node){
+    if(node.nodeType===3)return esc(node.textContent);
+    if(node.nodeType!==1)return'';
+    const tag=node.tagName.toLowerCase();
+    const inner=Array.from(node.childNodes).map(nodeToRtf).join('');
+    if(tag==='h3'){return`\\pard\\sb200\\sa100\\qc\\b\\ul ${inner}\\ulnone\\b0\\par\n`;}
+    if(tag==='p'){
+      const style=node.getAttribute('style')||'';
+      const center=node.style?.textAlign==='center'||style.includes('center');
+      return`\\pard\\sb0\\sa120\\qj ${inner}\\par\n`;
     }
-    statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx…</div>';
-    try{
-      // ── Usar exactamente los mismos helpers que la autorización ──────────────
-      const d2=getDatosDoc();
-      const fecha2=gv('fecha_acta')||new Date().toISOString().split('T')[0];
-      const hora2=gv('hora_acta')||(isReplanteo?'09:00':'13:00');
-      const dt2=new Date(fecha2+'T12:00:00');
-      const meses2=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-      const fechaES2=`${dt2.getDate()} de ${meses2[dt2.getMonth()]} del año ${dt2.getFullYear()}`;
-      const xe2=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      function rX2(sz,bold,ul){return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;}
-      function r2(txt,sz,bold,ul){if(!txt&&txt!=='')return'';return`<w:r><w:rPr>${rX2(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe2(String(txt))}</w:t></w:r>`;}
-      function p2(runs,{jc='both',before=0,after=120,sz=22,bold=false,ul=false}={}){
-        const pPr=`<w:autoSpaceDE w:val="0"/><w:autoSpaceDN w:val="0"/><w:adjustRightInd w:val="0"/><w:spacing w:before="${before}" w:after="${after}" w:line="240" w:lineRule="auto"/>${jc?`<w:jc w:val="${jc}"/>`:''}`;
-        const rs=Array.isArray(runs)?runs.join(''):runs;
-        return`<w:p><w:pPr>${pPr}<w:rPr>${rX2(sz,bold,ul)}</w:rPr></w:pPr>${rs}</w:p>`;
+    if(tag==='strong'||tag==='b')return`\\b ${inner}\\b0 `;
+    if(tag==='em'||tag==='i')return`\\i ${inner}\\i0 `;
+    if(tag==='u')return`\\ul ${inner}\\ulnone `;
+    if(tag==='br')return`\\line `;
+    if(tag==='hr')return`\\pard\\brdrb\\brdrs\\brdrw5\\brsp20 \\par\n`;
+    if(tag==='div'){
+      const cls=node.className||'';
+      if(cls.includes('ficha')){
+        // Tabla catastral: convertir spans fk/fv a dos columnas
+        const fks=node.querySelectorAll('.fk');
+        const fvs=node.querySelectorAll('.fv');
+        let rows='';
+        for(let i=0;i<fks.length;i++){
+          rows+=`\\trowd\\trgaph108\\cellx2800\\cellx9000\n\\pard\\intbl\\b\\fs18 ${esc(fks[i]?.textContent||'')}\\b0\\cell\n\\pard\\intbl\\b\\fs22 ${esc(fvs[i]?.textContent||'')}\\b0\\cell\\row\n`;
+        }
+        return rows;
       }
-      function pE2(before=0,after=120){return p2('',{before,after});}
-
-      const etiqProm2=d2.promotor2?'PROMOTORES':'PROMOTOR';
-      const ps2=[];
-
-      // Título centrado, negrita, subrayado
-      ps2.push(p2(r2(isReplanteo?'ACTA DE COMPROBACIÓN DEL REPLANTEO':'ACTA DE RECEPCIÓN DE OBRA',22,true,true),{jc:'center',before:200,after:200,bold:true,ul:true}));
-      ps2.push(pE2(0,120));
-
-      // Ficha con grid real (misma estructura que autorización)
-      // Ficha con tabla invisible 2 columnas — etiqueta fija 2200 twips, valor resto
-      const FW=9864,FC1=2200,FC2=FW-FC1;
-      const tcBf=`<w:tcBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/></w:tcBorders>`;
-      const tblBf=`<w:tblBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideH w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideV w:val="none" w:color="FFFFFF" w:sz="0"/></w:tblBorders>`;
-      const gridF=`<w:tblGrid><w:gridCol w:w="${FC1}"/><w:gridCol w:w="${FC2}"/></w:tblGrid>`;
-      function pFicha(txt,bold,sz){return`<w:p><w:pPr><w:spacing w:after="40" w:before="0" w:line="240"/></w:pPr><w:r><w:rPr>${rX2(sz||20,bold)}</w:rPr><w:t xml:space="preserve">${xe2(txt||'')}</w:t></w:r></w:p>`;}
-      function tcF(w,content){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBf}</w:tcPr>${content}</w:tc>`;}
-      function filaFicha2(lbl,val){
-        return`<w:tr>${tcF(FC1,pFicha(lbl,true,18))}${tcF(FC2,pFicha(val,true,20))}</w:tr>`;
-      }
-      function filaFichaVal(val){
-        // Segunda línea de promotores: celda etiqueta vacía
-        return`<w:tr>${tcF(FC1,pFicha('',false,18))}${tcF(FC2,pFicha(val,true,20))}</w:tr>`;
-      }
-      const fichaRows=[];
-      fichaRows.push(filaFicha2('PROYECTO',d2.proyecto));
-      fichaRows.push(filaFicha2('EMPLAZAMIENTO',d2.emplazamiento));
-      if(isReplanteo)fichaRows.push(filaFicha2('CÓDIGO POSTAL',d2.cp_obra));
-      fichaRows.push(filaFicha2('LOCALIDAD',d2.municipio));
-      fichaRows.push(filaFicha2('REF. CATASTRAL',d2.ref_catastral));
-      fichaRows.push(filaFicha2(etiqProm2,d2.promotor1));
-      if(d2.promotor2)fichaRows.push(filaFichaVal(d2.promotor2));
-      fichaRows.push(filaFicha2('DIRECTOR DE OBRA',d2.arq));
-      ps2.push(`<w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="${FW}"/>${tblBf}</w:tblPr>${gridF}${fichaRows.join('')}</w:tbl>`);
-      ps2.push(pE2(0,120));
-
-      // ACTA:
-      ps2.push(p2(r2('ACTA:',20,true),{before:0,after:120,sz:20,bold:true}));
-
-      // Texto del acta
-      if(isReplanteo){
-        const pTxt=d2.promotor2?`${d2.promotor1} e ${d2.promotor2}, como promotores de la obra`:`${d2.promotor1}, como promotor de la obra`;
-        ps2.push(p2(r2(`En el lugar de emplazamiento de las obras, siendo las ${hora2} horas del día ${fechaES2}, se reúnen exclusivamente los firmantes, para proceder a la comprobación del replanteo de las obras.`,22,false),{after:120}));
-        ps2.push(p2(r2(`${pTxt}, como representante de la empresa constructora ${d2.constructor}, y ${d2.arq}, ARQUITECTO, en calidad de Director de Obra.`,22,false),{after:120}));
-        ps2.push(p2(r2('Proceden a efectuar la comprobación del replanteo de la obra con el siguiente resultado: Que aprobado el proyecto técnico de la obra cuya ejecución se pretende realizar es conforme con la memoria que considera las necesidades a satisfacer, planos de conjunto y detalles, pliego de prescripciones técnicas, presupuesto y calles afectadas. Asimismo, indica la propiedad que dispone de los terrenos, autorizaciones y concesiones precisas.',22,false),{after:120}));
-        ps2.push(p2(r2('Y para la debida constancia y oportunos efectos se levanta el presente Acta, que firman los señores que la encabezan.',22,false),{after:120}));
-      } else {
-        const fechaGar2=gv('fecha_fin_garantia')?`${new Date(gv('fecha_fin_garantia')+'T12:00:00').getDate()} de ${meses2[new Date(gv('fecha_fin_garantia')+'T12:00:00').getMonth()]} de ${new Date(gv('fecha_fin_garantia')+'T12:00:00').getFullYear()}`:'—';
-        const pTxt=d2.promotor2?`${d2.promotor1} e ${d2.promotor2}, como propietarios`:`${d2.promotor1} como propietario`;
-        ps2.push(p2(r2(`${pTxt}, el representante de la empresa constructora ${d2.constructor}, y ${d2.arq}, ARQUITECTO, en calidad de Director de Obra.`,22,false),{after:120}));
-        ps2.push(p2(r2(`En el lugar de emplazamiento de las obras, siendo las ${hora2} horas del día ${fechaES2}, se reúnen exclusivamente los firmantes, para proceder por parte de la Propiedad a su recepción.`,22,false),{after:120}));
-        ps2.push(p2(r2('Tras el reconocimiento detallado de las obras, el Director de la obra expone que las mismas han sido ejecutadas sensiblemente de acuerdo con el proyecto y sus modificaciones aprobadas, en su caso, teniendo en cuenta todas las prescripciones en vigor, y que se encuentran en condiciones de ser recibidas.',22,false),{after:120}));
-        ps2.push(p2(r2('La propiedad solicita a los asistentes que manifiesten cuanto estimen conveniente en relación al acto que se está realizando y a las actuaciones llevadas a cabo, no haciéndolo ninguno de ellos.',22,false),{after:120}));
-        ps2.push(p2(r2(`En consecuencia, y con la conformidad de los firmantes, la Propiedad da por recibida la obra, entregándola al uso o servicio correspondiente y finalizando el plazo de garantía a las ${hora2} horas del día ${fechaGar2}.`,22,false),{after:120}));
-      }
-
-      // Firmas: tabla invisible 3 columnas igual que la ficha
-      const col1t=isReplanteo?'EL DIRECTOR DE OBRA':'EL PROYECTISTA Y DIRECTOR DE OBRA';
-      // Para recepción: título en dos líneas dentro de la celda
-      function pSCol1(bold,before,after){
-        if(isReplanteo)return pS(col1t,bold,before,after);
-        return`<w:p><w:pPr><w:spacing w:before="${before||0}" w:after="${after||0}" w:line="240"/></w:pPr><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:t xml:space="preserve">EL PROYECTISTA Y</w:t></w:r><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:br/></w:r><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:t xml:space="preserve">DIRECTOR DE OBRA</w:t></w:r></w:p>`;
-      }
-      const SW=9864,SC1=Math.round(SW*0.34),SC2=Math.round(SW*0.42),SC3=SW-SC1-SC2;
-      const tcBs=`<w:tcBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/></w:tcBorders>`;
-      const tblBs=`<w:tblBorders><w:top w:val="none" w:color="FFFFFF" w:sz="0"/><w:left w:val="none" w:color="FFFFFF" w:sz="0"/><w:bottom w:val="none" w:color="FFFFFF" w:sz="0"/><w:right w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideH w:val="none" w:color="FFFFFF" w:sz="0"/><w:insideV w:val="none" w:color="FFFFFF" w:sz="0"/></w:tblBorders>`;
-      const gridS=`<w:tblGrid><w:gridCol w:w="${SC1}"/><w:gridCol w:w="${SC2}"/><w:gridCol w:w="${SC3}"/></w:tblGrid>`;
-      function pS(txt,bold,before,after){return`<w:p><w:pPr><w:spacing w:before="${before||0}" w:after="${after||0}" w:line="240"/></w:pPr><w:r><w:rPr>${rX2(20,bold)}</w:rPr><w:t xml:space="preserve">${xe2(txt||'')}</w:t></w:r></w:p>`;}
-      function tcS(w,content){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBs}</w:tcPr>${content}</w:tc>`;}
-      // Fila 1: títulos (with before=400 para separar del texto)
-      const rowST=`<w:tr>${tcS(SC1,pSCol1(true,400,0))}${tcS(SC2,pS('LA PROPIEDAD',true,400,0))}${tcS(SC3,pS('EL CONTRATISTA',true,400,0))}</w:tr>`;
-      // Fila 2: espacio vacío ~4cm
-      function tcSe(w){return`<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="${w}"/>${tcBs}</w:tcPr><w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p></w:tc>`;}
-      const rowSE=`<w:tr><w:trPr><w:trHeight w:val="1400" w:hRule="exact"/></w:trPr>${tcSe(SC1)}${tcSe(SC2)}${tcSe(SC3)}</w:tr>`;
-      // Fila 3: nombres
-      const cell2s=d2.promotor2?pS(d2.promotor1,false,0,0)+pS(d2.promotor2,false,0,0):pS(d2.promotor1,false,0,0);
-      const rowSN=`<w:tr>${tcS(SC1,pS(d2.arq,false,0,0))}${tcS(SC2,cell2s)}${tcS(SC3,pS('',false,0,0))}</w:tr>`;
-      ps2.push(`<w:tbl><w:tblPr><w:tblW w:type="dxa" w:w="${SW}"/>${tblBs}</w:tblPr>${gridS}${rowST}${rowSE}${rowSN}</w:tbl>`);
-
-      // Ensamblar — mismo ZIP que autorización
-      const sectPr2=`<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="851" w:right="1021" w:bottom="851" w:left="1021" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>`;
-      const docXml2=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${ps2.join('')}${sectPr2}</w:body></w:document>`;
-      const rX=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
-      const sX=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
-      const dR=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
-      const cT=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`;
-      const zip2=new JSZip();
-      zip2.file('[Content_Types].xml',cT);zip2.file('_rels/.rels',dR);
-      zip2.file('word/document.xml',docXml2);zip2.file('word/styles.xml',sX);
-      zip2.file('word/_rels/document.xml.rels',rX);
-      const buf2=await zip2.generateAsync({type:'arraybuffer',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-      const blob2=new Blob([buf2],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-      const url2=URL.createObjectURL(blob2);
-      const a2=document.createElement('a');a2.href=url2;
-      a2.download=`${docExpedienteActivo.expediente} \u2014 ${docSeleccionado.nombre.substring(0,50)}.docx`;
-      a2.click();URL.revokeObjectURL(url2);
-      statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
-      setTimeout(()=>statusEl.innerHTML='',6000);
-    }catch(e){statusEl.innerHTML=`<div class="status error">\u2717 Error: ${e.message}</div>`;}
-    return;
-  }
-  statusEl.innerHTML='<div class="status loading"><div class="spinner"></div> Generando .docx\u2026</div>';
-
-  const d=getDatosDoc();
-  const fecha=gv('fecha_acta')||new Date().toISOString().split('T')[0];
-
-  // Capitaliza primera letra de cada palabra
-  function toTC(s){return(s||'').replace(/\w\S*/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());}
-  // Escapa XML
-  function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-  const dt=new Date(fecha+'T12:00:00');
-  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const fechaStr=`En ${toTC(d.municipio)}, a ${dt.getDate()} de ${meses[dt.getMonth()]} de ${dt.getFullYear()}`;
-  const dest=gv('destinatario_ayto')||`ILMO. ALCALDE DEL MUNICIPIO DE ${(d.municipio||'').toUpperCase()}`;
-
-  // ── XML helpers (medidas en twips: 1 cm = 567 twips, 1 pt = 20 twips) ────────
-  function rPrXml(sz,bold,ul){
-    return`<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>${bold?'<w:b/><w:bCs/>':''}<w:color w:val="000000"/><w:kern w:val="0"/><w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${ul?'<w:u w:val="single"/>':''}`;
-  }
-  function run(txt,sz,bold,ul){
-    if(txt===null||txt===undefined)return'';
-    return`<w:r><w:rPr>${rPrXml(sz,bold,ul)}</w:rPr><w:t xml:space="preserve">${xe(String(txt))}</w:t></w:r>`;
-  }
-  // jc: 'both'=justificado  'center'=centrado  ''=izquierda
-  // before/after/line: twips. indent: sangría primera línea en twips
-  function p(runsInput,{jc='both',before=0,after=120,line=240,indent=0,sz=22,bold=false,ul=false}={}){
-    const pPr=[
-      '<w:autoSpaceDE w:val="0"/>','<w:autoSpaceDN w:val="0"/>','<w:adjustRightInd w:val="0"/>',
-      `<w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>`,
-      indent?`<w:ind w:firstLine="${indent}"/>`:'',
-      jc?`<w:jc w:val="${jc}"/>`:'',
-    ].join('');
-    const rPrPara=rPrXml(sz,bold,ul);
-    const r=Array.isArray(runsInput)?runsInput.join(''):runsInput;
-    return`<w:p><w:pPr>${pPr}<w:rPr>${rPrPara}</w:rPr></w:pPr>${r}</w:p>`;
-  }
-  function pEmpty(before=0,after=120){return p('',{before,after});}
-
-  const ps=[];
-
-  // ── Título: negrita, subrayado, centrado, 11pt ─────────────────────────────
-  ps.push(p([
-    run('AUTORIZACIÓN DE REPRESENTACIÓN',22,true,true),
-    `<w:r><w:rPr>${rPrXml(22,true,true)}</w:rPr><w:br/></w:r>`,
-    run('PARA LA GESTIÓN DE LA LICENCIA URBANÍSTICA',22,true,true)
-  ],{jc:'center',before:200,after:400,bold:true,ul:true}));
-  ps.push(pEmpty(0,240));
-
-  // ── Destinatario: 10pt negrita ─────────────────────────────────────────────
-  ps.push(p(run(dest,20,true),{before:0,after:280,sz:20,bold:true}));
-  ps.push(pEmpty(0,160));
-
-  // ── EXPONE: ────────────────────────────────────────────────────────────────
-  ps.push(p(run('EXPONE:',20,true),{before:0,after:120,sz:20,bold:true}));
-
-  // Propietario 1: dirección en minúsculas (toTC), emplazamiento obra en MAYÚSCULAS
-  const p1txt=`${d.promotor1}, actuando en su propio nombre y representación, con domicilio en ${toTC(d.promotor1_dir)}, código postal ${d.promotor1_cp} de ${toTC(d.promotor1_mun)}, provincia de ${toTC(d.promotor1_prov)}, provisto de N.I.F número ${d.promotor1_nif}.`;
-  ps.push(p(run(p1txt,22,false),{before:0,after:120}));
-
-  // Propietario 2 (si existe)
-  if(d.promotor2){
-    const p2mun=toTC(d.promotor2_mun||d.promotor1_mun);
-    const p2prov=toTC(d.promotor2_prov||d.promotor1_prov);
-    const p2dir=toTC(d.promotor2_dir||d.promotor1_dir);
-    const p2cp=d.promotor2_cp||d.promotor1_cp;
-    const p2txt=`${d.promotor2}, actuando en su propio nombre y representación, con domicilio en ${p2dir}, código postal ${p2cp} de ${p2mun}, provincia de ${p2prov}, provisto de N.I.F número ${d.promotor2_nif}.`;
-    ps.push(p(run(p2txt,22,false),{before:0,after:120}));
+      if(cls.includes('firma')){return`\\pard\\sb400 ${inner}\\par\n`;}
+      if(cls.includes('firma-lugar')){return`\\pard\\sb200\\sa200 ${inner}\\par\n`;}
+      if(cls.includes('firma-bloque')){return`\\pard\\sb0\\b ${inner}\\b0\\par\n`;}
+      return inner;
+    }
+    if(tag==='span'){
+      const cls=node.className||'';
+      if(cls.includes('fk'))return`\\b\\fs18 ${inner}\\b0\\fs22 `;
+      if(cls.includes('fv'))return`\\b ${inner}\\b0 `;
+      return inner;
+    }
+    return inner;
   }
 
-  // Actuación: emplazamiento de la obra en MAYÚSCULAS
-  const quieren=d.promotor2?'Que quieren realizar':'Que quiere realizar';
-  const actTxt=`${quieren} la siguiente actuación urbanística: ${d.proyecto.toUpperCase()}, en ${(d.emplazamiento||'').toUpperCase()}, código postal ${d.cp_obra} de ${(d.municipio||'').toUpperCase()}, provincia de ${(d.provincia||'').toUpperCase()}, según ${d.fase} DE ${d.proyecto.toUpperCase()} redactado por ${d.arq}, Arquitecto colegiado número ${d.arq_num} del Colegio Oficial de Arquitectos de Castilla la Mancha.`;
-  ps.push(p(run(actTxt,22,false),{before:0,after:120}));
-  ps.push(pEmpty(0,120));
+  const rtfBody=Array.from(container.childNodes).map(nodeToRtf).join('');
+  const rtf=`{\\rtf1\\ansi\\ansicpg1252\\deff0\n{\\fonttbl{\\f0\\fswiss\\fcharset0 Arial;}}\n{\\colortbl ;\\red0\\green0\\blue0;}\n\\paperw11906\\paperh16838\\margl1800\\margr1800\\margt1440\\margb1440\n\\widowctrl\\f0\\fs22\\cf1\n${rtfBody}\n}`;
 
-  // ── POR LA PRESENTE AUTORIZA: ──────────────────────────────────────────────
-  ps.push(p(run('POR LA PRESENTE AUTORIZA:',20,true),{before:0,after:120,sz:20,bold:true}));
-  ps.push(p(run(`A ${d.arq}, con NIF ${d.arq_nif}, dirección en ${d.arq_dir}, y dirección de correo electrónico ${d.arq_email}`,22,false),{before:0,after:120}));
-  ps.push(p(run('Para que realice y gestione en su nombre la solicitud de las licencias urbanísticas necesarias para realizar la actuación arriba referida.',22,false),{before:0,after:120}));
-
-  // ── Fecha: espacio antes ───────────────────────────────────────────────────
-  ps.push(p(run(fechaStr,22,false),{before:400,after:0,jc:''}));
-
-  // ── Firmas: "Firmado: NOMBRE1" y debajo "        NOMBRE2" alineado ─────────
-  ps.push(p(run(`Firmado: ${(d.promotor1||'').toUpperCase()}`,22,false),{before:1440,after:0,jc:''}));
-  if(d.promotor2){
-    // Run invisible "Firmado: " (color blanco) para alinear el nombre con el de arriba
-    const runInvis=`<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:color w:val="FFFFFF"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr><w:t xml:space="preserve">Firmado: </w:t></w:r>`;
-    const runNombre=run((d.promotor2||'').toUpperCase(),22,false);
-    ps.push(p([runInvis,runNombre],{before:1440,after:0,jc:''}));
-  }
-
-  // ── document.xml ──────────────────────────────────────────────────────────
-  const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-  <w:body>
-${ps.join('\n')}
-    <w:sectPr>
-      <w:pgSz w:w="11906" w:h="16838"/>
-      <w:pgMar w:top="1440" w:right="1800" w:bottom="1440" w:left="1800" w:header="720" w:footer="720" w:gutter="0"/>
-    </w:sectPr>
-  </w:body>
-</w:document>`;
-
-  const relsXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
-  const stylesXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`;
-  const dotRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`;
-  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`;
-  const coreXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:creator>Juan José Ramón Vindel</dc:creator></cp:coreProperties>`;
-  const appXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Gestor de Proyectos</Application></Properties>`;
-
-  try{
-    const zip=new JSZip();
-    zip.file('[Content_Types].xml',contentTypes);
-    zip.file('_rels/.rels',dotRels);
-    zip.file('word/document.xml',documentXml);
-    zip.file('word/styles.xml',stylesXml);
-    zip.file('word/_rels/document.xml.rels',relsXml);
-    zip.file('docProps/app.xml',appXml);
-    zip.file('docProps/core.xml',coreXml);
-    const buf=await zip.generateAsync({type:'arraybuffer',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=`${docExpedienteActivo.expediente} \u2014 ${docSeleccionado.nombre.substring(0,50)}.docx`;
-    a.click();URL.revokeObjectURL(url);
-    statusEl.innerHTML='<div class="status ok">\u2713 Descargado .docx.</div>';
-    setTimeout(()=>statusEl.innerHTML='',6000);
-  }catch(e){
-    statusEl.innerHTML=`<div class="status error">\u2717 Error: ${e.message}</div>`;
-  }
+  const blob=new Blob([rtf],{type:'application/rtf'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`${docExpedienteActivo.expediente} — ${docSeleccionado.nombre.substring(0,50)}.rtf`;
+  a.click();URL.revokeObjectURL(url);
+  statusEl.innerHTML='<div class="status ok">✓ Documento descargado en formato .RTF con formato completo. Ábrelo con Word o LibreOffice.</div>';
+  setTimeout(()=>statusEl.innerHTML='',6000);
 }
+
 // ============ CATASTRO ============
 async function comprobarRefCatastral(ref){
   const aviso=document.getElementById('catastral-proyectos-aviso');
@@ -2237,14 +1860,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('pro-tipo-otro')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
   const saved=localStorage.getItem('make_webhook_url')||'https://hook.eu1.make.com/rmj9ywkfh38kalhvji1kxy9llaqjru4e';
   if(saved){const el=document.getElementById('make-webhook-url');if(el)el.value=saved;}
-  // Calendario opcional para "Licencia de Obras": rellena el texto en DD/MM/AAAA sin impedir escribir un nº de licencia
-  document.getElementById('pro-licencia-cal')?.addEventListener('change',e=>{
-    if(!e.target.value)return;
-    const [y,m,d]=e.target.value.split('-');
-    const campo=document.getElementById('pro-licencia');
-    campo.value=`${d}/${m}/${y}`;
-    campo.dispatchEvent(new Event('input'));
-  });
 });
 
 function getCorrelativo(){const y=new Date().getFullYear();const ex=proyectos.filter(p=>p.anio==y);return ex.reduce((m,p)=>{const n=parseInt(p.numero_seq||0);return n>m?n:m;},1199)+1;}
@@ -2273,9 +1888,6 @@ function copiarDatosGestorMemorias(){
     promotor1:      d.promotor1||d.cliente_nombre_completo||d.cliente_nombre||'',
     promotor1_nif:  d.promotor1_nif||d.cliente_nif||'',
     promotor1_dir:  d.promotor1_dir||d.cliente_direccion||'',
-    promotor2_nombre: d.promotor2_nombre||'',
-    promotor2_nif:  d.promotor2_nif||'',
-    promotor3_nombre: d.promotor3_nombre||'',
     pro_fase:       d.pro_fase||'',
     pem:            d.pem ? parseFloat(d.pem).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) : '',
   });
@@ -2413,10 +2025,6 @@ function generarExpediente(){
     cliente_provincia:document.getElementById('cli-provincia').value.trim(),
     promotor2_nombre:[document.getElementById('cli2-nombre')?.value.trim(),document.getElementById('cli2-apellido1')?.value.trim(),document.getElementById('cli2-apellido2')?.value.trim()].filter(Boolean).join(' '),
     promotor2_nif:document.getElementById('cli2-nif')?.value.trim()||'',
-    promotor2_dir:document.getElementById('cli2-dir')?.value.trim()||'',
-    promotor2_cp:document.getElementById('cli2-cp')?.value.trim()||'',
-    promotor2_mun:document.getElementById('cli2-municipio')?.value.trim()||'',
-    promotor2_prov:document.getElementById('cli2-provincia')?.value.trim()||'',
     promotor3_nombre:[document.getElementById('cli3-nombre')?.value.trim(),document.getElementById('cli3-apellido1')?.value.trim(),document.getElementById('cli3-apellido2')?.value.trim()].filter(Boolean).join(' '),
     promotor3_nif:document.getElementById('cli3-nif')?.value.trim()||'',
     representante_nombre:[document.getElementById('rep-nombre')?.value.trim(),document.getElementById('rep-apellido1')?.value.trim(),document.getElementById('rep-apellido2')?.value.trim()].filter(Boolean).join(' '),
@@ -2554,17 +2162,18 @@ function renderTabla(lista){
     return;
   }
   const rows=lista.map(p=>`<tr>
-    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong> <span style="font-size:10px;color:var(--ink3);">${p.fecha_creacion}</span></td>
+    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">${p.expediente}</strong></td>
+    <td>${p.fecha_creacion}</td>
     <td><span class="badge-tipo" style="background:rgba(45,74,62,.1);color:var(--accent);border:1px solid rgba(45,74,62,.3)">${p.tipo_obra}</span></td>
     <td>${p.cliente_nombre_completo||p.cliente_nombre}</td>
-    <td style="color:var(--ink3);font-size:11px;">${p.municipio||'—'}</td>
+    <td>${p.municipio||'—'}</td>
     <td>
       <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;" onclick="verExpediente('${p.expediente}')">Ver</button>
       <button class="btn btn-secondary" style="padding:4px 10px;font-size:10px;margin-left:4px;" onclick="cargarParaDocumentos('${p.expediente}')">Docs</button>
       <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
     </td>
   </tr>`).join('');
-  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function borrarExpediente(code){
@@ -2627,33 +2236,10 @@ function cargarDatosEnFormulario(p){
     }
   }
 
-  // Promotores adicionales — separar nombre completo en sus campos
-  function separarNombre(nombreCompleto,prefijo){
-    const partes=(nombreCompleto||'').trim().split(/\s+/);
-    const el1=document.getElementById(prefijo+'-nombre');
-    const el2=document.getElementById(prefijo+'-apellido1');
-    const el3=document.getElementById(prefijo+'-apellido2');
-    if(el1)el1.value=partes[0]||'';
-    if(el2)el2.value=partes[1]||'';
-    if(el3)el3.value=partes.slice(2).join(' ')||'';
-  }
-  // Abrir secciones ANTES de rellenar (necesario en móvil)
-  const sec2=document.getElementById('sec-promotor2');
-  const btn2=sec2?.previousElementSibling?.querySelector('button');
-  const sec3=document.getElementById('sec-promotor3');
-  const btn3=sec3?.previousElementSibling?.querySelector('button');
-  if(p.promotor2_nombre&&sec2){sec2.style.display='block';if(btn2)btn2.textContent=btn2.textContent.replace('+ Añadir','− Ocultar');}
-  else if(!p.promotor2_nombre&&sec2){sec2.style.display='none';if(btn2)btn2.textContent=btn2.textContent.replace('− Ocultar','+ Añadir');}
-  if(p.promotor3_nombre&&sec3){sec3.style.display='block';if(btn3)btn3.textContent=btn3.textContent.replace('+ Añadir','− Ocultar');}
-  else if(!p.promotor3_nombre&&sec3){sec3.style.display='none';if(btn3)btn3.textContent=btn3.textContent.replace('− Ocultar','+ Añadir');}
-
-  separarNombre(p.promotor2_nombre,'cli2');
+  // Promotores adicionales (solo se guarda el nombre completo y el NIF)
+  set('cli2-nombre',p.promotor2_nombre);
   set('cli2-nif',p.promotor2_nif);
-  set('cli2-dir',p.promotor2_dir);
-  set('cli2-cp',p.promotor2_cp);
-  set('cli2-municipio',p.promotor2_mun);
-  set('cli2-provincia',p.promotor2_prov);
-  separarNombre(p.promotor3_nombre,'cli3');
+  set('cli3-nombre',p.promotor3_nombre);
   set('cli3-nif',p.promotor3_nif);
 
   // Representante
@@ -2895,16 +2481,7 @@ async function descargarExcelPresupuesto(){
     });
 
     // ── Añadir strings extra (municipio cli, provincias, fase, CPs, email, tel) ──
-    // Leer promotor2/3 de expedienteActual o formulario activo (para móvil)
-    const _p2nom=d.promotor2_nombre||[document.getElementById('cli2-nombre')?.value,document.getElementById('cli2-apellido1')?.value,document.getElementById('cli2-apellido2')?.value].filter(v=>v&&v.trim()).map(v=>v.trim()).join(' ')||'';
-    const _p2nif=d.promotor2_nif||document.getElementById('cli2-nif')?.value||'';
-    const _p2dir=d.promotor2_dir||document.getElementById('cli2-dir')?.value||'';
-    const _p2cp=d.promotor2_cp||document.getElementById('cli2-cp')?.value||'';
-    const _p2mun=d.promotor2_mun||document.getElementById('cli2-municipio')?.value||'';
-    const _p2prov=d.promotor2_prov||document.getElementById('cli2-provincia')?.value||'';
-    const _p3nom=d.promotor3_nombre||[document.getElementById('cli3-nombre')?.value,document.getElementById('cli3-apellido1')?.value,document.getElementById('cli3-apellido2')?.value].filter(v=>v&&v.trim()).map(v=>v.trim()).join(' ')||'';
-    const _p3nif=d.promotor3_nif||document.getElementById('cli3-nif')?.value||'';
-        const extras=[
+    const extras=[
       {key:'munCli',  val:(d.cliente_municipio||'').toUpperCase()},
       {key:'provCli', val:(d.cliente_provincia||'').toUpperCase()},
       {key:'provPro', val:(d.provincia_proyecto||d.provincia||'').toUpperCase()},
@@ -2913,24 +2490,6 @@ async function descargarExcelPresupuesto(){
       {key:'cpPro',   val:(d.cp_proyecto||'').trim()},
       {key:'email',   val:d.cliente_email||''},
       {key:'tel',     val:d.cliente_tel||d.cliente_telefono||''},
-      // Promotor 2
-      {key:'p2nom',   val:(_p2nom||'').toUpperCase()},
-      {key:'p2nif',   val:_p2nif||''},
-      {key:'p2dir',   val:(_p2dir||'').toUpperCase()},
-      {key:'p2cp',    val:_p2cp||''},
-      {key:'p2mun',   val:(_p2mun||'').toUpperCase()},
-      {key:'p2prov',  val:(_p2prov||'').toUpperCase()},
-      {key:'p2email', val:d.promotor2_email||''},
-      {key:'p2tel',   val:d.promotor2_tel||d.promotor2_telefono||''},
-      // Promotor 3
-      {key:'p3nom',   val:(_p3nom||'').toUpperCase()},
-      {key:'p3nif',   val:_p3nif||''},
-      {key:'p3dir',   val:(d.promotor3_dir||'').toUpperCase()},
-      {key:'p3cp',    val:d.promotor3_cp||''},
-      {key:'p3mun',   val:(d.promotor3_mun||'').toUpperCase()},
-      {key:'p3prov',  val:(d.promotor3_prov||'').toUpperCase()},
-      {key:'p3email', val:d.promotor3_email||''},
-      {key:'p3tel',   val:d.promotor3_tel||d.promotor3_telefono||''},
     ];
     const newIdx={};
     let baseIdx=(ss.match(/<si>/g)||[]).length;
@@ -2958,21 +2517,7 @@ async function descargarExcelPresupuesto(){
         return cr+cleanAttrs+' t="s"><v>'+idx+'</v></c>';
       });
     }
-    // cellTxtInsert: igual que cellTxt pero inserta la celda si no existe en la fila
-    function cellTxtInsert(s1,ref,idx,val){
-      if(!val||idx===null||idx===undefined)return s1;
-      // Si la celda ya existe, usar cellTxt normal
-      if(s1.includes('"'+ref+'"'))return cellTxt(s1,ref,idx,val);
-      // Si no existe, insertarla al final de la fila correspondiente
-      const rowNum=ref.replace(/[A-Z]+/,'');
-      const rowPat=new RegExp('(<row r="'+rowNum+'"[^>]*>)(.*?)(</row>)','s');
-      const cellXml=`<c r="${ref}" t="s"><v>${idx}</v></c>`;
-      if(rowPat.test(s1)){
-        return s1.replace(rowPat,(m,open,content,close)=>open+content+cellXml+close);
-      }
-      // Si la fila tampoco existe, insertarla antes de </sheetData>
-      return s1.replace('</sheetData>',`<row r="${rowNum}">${cellXml}</row></sheetData>`);
-    }
+    // cellNum: escribe número, o limpia si vacío
     function cellNum(s1,ref,val){
       const pat=new RegExp('(<c r="'+ref+'")((?:\\s+[^>]*)?)(?:>(?:<f>[^<]*</f>)?(?:<v>[^<]*</v>)?</c>|/>)');
       if(!val&&val!==0){
@@ -3001,30 +2546,6 @@ async function descargarExcelPresupuesto(){
       });
     }
     s1=cellTxt(s1,'B12',newIdx['tel'],d.cliente_tel||d.cliente_telefono||'');
-
-
-    // Promotor 2 — columna C, filas 5-12
-    if(_p2nom.trim()){
-      s1=cellTxtInsert(s1,'C5',newIdx['p2nom'],_p2nom.toUpperCase());
-      s1=cellTxtInsert(s1,'C6',newIdx['p2nif'],_p2nif);
-      s1=cellTxtInsert(s1,'C7',newIdx['p2dir'],_p2dir.toUpperCase());
-      s1=cellTxtInsert(s1,'C8',newIdx['p2cp'],_p2cp);
-      s1=cellTxtInsert(s1,'C9',newIdx['p2mun'],_p2mun.toUpperCase());
-      s1=cellTxtInsert(s1,'C10',newIdx['p2prov'],_p2prov.toUpperCase());
-      s1=cellTxtInsert(s1,'C11',newIdx['p2email'],d.promotor2_email||'');
-      s1=cellTxtInsert(s1,'C12',newIdx['p2tel'],d.promotor2_tel||d.promotor2_telefono||'');
-    }
-    // Promotor 3 — columna D, filas 5-12
-    if(_p3nom.trim()){
-      s1=cellTxtInsert(s1,'D5',newIdx['p3nom'],_p3nom.toUpperCase());
-      s1=cellTxtInsert(s1,'D6',newIdx['p3nif'],_p3nif);
-      s1=cellTxtInsert(s1,'D7',newIdx['p3dir'],(d.promotor3_dir||'').toUpperCase());
-      s1=cellTxtInsert(s1,'D8',newIdx['p3cp'],d.promotor3_cp||'');
-      s1=cellTxtInsert(s1,'D9',newIdx['p3mun'],(d.promotor3_mun||'').toUpperCase());
-      s1=cellTxtInsert(s1,'D10',newIdx['p3prov'],(d.promotor3_prov||'').toUpperCase());
-      s1=cellTxtInsert(s1,'D11',newIdx['p3email'],d.promotor3_email||'');
-      s1=cellTxtInsert(s1,'D12',newIdx['p3tel'],d.promotor3_tel||d.promotor3_telefono||'');
-    }
     s1=cellTxt(s1,'B16',newIdx['fase'],(d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase());
     const pem=parseFloat((d.pem||'0').toString().replace(/[^0-9.,]/g,'').replace(',','.'));
     s1=cellNum(s1,'F16',pem||'');
@@ -3197,50 +2718,21 @@ async function generarExcelDatos(){
     set('A3','FECHA INICIAL',F_LABEL);
     set('B3',d.fecha_iso?toDate(d.fecha_iso):'',F_IN,{numFmt:DATEFMT});
     set('A4','FECHA',F_LABEL); set('B4',{formula:'TODAY()'},F_IN,{numFmt:DATEFMT});
-    // Promotor 1 — columna B, filas 5-12
-    set('A5','PROMOTOR',F_LABEL);        set('B5',d.cliente_nombre_completo||'',F_IN,{numFmt:'@'});
-    set('A6','CIF/NIF',F_LABEL);         set('B6',d.cliente_nif||'',F_IN,{numFmt:'@'});
-    set('A7','DIRECCION',F_LABEL);       set('B7',d.cliente_direccion||'',F_IN,{numFmt:'@'});
-    set('A8','CODIGO POSTAL',F_LABEL);   set('B8',d.cliente_cp||'',F_IN,{numFmt:'@'});
-    set('A9','LOCALIDAD',F_LABEL);       set('B9',d.cliente_municipio||'',F_IN,{numFmt:'@'});
-    set('A10','PROVINCIA',F_LABEL);      set('B10',d.cliente_provincia||'',F_IN,{numFmt:'@'});
-    set('A11','CORREO ELCTRÓNICO',F_LABEL);set('B11',d.cliente_email||'',F_IN,{numFmt:'@'});
-    set('A12','TELÉFONO',F_LABEL);       set('B12',d.cliente_telefono||'',F_IN,{numFmt:'@'});
-    // Promotor 2 — columna C, filas 5-12
-    // Leer de expedienteActual O del formulario si está abierto
-    const p2nom=d.promotor2_nombre||[document.getElementById('cli2-nombre')?.value,document.getElementById('cli2-apellido1')?.value,document.getElementById('cli2-apellido2')?.value].filter(v=>v&&v.trim()).map(v=>v.trim()).join(' ')||'';
-    const p2nif=d.promotor2_nif||document.getElementById('cli2-nif')?.value||'';
-    const p2dir=d.promotor2_dir||document.getElementById('cli2-dir')?.value||'';
-    const p2cp=d.promotor2_cp||document.getElementById('cli2-cp')?.value||'';
-    const p2mun=d.promotor2_mun||document.getElementById('cli2-municipio')?.value||'';
-    const p2prov=d.promotor2_prov||document.getElementById('cli2-provincia')?.value||'';
-    if(p2nom.trim()){
-      set('C5',p2nom,F_IN,{numFmt:'@'});
-      set('C6',p2nif,F_IN,{numFmt:'@'});
-      set('C7',p2dir,F_IN,{numFmt:'@'});
-      set('C8',p2cp,F_IN,{numFmt:'@'});
-      set('C9',p2mun,F_IN,{numFmt:'@'});
-      set('C10',p2prov,F_IN,{numFmt:'@'});
-      set('C11','',F_IN,{numFmt:'@'});
-      set('C12','',F_IN,{numFmt:'@'});
-    }
-    // Promotor 3 — columna D, filas 5-12
-    const p3nom=d.promotor3_nombre||[document.getElementById('cli3-nombre')?.value,document.getElementById('cli3-apellido1')?.value,document.getElementById('cli3-apellido2')?.value].filter(Boolean).join(' ')||'';
-    const p3nif=d.promotor3_nif||document.getElementById('cli3-nif')?.value||'';
-    if(p3nom){
-      set('D5',p3nom,F_IN,{numFmt:'@'});
-      set('D6',p3nif,F_IN,{numFmt:'@'});
-      set('D7','',F_IN,{numFmt:'@'});set('D8','',F_IN,{numFmt:'@'});
-      set('D9','',F_IN,{numFmt:'@'});set('D10','',F_IN,{numFmt:'@'});
-      set('D11','',F_IN,{numFmt:'@'});set('D12','',F_IN,{numFmt:'@'});
-    }
-    set('E5','CONTRATISTA',F_LABEL);     set('F5',d.pro_constructor||'',F_IN,{numFmt:'@'});
-    set('E6','CIF/NIF',F_LABEL);         set('F6',d.pro_constructor_nif||'',F_IN,{numFmt:'@'});
-    set('E7','DIRECCION',F_LABEL);       set('F7','',F_IN,{numFmt:'@'});
-    set('E8','CODIGO POST.',F_LABEL);    set('F8','',F_IN,{numFmt:'@'});
-    set('E9','POBLACION',F_LABEL);       set('F9','',F_IN,{numFmt:'@'});
-    set('E10','PROVINCIA',F_LABEL);      set('F10','',F_IN,{numFmt:'@'});
-    set('E11','REPRESENTANTE',F_LABEL);  set('F11',d.representante_nombre||'',F_IN,{numFmt:'@'});
+    set('A5','PROMOTOR',F_LABEL); set('B5',d.cliente_nombre_completo||'',F_IN,{numFmt:'@'});
+    set('E5','CONTRATISTA',F_LABEL); set('F5',d.pro_constructor||'',F_IN,{numFmt:'@'});
+    set('A6','CIF/NIF',F_LABEL); set('B6',d.cliente_nif||'',F_IN,{numFmt:'@'});
+    set('E6','CIF/NIF',F_LABEL); set('F6',d.pro_constructor_nif||'',F_IN,{numFmt:'@'});
+    set('A7','DIRECCION',F_LABEL); set('B7',d.cliente_direccion||'',F_IN,{numFmt:'@'});
+    set('E7','DIRECCION',F_LABEL); set('F7','',F_IN,{numFmt:'@'});
+    set('A8','CODIGO POSTAL',F_LABEL); set('B8',d.cliente_cp||'',F_IN,{numFmt:'@'});
+    set('E8','CODIGO POST.',F_LABEL); set('F8','',F_IN,{numFmt:'@'});
+    set('A9','LOCALIDAD',F_LABEL); set('B9',d.cliente_municipio||'',F_IN,{numFmt:'@'});
+    set('E9','POBLACION',F_LABEL); set('F9','',F_IN,{numFmt:'@'});
+    set('A10','PROVINCIA',F_LABEL); set('B10',d.cliente_provincia||'',F_IN,{numFmt:'@'});
+    set('E10','PROVINCIA',F_LABEL); set('F10','',F_IN,{numFmt:'@'});
+    set('A11','CORREO ELCTRÓNICO',F_LABEL); set('B11',d.cliente_email||'',F_IN,{numFmt:'@'});
+    set('E11','REPRESENTANTE',F_LABEL); set('F11',d.representante_nombre||'',F_IN,{numFmt:'@'});
+    set('A12','TELÉFONO',F_LABEL); set('B12',d.cliente_telefono||'',F_IN,{numFmt:'@'});
     set('E12','FIRMA PSS OBRA',F_LABEL); set('F12',d.pro_constructor_rep||'',F_IN,{numFmt:'@'});
 
     // ── DATOS PROYECTO ──
@@ -3375,13 +2867,7 @@ function dibujarPortada(doc, d, titulo){
   blockEndY = y + (sitLines.length-1)*3.6;
   y = blockEndY + 3.55;
 
-  const prefix='PROPIEDAD: ';
-  const prefixW=doc.getTextWidth(prefix);
-  const propFirstLine=doc.splitTextToSize(prefix+d.promotor, PORT_MAXW);
-  // Si hay más de una línea, las de continuación llevan sangría = ancho del prefijo
-  const propLines=propFirstLine.length>1
-    ? [propFirstLine[0], ...doc.splitTextToSize(d.promotor, PORT_MAXW-prefixW).slice(1).map(l=>(' ').repeat(Math.round(prefixW/doc.getTextWidth(' ')))+l)]
-    : propFirstLine;
+  const propLines = doc.splitTextToSize('PROPIEDAD: '+d.promotor, PORT_MAXW);
   doc.text(d.fecha, PORT_COL_R, y, {align:'right'});
   doc.text(propLines, PORT_COL_L, y);
   blockEndY = y + (propLines.length-1)*3.6;
@@ -3402,15 +2888,7 @@ function getDatosPortada(){
   if(!d) return null;
   const proyecto  = (d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'').toUpperCase();
   const situacion = ((d.direccion_proyecto||d.direccion_inmueble||'')+(d.municipio_proyecto||d.municipio?', '+(d.municipio_proyecto||d.municipio):'')+(d.provincia?', '+(d.provincia):'CUENCA')).toUpperCase();
-  const p1=(d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
-  const p2=(d.promotor2_nombre||'').toUpperCase();
-  const p3=(d.promotor3_nombre||'').toUpperCase();
-  const promotores=[p1,p2,p3].filter(Boolean);
-  const promotor=promotores.reduce((acc,p,i)=>{
-    if(i===0)return p;
-    const conj=/^[IÍ]/i.test(p)?'E':'Y';
-    return acc+' '+conj+' '+p;
-  },'');
+  const promotor  = (d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
   const fase      = (d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
   const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const ahora=new Date();
@@ -3437,6 +2915,5 @@ function generarPortadasPDF(titulos, sufijoNombre, statusElId){
 
 previewExpediente();
 </script>
-<div id="print-area" style="display:none;"></div>
 </body>
 </html>
