@@ -93,7 +93,7 @@
     <div class="card-title">Datos del expediente</div>
     <div class="grid3">
       <div><label>Expediente</label><input type="text" id="d-expediente" placeholder="1216-2026-CAR"></div>
-      <div><label>Fecha</label><input type="text" id="d-fecha" placeholder="JUNIO 2026"><input type="date" id="d-fecha-cal" style="margin-top:6px;" title="Elegir fecha (rellena Fecha y Día)"></div>
+      <div><label>Fecha</label><input type="text" id="d-fecha" placeholder="JUNIO 2026"></div>
       <div><label>Fase</label><input type="text" id="d-fase" placeholder="PROYECTO BÁSICO Y DE EJECUCIÓN"></div>
     </div>
     <label>Proyecto</label>
@@ -112,9 +112,12 @@
       <div><label>NIF del promotor</label><input type="text" id="d-nif" placeholder="12345678A"></div>
     </div>
     <div class="grid2">
-      <div><label>2º Promotor (si hay) <span style="font-weight:400;color:var(--ink3);">— aparece en firma EBSS bajo la propiedad</span></label><input type="text" id="d-promotor2" placeholder="Dejar vacío si no hay"></div>
-      <div><label>NIF 2º Promotor</label><input type="text" id="d-nif2" placeholder="Dejar vacío si no hay"></div>
-      <div></div>
+      <div><label>2º Promotor (si hay)</label><input type="text" id="d-promotor2" placeholder="Dejar vacío si no hay"></div>
+      <div><label>NIF del 2º Promotor</label><input type="text" id="d-nif2" placeholder="Dejar vacío si no hay"></div>
+    </div>
+    <div class="grid2">
+      <div><label>3er Promotor (si hay)</label><input type="text" id="d-promotor3" placeholder="Dejar vacío si no hay"></div>
+      <div><label>NIF del 3er Promotor</label><input type="text" id="d-nif3" placeholder="Dejar vacío si no hay"></div>
     </div>
     <div class="grid2">
       <div><label>Dirección del promotor</label><input type="text" id="d-dir-promotor" placeholder="Calle Mayor 1, 16001 Cuenca"></div>
@@ -135,7 +138,7 @@
       <div><label>Plantas sobre rasante</label><input type="text" id="d-plantas-sobre" placeholder="Una"></div>
       <div><label>Plantas bajo rasante</label><input type="text" id="d-plantas-bajo" placeholder="Cero"></div>
     </div>
-    <div class="nota">Los datos en MAYÚSCULAS se usan en portada. Los datos del interior (promotor, dirección, municipio, provincia) se escriben con capitalización ortográfica correcta automáticamente. La descripción de la obra en el EBSS se genera automáticamente desde Fase + Proyecto.</div>
+    <div class="nota">Los datos en MAYÚSCULAS se usan en portada. Los datos del interior (promotor, dirección, municipio, provincia) se escriben con capitalización ortográfica correcta automáticamente. La descripción de la obra en el EBSS se genera automáticamente desde Fase + Proyecto. Si hay 2º y/o 3er promotor, aparecen combinados (con "Y") en portada, pliego y párrafo de domicilio del EBSS, y en la firma final (bajo la propiedad).</div>
   </div>
 
   <!-- GENERAR -->
@@ -160,26 +163,21 @@
   <div class="card">
     <div class="card-title">Portadas (PDF)</div>
     <p style="font-size:12px;color:var(--ink3);margin-bottom:10px;">Mismo formato de cabecera que las memorias. Se descargan directamente en PDF.</p>
-    <div style="margin-bottom:8px;">
-      <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')" style="width:100%;">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        PORTADAS DIPUTACIÓN
-      </button>
-    </div>
+    <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')" style="margin-bottom:10px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      PORTADAS DIPUTACIÓN
+    </button>
     <div id="portada-status"></div>
     <hr class="divider">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn btn-secondary btn-sm" onclick="generarPortadasPDF(['MEMORIA'],'portada memoria','portada-status')">↓ Memoria</button>
       <button class="btn btn-secondary btn-sm" onclick="generarPortadasPDF(['FOTOGRAFÍAS'],'portada fotografías','portada-status')">↓ Fotografías</button>
       <button class="btn btn-secondary btn-sm" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">↓ Anexos ahorro energía</button>
-      <button class="btn btn-secondary btn-sm" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
       <button class="btn btn-secondary btn-sm" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
-    </div>
-    <div style="display:flex;gap:6px;align-items:center;">
-      <input type="text" id="portada-titulo-custom" placeholder="Título personalizado…" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;"/>
-      <button class="btn btn-secondary btn-sm" onclick="const t=document.getElementById('portada-titulo-custom').value.trim();if(t)generarPortadasPDF([t],'portada '+t.toLowerCase(),'portada-status');else document.getElementById('portada-status').innerHTML='<span style=color:var(--err)>Escribe un título primero</span>';">↓ Personalizada</button>
+      <button class="btn btn-secondary btn-sm" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
     </div>
   </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -241,6 +239,8 @@ async function pegarDatos(){
     set('d-pem',        d.pem||'');
     set('d-promotor2',  d.promotor2_nombre||d.cliente2_nombre||'');
     set('d-nif2',       d.promotor2_nif||'');
+    set('d-promotor3',  d.promotor3_nombre||'');
+    set('d-nif3',       d.promotor3_nif||'');
     // Fecha: mes actual en mayúsculas
     const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
     set('d-fecha', meses[new Date().getMonth()]+' '+new Date().getFullYear());
@@ -293,11 +293,11 @@ function getSustituciones(d){
     ['CR CAMPILLOS, 5, VALDEMORO SIERRA, CUENCA.', d.situacion+'.'],
     ['CR CAMPILLOS, 5, VALDEMORO SIERRA, CUENCA',  d.situacion],
     ['DICIEMBRE 2025',  d.fecha],
-    ['CARLOS GARRIDO LAGUÍA Y ADELINA BARQUERO ORTEGA', d.promotor],
+    ['CARLOS GARRIDO LAGUÍA Y ADELINA BARQUERO ORTEGA', d.promotorTodos],
     // Pliego — descripción general
     ['Proyecto Básico y de Ejecución de Vivienda Unifamiliar.', 'Proyecto Básico y de Ejecución de '+d.proyectoMin+'.'],
     ['Carretera Campilos, 5, Valdemoro Sierra, Cuenca.', d.situacionFullMin+'.'],
-    ['Carlos Garrido Laguía y Adelina Barquero Ortega.', d.promotorMin+'.'],
+    ['Carlos Garrido Laguía y Adelina Barquero Ortega.', d.promotorTodosMin+'.'],
     // Pliego — tipología y plantas
     ['Aislada.', d.tipologia+'.'],
     ['Una.', d.plantasSobre+'.'],
@@ -307,9 +307,7 @@ function getSustituciones(d){
     ['Cuenca, a 22 de diciembre de 2025', fechaFinal2],
     // EBSS — datos propiedad (municipio del promotor)
     ['Carlos Garrido Laguia con NIF 22528325D y Adelina Barquero Ortega con NIF 22638167A con domicilio en la calle Vicente Roca Cervera, 5-6 y CP. 46950 de Xirivella, Valencia.',
-      d.promotor2
-        ? titleCase(document.getElementById('d-promotor')?.value.trim()||'')+' con NIF '+d.nif+(/^[IÍ]/i.test(d.promotor2)?' e ':' y ')+d.promotor2+(d.nif2?' con NIF '+d.nif2:'')+' con domicilio en '+d.dirPromotor+(munProm?', '+munProm:'')+(provProm?', '+provProm:'')+'.'
-        : titleCase(document.getElementById('d-promotor')?.value.trim()||'')+' con NIF '+d.nif+' con domicilio en '+d.dirPromotor+(munProm?', '+munProm:'')+(provProm?', '+provProm:'')+'.'],
+      d.personasConNif+' con domicilio en '+d.dirPromotor+(munProm?', '+munProm:'')+(provProm?', '+provProm:'')+'.'],
     // EBSS — situación de la finca
     ['carretera Campillos, 5, CP 16316 de Valdemoro Sierra, Cuenca, con referencia catastral 5498004XK0359N0001AM',
       d.situacionFullMin+(d.refcat?', con referencia catastral '+d.refcat:'')],
@@ -320,8 +318,8 @@ function getSustituciones(d){
     ['Setenta y un mil ciento cuarenta y ocho euros con sesenta céntimos (71.148,60 €)', d.pem],
     ['El presupuesto total de Ejecución Material asciende a la cantidad de Setenta y un mil ciento cuarenta y ocho euros con sesenta céntimos (71.148,60 €).','El presupuesto total de Ejecución Material asciende a la cantidad de '+d.pem+'.'],
     // EBSS — firma final (propiedad)
-    ['Fdo. : Carlos Garrido Laguía ', 'Fdo. : '+titleCase(document.getElementById('d-promotor')?.value.trim()||'')+' '],
-    ['Adelina Barquero Ortega', d.promotor2||' '],
+    ['Fdo. : Carlos Garrido Laguía ', 'Fdo. : '+d.promotorMin+' '],
+    ['Adelina Barquero Ortega', d.firmaSegundaLinea||' '],
   ];
   return lista.filter(([b,r])=>b!==r && r);
 }
@@ -381,10 +379,21 @@ function titleCase(str){
   });
 }
 
+// Une una lista de nombres/textos con coma y un nexo final ('Y'/'y') antes del último
+function unirConNexo(lista, nexo){
+  const l=lista.filter(Boolean);
+  if(l.length<=1)return l[0]||'';
+  return l.slice(0,-1).join(', ')+nexo+l[l.length-1];
+}
+
 function getDatos(){
   const v = id=>document.getElementById(id)?.value.trim()||'';
   const proyecto = v('d-proyecto');
   const promotor = v('d-promotor');
+  const promotor2Raw = v('d-promotor2');
+  const promotor3Raw = v('d-promotor3');
+  const nif2 = v('d-nif2');
+  const nif3 = v('d-nif3');
   const situacion = v('d-situacion');
   const situacionFull = v('d-situacion-full')||situacion;
   const municipio = v('d-municipio');
@@ -392,6 +401,21 @@ function getDatos(){
   const fase = v('d-fase');
   // Capitalización correcta para interior de documentos
   const promotorTC = titleCase(promotor);
+  const promotor2TC = titleCase(promotor2Raw);
+  const promotor3TC = titleCase(promotor3Raw);
+  // Todos los promotores combinados: portada (MAYÚSCULAS) y prosa interior (minúsculas)
+  const promotorTodos = unirConNexo([promotor,promotor2Raw,promotor3Raw], ' Y ');
+  const promotorTodosMin = unirConNexo([promotorTC,promotor2TC,promotor3TC], ' y ');
+  // 2ª línea de firma EBSS: promotor2 (+ promotor3 si lo hay)
+  const firmaSegundaLinea = unirConNexo([promotor2TC,promotor3TC], ' y ');
+  // "Nombre con NIF X" para cada promotor presente, unidos con "y" — párrafo de domicilio EBSS
+  const nifPrincipal = v('d-nif');
+  const personaConNif=(nombre,nif)=>nombre?(nombre+(nif?' con NIF '+nif:'')):'';
+  const personasConNif = unirConNexo([
+    personaConNif(promotorTC,nifPrincipal),
+    personaConNif(promotor2TC,nif2),
+    personaConNif(promotor3TC,nif3),
+  ], ' y ');
   const situacionFullTC = titleCase(situacionFull);
   const municipioTC = titleCase(municipio);
   const provinciaTC = titleCase(provincia);
@@ -412,17 +436,6 @@ function getDatos(){
   const municipioPromotorTC = titleCase(v('d-municipio-promotor')||v('d-municipio'));
   const provinciaPromotorTC = titleCase(v('d-provincia-promotor')||v('d-provincia'));
   const dia = v('d-dia') || '22';
-  const promotor2raw = v('d-promotor2');
-  const nif2raw = v('d-nif2')||'';
-  // Construir promotor para portada (MAYÚSCULAS): con Y/E si hay segundo
-  const promotorPortada = promotor2raw
-    ? promotor + (/^[IÍ]/i.test(promotor2raw) ? ' E ' : ' Y ') + promotor2raw
-    : promotor;
-  // Promotor en minúsculas con capitalización: con Y/E si hay segundo
-  const promotor2TC = titleCase(promotor2raw);
-  const promotorPortadaMin = promotor2raw
-    ? promotorTC + (/^[IÍ]/i.test(promotor2raw) ? ' e ' : ' y ') + promotor2TC
-    : promotorTC;
   return {
     expediente:           v('d-expediente'),
     proyecto,
@@ -430,8 +443,8 @@ function getDatos(){
     situacion,
     situacionFull,
     situacionFullMin:     situacionFullTC,
-    promotor:             promotorPortada,
-    promotorMin:          promotorPortadaMin,
+    promotor,
+    promotorMin:          promotorTC,
     municipio:            municipioTC,
     municipioMin:         municipioTC,
     municipioPromotor:    municipioPromotorTC,
@@ -441,7 +454,6 @@ function getDatos(){
     fecha:                v('d-fecha'),
     dia,
     nif:                  v('d-nif'),
-    nif2:                 nif2raw,
     dirPromotor:          dirPromotorTC,
     refcat:               v('d-refcat'),
     pem:                  pemCompleto,
@@ -450,6 +462,13 @@ function getDatos(){
     plantasBajo:          v('d-plantas-bajo')||'Cero',
     descripcion:          descripcionEBSS,
     promotor2:            promotor2TC,
+    promotor2Nif:         nif2,
+    promotor3:            promotor3TC,
+    promotor3Nif:         nif3,
+    promotorTodos,
+    promotorTodosMin,
+    firmaSegundaLinea,
+    personasConNif,
   };
 }
 
@@ -601,12 +620,6 @@ async function procesarDocx(buffer, d){
       xml=xml.replace(/<w:p[ >][\s\S]*?<\/w:p>/g,para=>{
         let p=para;
         for(const [b,r] of sust) p=sustituirEnParrafo(p,b,r);
-        // Añadir sangría de primera línea al párrafo del promotor si no la tiene
-        const txtPara=getParrafoTexto(p);
-        const esPromotor=d.promotorMin&&txtPara.includes(titleCase(document.getElementById('d-promotor')?.value.trim()||''));
-        if(esPromotor&&!p.includes('w:firstLine')&&!p.includes('w:ind')){
-          p=p.replace(/<\/w:pPr>/,'<w:ind w:firstLine="720"/></w:pPr>');
-        }
         return p;
       });
     } else {
@@ -706,12 +719,7 @@ function dibujarPortada(doc, d, titulo){
   blockEndY = y + (sitLines.length-1)*3.6;
   y = blockEndY + 3.55;
 
-  const prefix='PROPIEDAD: ';
-  const prefixW=doc.getTextWidth(prefix);
-  const propFirst=doc.splitTextToSize(prefix+d.promotor, PORT_MAXW);
-  const propLines=propFirst.length>1
-    ?[propFirst[0],...doc.splitTextToSize(d.promotor,PORT_MAXW-prefixW).slice(1).map(l=>(' ').repeat(Math.round(prefixW/doc.getTextWidth(' ')))+l)]
-    :propFirst;
+  const propLines = doc.splitTextToSize('PROPIEDAD: '+d.promotorTodos, PORT_MAXW);
   doc.text(d.fecha, PORT_COL_R, y, {align:'right'});
   doc.text(propLines, PORT_COL_L, y);
   blockEndY = y + (propLines.length-1)*3.6;
@@ -744,15 +752,6 @@ function generarPortadasPDF(titulos, sufijoNombre, statusElId){
 // ── Init ──────────────────────────────────────────────────────────────────────
 const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 document.getElementById('d-fecha').value=meses[new Date().getMonth()]+' '+new Date().getFullYear();
-
-// Calendario: al elegir una fecha, rellena Fecha (mes y año) y Día automáticamente
-document.getElementById('d-fecha-cal').value = new Date().toISOString().slice(0,10);
-document.getElementById('d-fecha-cal').addEventListener('change', e=>{
-  if(!e.target.value) return;
-  const [y,m,d] = e.target.value.split('-').map(Number);
-  document.getElementById('d-fecha').value = meses[m-1]+' '+y;
-  document.getElementById('d-dia').value = String(d);
-});
 </script>
 </body>
 </html>
