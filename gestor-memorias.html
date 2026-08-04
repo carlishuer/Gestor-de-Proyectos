@@ -134,9 +134,29 @@
       <input type="hidden" id="d-municipio-promotor"><input type="hidden" id="d-provincia-promotor"><input type="text" id="d-dia" placeholder="22" style="max-width:80px;">
     </div>
     <div class="grid3">
-      <div><label>Tipología de edificación</label><input type="text" id="d-tipologia" placeholder="Aislada"></div>
-      <div><label>Plantas sobre rasante</label><input type="text" id="d-plantas-sobre" placeholder="Una"></div>
-      <div><label>Plantas bajo rasante</label><input type="text" id="d-plantas-bajo" placeholder="Cero"></div>
+      <div><label>Tipología de edificación</label>
+        <select id="d-tipologia">
+          <option value="Entre Medianeras">Entre Medianeras</option>
+          <option value="Aislada">Aislada</option>
+        </select>
+      </div>
+      <div><label>Plantas sobre rasante</label>
+        <select id="d-plantas-sobre">
+          <option value="Una">Una</option>
+          <option value="Dos">Dos</option>
+          <option value="Tres">Tres</option>
+          <option value="Cuatro">Cuatro</option>
+          <option value="Cinco">Cinco</option>
+          <option value="Seis">Seis</option>
+        </select>
+      </div>
+      <div><label>Plantas bajo rasante</label>
+        <select id="d-plantas-bajo">
+          <option value="Cero">Cero</option>
+          <option value="Una">Una</option>
+          <option value="Dos">Dos</option>
+        </select>
+      </div>
     </div>
     <div class="nota">Los datos en MAYÚSCULAS se usan en portada. Los datos del interior (promotor, dirección, municipio, provincia) se escriben con capitalización ortográfica correcta automáticamente. La descripción de la obra en el EBSS se genera automáticamente desde Fase + Proyecto. Si hay 2º y/o 3er promotor, aparecen combinados (con "Y") en portada, pliego y párrafo de domicilio del EBSS, y en la firma final (bajo la propiedad).</div>
   </div>
