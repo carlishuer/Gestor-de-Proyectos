@@ -193,7 +193,7 @@ textarea{resize:vertical;min-height:70px;}
           <div class="field" style="margin-bottom:14px;">
             <label>Nombre de archivo / carpeta <span class="auto">editable</span></label>
             <input type="text" id="nombre-carpeta" placeholder="Se genera automáticamente"/>
-            <span class="help">Formato: 1234-2026-CUE TIPO DE OBRA CL IGLESIA 10 — el código inicial (1234-2026-CUE) coincide con "Nº de Expediente" y se usa como prefijo de las subcarpetas (PLANOS, FOTOGRAFÍAS, PDF...) y de los documentos.</span>
+            <span class="help">Formato: 1234-2026-CUE NOMBRE DE PROYECTO CL IGLESIA 10 — el código inicial (1234-2026-CUE) coincide con "Nº de Expediente" y se usa como prefijo de las subcarpetas (PLANOS, FOTOGRAFÍAS, PDF...) y de los documentos.</span>
           </div>
           <div class="actions">
             <button class="btn btn-primary" onclick="abrirFichaCatastro()">
@@ -498,7 +498,7 @@ textarea{resize:vertical;min-height:70px;}
             <button class="btn btn-secondary" onclick="irADocumentos()">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Generar documentos
             </button>
-            <button class="btn btn-secondary" onclick="descargarExcelPresupuesto()" title="Descarga el PRESUPUESTO_DE_REFERENCIA_v26 con los datos del expediente ya rellenos">
+            <button class="btn btn-secondary" onclick="descargarExcelPresupuesto()" title="Descarga el PRESUPUESTO_DE_REFERENCIA_v27 con los datos del expediente ya rellenos">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg>&#8595; Excel Presupuesto
             </button>
             <button class="btn btn-ghost" onclick="resetearPlantillaExcel()" title="Cambiar plantilla Excel cacheada" style="font-size:10px;padding:4px 8px;opacity:.6;">↺ Cambiar plantilla</button>
@@ -1737,16 +1737,16 @@ function abrirFichaCatastro(){const ref=document.getElementById('ref-catastral')
 
 function actualizarNombreCarpeta(){
   const{code}=previewExpediente();
-  const ts=document.getElementById('pro-tipo')?.value||'';const to=document.getElementById('pro-tipo-otro')?.value||'';
-  const tipo=((ts==='OTRO'&&to)?to:ts).toUpperCase()||'TIPO DE OBRA';
+  const np=(document.getElementById('pro-nombre-proyecto')?.value||'').toUpperCase()||'NOMBRE DE PROYECTO';
   const dir=(datosCatastro?.direccion||document.getElementById('pro-dir-inmueble')?.value||'').toUpperCase();
   const sc=dir.match(/^(.*?)\s+\d{5}/);const dl=sc?sc[1].trim():dir.replace(/,/g,'').replace(/\s+/g,' ').trim();
-  document.getElementById('nombre-carpeta').value=`${code} ${tipo} ${dl}`;
+  document.getElementById('nombre-carpeta').value=`${code} ${np} ${dl}`;
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('cli-nombre')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
   document.getElementById('pro-municipio')?.addEventListener('input',()=>{previewExpediente();actualizarNombreCarpeta();});
+  document.getElementById('pro-nombre-proyecto')?.addEventListener('input',()=>{actualizarNombreCarpeta();});
   const ts=document.getElementById('pro-tipo');
   if(ts)ts.addEventListener('change',()=>{document.getElementById('pro-tipo-otro').style.display=ts.value==='OTRO'?'block':'none';if(datosCatastro)actualizarNombreCarpeta();});
   document.getElementById('pro-tipo-otro')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
@@ -1755,6 +1755,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function getCorrelativo(){const y=new Date().getFullYear();const ex=proyectos.filter(p=>p.anio==y);return ex.reduce((m,p)=>{const n=parseInt(p.numero_seq||0);return n>m?n:m;},1199)+1;}
+function nombresPromotores(d){
+  const arr=[d.cliente_nombre_completo||d.cliente_nombre,d.promotor2_nombre,d.promotor3_nombre].filter(Boolean);
+  if(arr.length<=1)return arr[0]||'';
+  return arr.slice(0,-1).join(', ')+' Y '+arr[arr.length-1];
+}
 function municipioASufijo(m){if(!m)return'CUE';return m.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').substring(0,3).trim();}
 function copiarDatosGestorMemorias(){
   const statusEl=document.getElementById('memorias-status');
@@ -1780,6 +1785,10 @@ function copiarDatosGestorMemorias(){
     promotor1:      d.promotor1||d.cliente_nombre_completo||d.cliente_nombre||'',
     promotor1_nif:  d.promotor1_nif||d.cliente_nif||'',
     promotor1_dir:  d.promotor1_dir||d.cliente_direccion||'',
+    promotor2_nombre: d.promotor2_nombre||'',
+    promotor2_nif:     d.promotor2_nif||'',
+    promotor3_nombre: d.promotor3_nombre||'',
+    promotor3_nif:     d.promotor3_nif||'',
     pro_fase:       d.pro_fase||'',
     pem:            d.pem ? parseFloat(d.pem).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) : '',
   });
@@ -1797,7 +1806,7 @@ function copiarMensajeMemorias(){
   const d=expedienteActual;
   const proyecto=(d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'').toUpperCase();
   const situacion=((d.direccion_proyecto||d.direccion_inmueble||'')+', '+(d.municipio_proyecto||d.municipio||'')+', '+(d.provincia_proyecto||d.provincia||'CUENCA')).toUpperCase();
-  const promotor=(d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
+  const promotor=nombresPromotores(d).toUpperCase();
   const fase=(d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
   const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const ahora=new Date();
@@ -2065,7 +2074,7 @@ function renderTabla(lista){
       <button class="btn" style="padding:4px 8px;font-size:10px;margin-left:4px;background:#f5e6e6;color:#a52020;border:1px solid #e8c8c8;" onclick="borrarExpediente('${p.expediente}')" title="Borrar expediente"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
     </td>
   </tr>`).join('');
-  container.innerHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  container.innerHTML=`<table class="project-list"><thead><tr><th>Expediente</th><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Municipio</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function borrarExpediente(code){
@@ -2277,7 +2286,7 @@ function buildSubcarpetas(code){return SUBCARPETAS_BASE.map(c=>`${code} ${c}`);}
 // ── DESCARGAR EXCEL PRESUPUESTO CON DATOS DEL EXPEDIENTE ────────────────────
 // La plantilla se carga una vez desde disco y se cachea en IndexedDB
 
-const IDB_NAME='gestor_estudio',IDB_STORE='plantillas',IDB_KEY='presupuesto_v26';
+const IDB_NAME='gestor_estudio',IDB_STORE='plantillas',IDB_KEY='presupuesto_v27';
 
 function abrirIDB(){
   return new Promise((res,rej)=>{
@@ -2382,6 +2391,10 @@ async function descargarExcelPresupuesto(){
       {key:'cpPro',   val:(d.cp_proyecto||'').trim()},
       {key:'email',   val:d.cliente_email||''},
       {key:'tel',     val:d.cliente_tel||d.cliente_telefono||''},
+      {key:'prom2Nombre', val:(d.promotor2_nombre||'').toUpperCase()},
+      {key:'prom2Nif',    val:d.promotor2_nif||''},
+      {key:'prom3Nombre', val:(d.promotor3_nombre||'').toUpperCase()},
+      {key:'prom3Nif',    val:d.promotor3_nif||''},
     ];
     const newIdx={};
     let baseIdx=(ss.match(/<si>/g)||[]).length;
@@ -2447,6 +2460,10 @@ async function descargarExcelPresupuesto(){
     s1=cellTxt(s1,'B19',newIdx['cpPro'],d.cp_proyecto||'');
     s1=cellTxt(s1,'B20',642,(d.municipio_proyecto||d.municipio||'').toUpperCase());
     s1=cellTxt(s1,'B21',newIdx['provPro'],(d.provincia_proyecto||d.provincia||'').toUpperCase());
+    s1=cellTxt(s1,'B13',newIdx['prom2Nombre'],(d.promotor2_nombre||'').toUpperCase());
+    s1=cellTxt(s1,'F13',newIdx['prom2Nif'],d.promotor2_nif||'');
+    s1=cellTxt(s1,'B14',newIdx['prom3Nombre'],(d.promotor3_nombre||'').toUpperCase());
+    s1=cellTxt(s1,'F14',newIdx['prom3Nif'],d.promotor3_nif||'');
 
     zip.file('xl/worksheets/sheet1.xml',s1);
 
@@ -2780,7 +2797,7 @@ function getDatosPortada(){
   if(!d) return null;
   const proyecto  = (d.pro_nombre_proyecto||d.descripcion||d.tipo_obra||'').toUpperCase();
   const situacion = ((d.direccion_proyecto||d.direccion_inmueble||'')+(d.municipio_proyecto||d.municipio?', '+(d.municipio_proyecto||d.municipio):'')+(d.provincia?', '+(d.provincia):'CUENCA')).toUpperCase();
-  const promotor  = (d.cliente_nombre_completo||d.cliente_nombre||'').toUpperCase();
+  const promotor  = nombresPromotores(d).toUpperCase();
   const fase      = (d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase();
   const meses=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const ahora=new Date();
