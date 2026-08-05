@@ -1758,7 +1758,11 @@ function getCorrelativo(){const y=new Date().getFullYear();const ex=proyectos.fi
 function nombresPromotores(d){
   const arr=[d.cliente_nombre_completo||d.cliente_nombre,d.promotor2_nombre,d.promotor3_nombre].filter(Boolean);
   if(arr.length<=1)return arr[0]||'';
-  return arr.slice(0,-1).join(', ')+' Y '+arr[arr.length-1];
+  const ultimo=arr[arr.length-1];
+  const s=(ultimo||'').trim();
+  const esI=/^h?i/i.test(s) && !/^hie/i.test(s) && !/^hia/i.test(s);
+  const nexo=esI?' E ':' Y ';
+  return arr.slice(0,-1).join(', ')+nexo+ultimo;
 }
 function municipioASufijo(m){if(!m)return'CUE';return m.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').substring(0,3).trim();}
 function copiarDatosGestorMemorias(){
@@ -1924,10 +1928,36 @@ function generarExpediente(){
     cliente_cp:document.getElementById('cli-cp').value.trim(),
     cliente_municipio:document.getElementById('cli-municipio').value.trim(),
     cliente_provincia:document.getElementById('cli-provincia').value.trim(),
-    promotor2_nombre:[document.getElementById('cli2-nombre')?.value.trim(),document.getElementById('cli2-apellido1')?.value.trim(),document.getElementById('cli2-apellido2')?.value.trim()].filter(Boolean).join(' '),
+    promotor2_tipo_persona:tipoPersona['cli2']||'fisica',
+    promotor2_razon:document.getElementById('cli2-razon')?.value.trim()||'',
+    promotor2_nombre_pila:document.getElementById('cli2-nombre')?.value.trim()||'',
+    promotor2_apellido1:document.getElementById('cli2-apellido1')?.value.trim()||'',
+    promotor2_apellido2:document.getElementById('cli2-apellido2')?.value.trim()||'',
+    promotor2_nombre:tipoPersona['cli2']==='juridica'
+      ?(document.getElementById('cli2-razon')?.value.trim()||document.getElementById('cli2-nombre')?.value.trim()||'')
+      :[document.getElementById('cli2-nombre')?.value.trim(),document.getElementById('cli2-apellido1')?.value.trim(),document.getElementById('cli2-apellido2')?.value.trim()].filter(Boolean).join(' '),
     promotor2_nif:document.getElementById('cli2-nif')?.value.trim()||'',
-    promotor3_nombre:[document.getElementById('cli3-nombre')?.value.trim(),document.getElementById('cli3-apellido1')?.value.trim(),document.getElementById('cli3-apellido2')?.value.trim()].filter(Boolean).join(' '),
+    promotor2_tel:document.getElementById('cli2-tel')?.value.trim()||'',
+    promotor2_email:document.getElementById('cli2-email')?.value.trim()||'',
+    promotor2_dir:document.getElementById('cli2-dir')?.value.trim()||'',
+    promotor2_cp:document.getElementById('cli2-cp')?.value.trim()||'',
+    promotor2_municipio:document.getElementById('cli2-municipio')?.value.trim()||'',
+    promotor2_provincia:document.getElementById('cli2-provincia')?.value.trim()||'',
+    promotor3_tipo_persona:tipoPersona['cli3']||'fisica',
+    promotor3_razon:document.getElementById('cli3-razon')?.value.trim()||'',
+    promotor3_nombre_pila:document.getElementById('cli3-nombre')?.value.trim()||'',
+    promotor3_apellido1:document.getElementById('cli3-apellido1')?.value.trim()||'',
+    promotor3_apellido2:document.getElementById('cli3-apellido2')?.value.trim()||'',
+    promotor3_nombre:tipoPersona['cli3']==='juridica'
+      ?(document.getElementById('cli3-razon')?.value.trim()||document.getElementById('cli3-nombre')?.value.trim()||'')
+      :[document.getElementById('cli3-nombre')?.value.trim(),document.getElementById('cli3-apellido1')?.value.trim(),document.getElementById('cli3-apellido2')?.value.trim()].filter(Boolean).join(' '),
     promotor3_nif:document.getElementById('cli3-nif')?.value.trim()||'',
+    promotor3_tel:document.getElementById('cli3-tel')?.value.trim()||'',
+    promotor3_email:document.getElementById('cli3-email')?.value.trim()||'',
+    promotor3_dir:document.getElementById('cli3-dir')?.value.trim()||'',
+    promotor3_cp:document.getElementById('cli3-cp')?.value.trim()||'',
+    promotor3_municipio:document.getElementById('cli3-municipio')?.value.trim()||'',
+    promotor3_provincia:document.getElementById('cli3-provincia')?.value.trim()||'',
     representante_nombre:[document.getElementById('rep-nombre')?.value.trim(),document.getElementById('rep-apellido1')?.value.trim(),document.getElementById('rep-apellido2')?.value.trim()].filter(Boolean).join(' '),
     representante_nif:document.getElementById('rep-nif')?.value.trim()||'',
     representante_cargo:document.getElementById('rep-cargo')?.value.trim()||'',
@@ -1982,6 +2012,7 @@ function copiarJSON(){navigator.clipboard.writeText(JSON.stringify(expedienteAct
 function copiarVariables(){navigator.clipboard.writeText(generarVariablesMemoria(expedienteActual)).then(()=>alert('Variables copiadas.'));}
 
 function guardarEnListado(){
+  generarExpediente(); // vuelca los valores actuales del formulario en expedienteActual antes de guardar
   if(!expedienteActual)return;
   const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
   if(idx>=0)proyectos[idx]=expedienteActual;else proyectos.unshift(expedienteActual);
@@ -2137,11 +2168,58 @@ function cargarDatosEnFormulario(p){
     }
   }
 
-  // Promotores adicionales (solo se guarda el nombre completo y el NIF)
-  set('cli2-nombre',p.promotor2_nombre);
+  // Promotor 2
+  if(p.promotor2_tipo_persona)setTipoPersona('cli2',2,p.promotor2_tipo_persona);
+  if(p.promotor2_nombre_pila!==undefined||p.promotor2_apellido1!==undefined){
+    set('cli2-nombre',p.promotor2_nombre_pila);
+    set('cli2-apellido1',p.promotor2_apellido1);
+    set('cli2-apellido2',p.promotor2_apellido2);
+  }else{
+    // Compatibilidad con expedientes guardados antes de este cambio (solo tenían el nombre completo)
+    set('cli2-nombre',p.promotor2_nombre);
+  }
+  if(p.promotor2_tipo_persona==='juridica')set('cli2-razon',p.promotor2_razon||'');
   set('cli2-nif',p.promotor2_nif);
-  set('cli3-nombre',p.promotor3_nombre);
+  set('cli2-tel',p.promotor2_tel);
+  set('cli2-email',p.promotor2_email);
+  set('cli2-dir',p.promotor2_dir);
+  set('cli2-cp',p.promotor2_cp);
+  set('cli2-municipio',p.promotor2_municipio);
+  set('cli2-provincia',p.promotor2_provincia);
+  if(p.promotor2_nombre_pila||p.promotor2_nombre){
+    const secc2=document.getElementById('sec-promotor2');
+    if(secc2&&secc2.style.display==='none'){
+      secc2.style.display='block';
+      const btn2=secc2.previousElementSibling?.querySelector('button');
+      if(btn2)btn2.textContent=btn2.textContent.replace('+ Añadir','− Ocultar');
+    }
+  }
+
+  // Promotor 3
+  if(p.promotor3_tipo_persona)setTipoPersona('cli3',3,p.promotor3_tipo_persona);
+  if(p.promotor3_nombre_pila!==undefined||p.promotor3_apellido1!==undefined){
+    set('cli3-nombre',p.promotor3_nombre_pila);
+    set('cli3-apellido1',p.promotor3_apellido1);
+    set('cli3-apellido2',p.promotor3_apellido2);
+  }else{
+    set('cli3-nombre',p.promotor3_nombre);
+  }
+  if(p.promotor3_tipo_persona==='juridica')set('cli3-razon',p.promotor3_razon||'');
   set('cli3-nif',p.promotor3_nif);
+  set('cli3-tel',p.promotor3_tel);
+  set('cli3-email',p.promotor3_email);
+  set('cli3-dir',p.promotor3_dir);
+  set('cli3-cp',p.promotor3_cp);
+  set('cli3-municipio',p.promotor3_municipio);
+  set('cli3-provincia',p.promotor3_provincia);
+  if(p.promotor3_nombre_pila||p.promotor3_nombre){
+    const secc3=document.getElementById('sec-promotor3');
+    if(secc3&&secc3.style.display==='none'){
+      secc3.style.display='block';
+      const btn3=secc3.previousElementSibling?.querySelector('button');
+      if(btn3)btn3.textContent=btn3.textContent.replace('+ Añadir','− Ocultar');
+    }
+  }
 
   // Representante
   set('rep-nombre',p.representante_nombre);
@@ -2750,12 +2828,12 @@ const TITULOS_DIPUTACION = [
 
 // Geometría medida píxel a píxel sobre 1216-2026-CAR_modelo_portada.docx (modelo real
 // de portada EBSS). Idéntica a la usada en el Gestor de Memorias.
-const PORT_ML = 27.5;                 // margen izquierdo de página (1560 twips)
-const PORT_MR = 17.5;                 // margen derecho de página (991 twips)
-const PORT_COL_L = PORT_ML + 60.0;    // columna de texto (tab/indent a 3402-3544 twips)
-const PORT_COL_R = PORT_ML + 52.46;   // tabulador derecho (2977 twips): fecha y firma
+const PORT_ML = 13.0;                 // borde izquierdo de las líneas (desplazado, igual que en los .docx)
+const PORT_MR = 20.0;                 // margen derecho real de página (1133 twips)
+const PORT_COL_L = 73.0;              // columna de texto: título/situación/propiedad
+const PORT_COL_R = 66.0;              // columna derecha: fecha y firma del arquitecto comparten este tabulador
 const PORT_MAXW  = 210 - PORT_COL_L - PORT_MR;
-const PORT_Y_START = 184.5;           // posición vertical fija del bloque (igual en todas)
+const PORT_Y_START = 198;             // posición vertical fija del bloque (igual en todas)
 
 function dibujarPortada(doc, d, titulo){
   let y = PORT_Y_START;
