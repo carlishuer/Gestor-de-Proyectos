@@ -554,13 +554,13 @@ textarea{resize:vertical;min-height:70px;}
           <div id="doc-preview-container" class="doc-preview"></div>
           <hr class="divider">
           <div class="actions" style="margin-top:4px;">
-            <button class="btn btn-word" onclick="descargarRTF()">
+            <button id="btn-rtf" class="btn btn-word" onclick="descargarRTF()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar .RTF (Word)
             </button>
             <button class="btn btn-pdf" onclick="imprimirPDF()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir / PDF
             </button>
-            <button class="btn btn-secondary" onclick="copiarTextoDoc()">Copiar texto</button>
+            <button id="btn-copiar-texto" class="btn btn-secondary" onclick="copiarTextoDoc()">Copiar texto</button>
             <button id="btn-oficio-word" class="btn btn-word" style="display:none;" onclick="descargarOficioWordIdentico()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar .docx idéntico
             </button>
@@ -942,6 +942,39 @@ function flashEl(el){el.style.background='var(--ok-pale)';el.style.borderColor='
 
 let proyectos=JSON.parse(localStorage.getItem('proyectos_estudio')||'[]');
 let datosCatastro=null,expedienteActual=null,docExpedienteActivo=null,docSeleccionado=null;
+
+// ── SINCRONIZACIÓN DEL LISTADO ENTRE ORDENADORES (vía Make.com) ─────────────
+const MAKE_SYNC_URL='https://hook.eu1.make.com/rmj9ywkfh38kalhvji1kxy9llaqjru4e';
+function guardarProyectos(){
+  localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));
+  fetch(MAKE_SYNC_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'guardar',listado:JSON.stringify(proyectos)})}).catch(()=>{});
+}
+async function cargarListadoRemoto(){
+  try{
+    const res=await fetch(MAKE_SYNC_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'cargar'})});
+    if(!res.ok)return;
+    const txt=(await res.text()).trim();
+    if(!txt)return;
+    let remoto;
+    try{remoto=JSON.parse(txt);}catch(e){
+      try{remoto=JSON.parse(atob(txt));}catch(e2){return;}
+    }
+    if(!Array.isArray(remoto)||!remoto.length)return;
+    let cambios=false;
+    remoto.forEach(d=>{
+      if(!d||!d.expediente)return;
+      const idx=proyectos.findIndex(p=>p.expediente===d.expediente);
+      if(idx<0){proyectos.push(d);cambios=true;}
+      else if(JSON.stringify(proyectos[idx])!==JSON.stringify(d)){proyectos[idx]=d;cambios=true;}
+    });
+    if(cambios){
+      proyectos.sort((a,b)=>parseInt(b.numero_seq||0)-parseInt(a.numero_seq||0));
+      localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));
+      if(typeof actualizarFiltroAnios==='function')actualizarFiltroAnios();
+      if(typeof renderListado==='function')renderListado();
+    }
+  }catch(e){/* sin conexión: se sigue trabajando con la copia local */}
+}
 
 function showTab(name,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1601,8 +1634,13 @@ function generarTextoDoc(doc,d){
 function actualizarPreview(){
   if(!docSeleccionado)return;
   document.getElementById('doc-preview-container').innerHTML=generarTextoDoc(docSeleccionado,getDatosDoc());
+  const esOficio=docSeleccionado.id==='oficio-direccion-obra';
   const btnW=document.getElementById('btn-oficio-word');
-  if(btnW)btnW.style.display=(docSeleccionado.id==='oficio-direccion-obra')?'':'none';
+  if(btnW)btnW.style.display='none';
+  const btnRtf=document.getElementById('btn-rtf');
+  if(btnRtf)btnRtf.style.display=esOficio?'none':'';
+  const btnCopiar=document.getElementById('btn-copiar-texto');
+  if(btnCopiar)btnCopiar.style.display=esOficio?'none':'';
 }
 
 // Separa una dirección tipo "CALLE X, 19" o "CALLE X 19" en {calle, numero}.
@@ -1903,6 +1941,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('pro-tipo-otro')?.addEventListener('input',()=>{if(datosCatastro)actualizarNombreCarpeta();});
   const saved=localStorage.getItem('make_webhook_url')||'https://hook.eu1.make.com/rmj9ywkfh38kalhvji1kxy9llaqjru4e';
   if(saved){const el=document.getElementById('make-webhook-url');if(el)el.value=saved;}
+  cargarListadoRemoto();
 });
 
 function getCorrelativo(){const y=new Date().getFullYear();const ex=proyectos.filter(p=>p.anio==y);return ex.reduce((m,p)=>{const n=parseInt(p.numero_seq||0);return n>m?n:m;},1199)+1;}
@@ -2169,7 +2208,7 @@ function guardarEnListado(){
   if(!expedienteActual)return;
   const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
   if(idx>=0)proyectos[idx]=expedienteActual;else proyectos.unshift(expedienteActual);
-  localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));
+  guardarProyectos();
   alert(`Expediente ${expedienteActual.expediente} guardado.`);
 }
 
@@ -2264,7 +2303,7 @@ function renderTabla(lista){
 function borrarExpediente(code){
   if(!confirm(`¿Eliminar el expediente ${code}?\n\nEsta acción no se puede deshacer. La carpeta de Drive NO se borra.`))return;
   proyectos=proyectos.filter(p=>p.expediente!==code);
-  localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));
+  guardarProyectos();
   if(expedienteActual&&expedienteActual.expediente===code)expedienteActual=null;
   actualizarFiltroAnios();renderListado();
 }
@@ -2484,7 +2523,7 @@ function importarJSON(input){
         if(idx>=0)proyectos[idx]=d;else proyectos.unshift(d);
       });
       proyectos.sort((a,b)=>parseInt(b.numero_seq||0)-parseInt(a.numero_seq||0));
-      localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));
+      guardarProyectos();
       actualizarFiltroAnios();renderListado();
       alert(`✓ Importados ${nuevos.length} expedientes correctamente.`);
     }catch(err){
@@ -2510,7 +2549,7 @@ function limpiarFormulario(){
   datosCatastro=null;expedienteActual=null;activarStep(1);
 }
 function nuevoExpediente(){limpiarFormulario();window.scrollTo({top:0,behavior:'smooth'});}
-function limpiarListado(){if(!confirm('¿Eliminar todos los expedientes?'))return;proyectos=[];localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));renderListado();}
+function limpiarListado(){if(!confirm('¿Eliminar todos los expedientes?'))return;proyectos=[];guardarProyectos();renderListado();}
 const SUBCARPETAS_BASE=['DATOS Y TEXTO','FOTOGRAFIAS','PLANOS','PRESUPUESTO','PDF','CEE','FINAL DE OBRA','GESTION'];
 function buildSubcarpetas(code){return SUBCARPETAS_BASE.map(c=>`${code} ${c}`);}
 
@@ -2785,7 +2824,7 @@ async function enviarAMake(){
       if(res?.presupuesto_id)   expedienteActual.drive_presupuesto_id=res.presupuesto_id;
       if(res?.excel_id)         expedienteActual.drive_excel_id=res.excel_id;
       const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
-      if(idx>=0){proyectos[idx]=expedienteActual;localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));}
+      if(idx>=0){proyectos[idx]=expedienteActual;guardarProyectos();}
       const u=res?.folder_url||res?.url||'';
       document.getElementById('btn-make-reset').style.display='';
       statusEl.innerHTML=`<div class="status ok">✓ Carpeta creada en Drive.${u?` <a href="${u}" target="_blank" style="color:var(--ok);text-decoration:underline;">Abrir en Drive →</a>`:''} Pulsa "↺ Reenviar" solo si necesitas borrar y recrear la carpeta.</div>`;
@@ -2800,7 +2839,7 @@ function resetarDriveEnviado(){
   if(!confirm(`¿Confirmas que la carpeta de Drive del expediente ${expedienteActual.expediente} ya no existe y quieres poder volvera a crearla?`))return;
   expedienteActual.drive_enviado=false;
   const idx=proyectos.findIndex(p=>p.expediente===expedienteActual.expediente);
-  if(idx>=0){proyectos[idx]=expedienteActual;localStorage.setItem('proyectos_estudio',JSON.stringify(proyectos));}
+  if(idx>=0){proyectos[idx]=expedienteActual;guardarProyectos();}
   const btn=document.getElementById('btn-make');
   btn.innerHTML='<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Enviar a Make → Drive';
   btn.style.opacity='';
