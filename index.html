@@ -630,9 +630,11 @@ textarea{resize:vertical;min-height:70px;}
 <script>
 const CATALOGO=[
   {id:'cert-fin-obra-edif',cat:'Certificados',nombre:'Certificado Final de Obra — Edificación',desc:'Certifica que la edificación ha quedado terminada bajo dirección del arquitecto.',vars:['fecha_acta','tipo_obra_cert']},
+  {id:'cert-fin-obra-fotos',cat:'Certificados',nombre:'Certificado Final de Obra - Fotografias del Edificio',desc:'Certificado con titulo y ficha tecnica seguido de 1 a 4 fotografias del edificio.',vars:['fotos_cert']},
   {id:'cert-fin-obra-demol',cat:'Certificados',nombre:'Certificado Final de Obra — Demolición',desc:'Certifica que la demolición ha quedado ejecutada conforme al proyecto.',vars:['fecha_acta']},
   {id:'cert-resistencia-cub',cat:'Certificados',nombre:'Certificado Resistencia de Cubierta (placas solares)',desc:'Certifica que la cubierta soporta la instalación de placas fotovoltaicas.',vars:['fecha_acta','destinatario_cert']},
   {id:'cert-libro-ordenes',cat:'Certificados',nombre:'Comunicado Libro de Órdenes (verbal)',desc:'Informa al Colegio que las órdenes se comunicaron verbalmente.',vars:['fecha_acta']},
+  {id:'oficio-direccion-obra',cat:'Comunicaciones y Oficios',nombre:'Oficio Comunicación Dirección de Obra (COACM)',desc:'Comunica al Colegio de Arquitectos que se ha asumido la dirección facultativa de la obra.',vars:['fecha_acta']},
   {id:'acta-replanteo',cat:'Actas',nombre:'Acta de Comprobación del Replanteo',desc:'Constata la comprobación del replanteo por los agentes de la obra.',vars:['fecha_acta','hora_acta']},
   {id:'acta-recepcion',cat:'Actas',nombre:'Acta de Recepción de Obra',desc:'Formaliza la recepción de la obra por la propiedad.',vars:['fecha_acta','hora_acta','fecha_fin_garantia']},
   {id:'acta-pavimento',cat:'Actas',nombre:'Acta Comprobación Pavimento y Mobiliario',desc:'Documenta el estado del pavimento y mobiliario urbano antes del inicio.',vars:['fecha_acta','hora_acta']},
@@ -660,6 +662,7 @@ const VARS_CFG={
   fecha_acta:{label:'Fecha del documento',type:'date',default:()=>new Date().toISOString().split('T')[0]},
   hora_acta:{label:'Hora',type:'text',placeholder:'Ej: 09:00'},
   tipo_obra_cert:{label:'Tipo de obra (para certificado)',type:'select',opciones:['Edificación','Demolición','Reforma','Rehabilitación','Ampliación']},
+  fotos_cert:{label:'Fotografías del edificio (1-4 fotos)',type:'photos'},
   destinatario_cert:{label:'Destinatario del certificado',type:'text',placeholder:'Ej: Ayuntamiento de Landete'},
   destinatario_ayto:{label:'Destinatario (alcalde/municipio)',type:'text',placeholder:'Ej: ILMO. ALCALDE DEL MUNICIPIO DE LANDETE'},
   destinatario_decl:{label:'Destinatario de la declaración',type:'text',placeholder:'Ej: GERENTE DEL CONSORCIO CIUDAD DE CUENCA'},
@@ -1050,14 +1053,92 @@ function renderVariablesExtra(doc){
     if(c.type==='date'){html+=`<input type="date" id="docvar-${vId}" value="${c.default?c.default():''}" onchange="actualizarPreview()"/>`;}
     else if(c.type==='select'){html+=`<select id="docvar-${vId}" onchange="actualizarPreview()">`;c.opciones.forEach(o=>html+=`<option value="${o}">${o}</option>`);html+='</select>';}
     else if(c.type==='textarea'){html+=`<textarea id="docvar-${vId}" placeholder="${c.placeholder||''}" rows="3" oninput="actualizarPreview()"></textarea>`;}
+    else if(c.type==='photos'){
+      html+=`<div class="span-2">`;
+      html+=`<input type="file" id="docvar-${vId}" accept="image/*" multiple style="margin-bottom:8px;" onchange="cargarFotosCert(this)"/>`;
+      html+=`<div id="fotos-preview-thumbs" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;"></div>`;
+      html+=`</div>`;
+    }
     else{html+=`<input type="text" id="docvar-${vId}" placeholder="${c.placeholder||''}" oninput="actualizarPreview()"/>`;}
     html+='</div>';
   });
   html+='</div></div>';
   container.innerHTML=html;
+  if(doc.id==='cert-fin-obra-fotos')renderThumbsFotos();
+}
+
+// ── Gestión de fotos para certificado ────────────────────────────────────────
+let _fotosCert=[]; // Array de {dataUrl, name, wide} (wide=true si horizontal)
+function cargarFotosCert(input){
+  const files=Array.from(input.files).slice(0,4);
+  _fotosCert=[];
+  const promises=files.map(f=>new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        _fotosCert.push({dataUrl:e.target.result,name:f.name,wide:img.width>=img.height});
+        res();
+      };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(f);
+  }));
+  Promise.all(promises).then(()=>{renderThumbsFotos();actualizarPreview();});
+}
+function renderThumbsFotos(){
+  const el=document.getElementById('fotos-preview-thumbs');
+  if(!el)return;
+  let h='';
+  _fotosCert.forEach(function(f,i){
+    h+='<div style="position:relative;">';
+    h+='<img src="'+f.dataUrl+'" style="height:60px;border-radius:4px;border:1px solid var(--border);" title="'+f.name+'"/>';
+    h+='<button onclick="eliminarFotoCert('+i+')" style="position:absolute;top:-6px;right:-6px;background:#e55;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;line-height:1;">×</button>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+function eliminarFotoCert(i){_fotosCert.splice(i,1);renderThumbsFotos();actualizarPreview();}
+function renderFotosLayout(){
+  const n=_fotosCert.length;
+  if(n===0)return'<div style="border:2px dashed #ccc;border-radius:8px;padding:40px;text-align:center;color:#888;">Sube las fotografías usando el panel de la izquierda (1-4 fotos)</div>';
+  const px=mm=>Math.round(mm*3.78);
+  // Espacio libre A4: 297mm - márgenes(30) - ficha(72) - hr(4) = 191mm para fotos
+  const LIBRE=191;
+  const imgS=(h)=>'width:100%;height:'+px(h)+'px;object-fit:contain;border-radius:4px;display:block;';
+  if(n===1){
+    return'<div style="height:'+px(LIBRE)+'px;"><img src="'+_fotosCert[0].dataUrl+'" style="'+imgS(LIBRE)+'"/></div>';
+  }
+  if(n===2){
+    const allWide=_fotosCert.every(f=>f.wide);
+    const allTall=_fotosCert.every(f=>!f.wide);
+    if(allTall){
+      // 2 verticales: lado a lado
+      const h=LIBRE;
+      const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+      return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'+imgs.join('')+'</div>';
+    } else {
+      // 2 horizontales (o mixtas): una encima de otra
+      const h=Math.round(LIBRE/2)-6;
+      const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+      return'<div style="display:grid;grid-template-columns:1fr;gap:12px;">'+imgs.join('')+'</div>';
+    }
+  }
+  if(n===3){
+    const h=Math.round(LIBRE/2)-6;
+    const top=_fotosCert.slice(0,2).map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+    const bot='<div style="height:'+px(h)+'px;grid-column:span 2;"><img src="'+_fotosCert[2].dataUrl+'" style="'+imgS(h)+'"/></div>';
+    return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+top.join('')+bot+'</div>';
+  }
+  // 4 fotos: cuadrícula 2×2
+  const h=Math.round(LIBRE/2)-6;
+  const imgs=_fotosCert.map(f=>'<div style="height:'+px(h)+'px;"><img src="'+f.dataUrl+'" style="'+imgS(h)+'"/></div>');
+  return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+imgs.join('')+'</div>';
 }
 
 function gv(id){const el=document.getElementById('docvar-'+id);return el?el.value.trim():'';}
+
+const LOGO_COACM_ICON='data:image/jpeg;base64,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';
 
 function getDatosDoc(){
   const e=docExpedienteActivo||{};
@@ -1177,6 +1258,22 @@ function generarTextoDoc(doc,d){
         <p>Y para que conste y a los efectos oportunos, expido el presente certificado en ${d.municipio} a ${fechaC}.</p>
       </div>${fa}`;}
 
+    case'cert-fin-obra-fotos':{
+      const etiqPromF=d.promotor2?'Promotores':'Promotor';
+      const valPromF=d.promotor2?`${d.promotor1}<br>${d.promotor2}`:d.promotor1;
+      return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA<br><em>FOTOGRAFÍA DEL EDIFICIO</em></h3>
+      <div class="ficha">
+        <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
+        <span class="fk">Emplazamiento</span><span class="fv">${d.emplazamiento}</span>
+        <span class="fk">Código Postal</span><span class="fv">${d.cp_obra}</span>
+        <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
+        <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
+        <span class="fk">${etiqPromF}</span><span class="fv">${valPromF}</span>
+        <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
+      </div>
+      <hr style="border:none;border-top:1px solid #ccc;margin:12px 0;"/>
+      ${renderFotosLayout()}`;}
+
     case'cert-fin-obra-demol':
       return`<h3>CERTIFICADO FINAL DE LA DIRECCIÓN DE OBRA</h3>
       <div class="ficha">
@@ -1218,6 +1315,35 @@ function generarTextoDoc(doc,d){
       <div class="firma"><div class="firma-lugar">${fechaLugar}</div>
       <div style="font-size:11px;margin-top:8px;">Fdo.: D. ${d.arq}</div>
       <div style="font-size:11px;">Colegiado ${d.arq_num} COACM</div></div>`;
+
+    case'oficio-direccion-obra':{
+      const mesesU=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+      const fd=new Date(fecha+'T12:00:00');
+      const dirProm=splitCalleNumero(d.promotor1_dir);
+      const dirObra=splitCalleNumero(d.emplazamiento);
+      const tabF=(w)=>`<span style="display:inline-block;width:${w}px;"></span>`;
+      return`<div style="margin-left:30px;">
+      <div style="font-family:'Fira Sans','FF Meta','FF Meta Pro','Segoe UI',Arial,Helvetica,sans-serif;display:flex;align-items:center;justify-content:flex-start;gap:18px;margin-top:0;margin-bottom:28px;text-align:left;">
+        <img src="${LOGO_COACM_ICON}" width="82" height="78" style="display:block;flex-shrink:0;">
+        <div style="font-family:'Fira Sans','FF Meta','FF Meta Pro','Segoe UI',Arial,Helvetica,sans-serif;font-size:29px;line-height:1.1;font-weight:500;letter-spacing:0.4px;font-stretch:normal;color:#1a1a1a;text-align:left;">Colegio Oficial de Arquitectos<br>de Castilla La Mancha&nbsp; <span style="font-family:'Fira Sans','FF Meta','FF Meta Pro','Segoe UI',Arial,Helvetica,sans-serif;font-weight:700;letter-spacing:0.6px;">COACM</span></div>
+      </div>
+      <div class="cuerpo" style="font-family:Arial,sans-serif;font-size:16px;line-height:1.7;color:#000;text-align:left;">
+        <p style="text-align:left;">D. ${d.arq}</p>
+        <p style="text-align:left;">Arquitecto colegiado/habilitado n° ${(d.arq_num||'').replace(/[.,]/g,'')} en el Colegio Oficial</p>
+        <p style="text-align:left;">de Arquitectos de Castilla-La Mancha pone en conocimiento de V.I.</p>
+        <p style="text-align:left;">que por D. ${d.promotor1}</p>
+        <p style="text-align:left;">domiciliado en ${(d.promotor1_mun||'').toUpperCase()} calle ${dirProm.calle.toUpperCase()}</p>
+        <p style="text-align:left;">n° ${dirProm.numero}, le ha sido encomendada la dirección facultativa de las</p>
+        <p style="text-align:left;">obras que se van a ejecutar en la finca de su propiedad, situada en la</p>
+        <p style="text-align:left;">${dirObra.calle.toUpperCase()} n° ${dirObra.numero} de ${(d.municipio||'').toUpperCase()}</p>
+        <p style="text-align:left;margin-top:10px;">Dichas obras consisten en:</p>
+        <p style="text-align:left;margin-bottom:150px;">${d.proyecto.toUpperCase()}</p>
+        <p style="text-align:left;">Según proyecto redactado por</p>
+      </div>
+      <div class="firma" style="font-family:Arial,sans-serif;margin-top:40px;font-size:16px;color:#000;">
+      <div style="color:#000;margin-left:20px;">En${tabF(18)}CUENCA${tabF(30)},${tabF(10)}a${tabF(18)}${fd.getDate()}${tabF(18)}de${tabF(18)}${mesesU[fd.getMonth()]}${tabF(30)}${fd.getFullYear()}</div>
+      <div style="margin-left:340px;margin-top:14pt;color:#000;font-weight:400;font-size:14px;">El arquitecto</div>
+      <div style="margin-left:340px;margin-top:55pt;border-bottom:1px solid transparent;width:150px;"></div></div></div>`;}
 
     case'acta-replanteo':{
       const hora=gv('hora_acta')||'09:00';
@@ -1533,6 +1659,16 @@ function actualizarPreview(){
   document.getElementById('doc-preview-container').innerHTML=generarTextoDoc(docSeleccionado,getDatosDoc());
 }
 
+// Separa una dirección tipo "CALLE X, 19" o "CALLE X 19" en {calle, numero}.
+// Nuestro modelo de datos no guarda calle/número por separado, así que esto
+// es una heurística: si no encuentra un número al final, deja numero vacío.
+function splitCalleNumero(dir){
+  const s=(dir||'').trim();
+  const m=s.match(/^(.*?)[,\s]+(\d+[A-Za-z]?)\s*$/);
+  if(m)return{calle:m[1].trim(),numero:m[2].trim()};
+  return{calle:s,numero:''};
+}
+
 function copiarTextoDoc(){
   const t=document.getElementById('doc-preview-container')?.innerText||'';
   navigator.clipboard.writeText(t).then(()=>{
@@ -1546,10 +1682,12 @@ function imprimirPDF(){
   if(!docSeleccionado){statusEl.innerHTML='<div class="status error">⚠ Selecciona un documento primero.</div>';return;}
   if(!docExpedienteActivo){statusEl.innerHTML='<div class="status error">⚠ Selecciona un expediente primero.</div>';return;}
   const contenido=document.getElementById('doc-preview-container')?.innerHTML||'';
+  const margenPagina=docSeleccionado.id==='oficio-direccion-obra'?'5mm 25mm 20mm 25mm':'20mm 25mm';
   const w=window.open('','_blank','width=900,height=700');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title></title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;600;700&family=Oswald:wght@400;600;700&family=Fira+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    @page{margin:20mm 25mm;size:A4;}
+    @page{margin:${margenPagina};size:A4;}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#000;background:#fff;}
     .page{width:210mm;margin:0 auto;padding:15mm 0;}
