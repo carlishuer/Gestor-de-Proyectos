@@ -1341,6 +1341,7 @@ function getDatosDoc(){
     arq_dir:'calle Dalmacio García Izcara número 6, 16004 de Cuenca',
     arq_email:'juanjoseramonarquitecto@gmail.com',
     constructor:e.pro_constructor||'—',
+    constructor_rep:e.pro_constructor_rep||'—',
     licencia:e.licencia||'—',
     fecha_inicio:e.pro_fecha_inicio?fES(e.pro_fecha_inicio):'—',
   };
@@ -1368,6 +1369,14 @@ function firmaArq(d,fecha){
   <div style="font-size:11px;">Colegio Oficial de Arquitectos de Castilla la Mancha</div></div>`;
 }
 
+// Filas Constructor/Representante — mismo criterio que la plantilla Excel:
+// se omiten si no hay constructor cargado en el expediente (fila oculta, como en DATOS!B28/B29).
+function filaConstructor(d){
+  if(!d.constructor||d.constructor==='—')return'';
+  return`<span class="fk">Constructor</span><span class="fv">${d.constructor}</span>
+    <span class="fk">Representante</span><span class="fv">${d.constructor_rep&&d.constructor_rep!=='—'?d.constructor_rep:'—'}</span>`;
+}
+
 function fichaBase(d){
   return`<div class="ficha">
     <span class="fk">Proyecto</span><span class="fv">${d.proyecto}</span>
@@ -1389,6 +1398,7 @@ function fichaObra(d){
     <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
     <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
     <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+    ${filaConstructor(d)}
     <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
     <span class="fk">Comienzo Obra</span><span class="fv">${d.fecha_inicio}</span>
   </div>`;
@@ -1424,6 +1434,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
         <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        ${filaConstructor(d)}
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
@@ -1444,6 +1455,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">${etiqPromF}</span><span class="fv">${valPromF}</span>
+        ${filaConstructor(d)}
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <hr style="border:none;border-top:1px solid #ccc;margin:12px 0;"/>
@@ -1460,6 +1472,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
         <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        ${filaConstructor(d)}
         <span class="fk">Proyectista</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">CERTIFICO:</p>
@@ -1530,6 +1543,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        ${filaConstructor(d)}
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
@@ -1555,6 +1569,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Ref. Catastral</span><span class="fv">${d.ref_catastral}</span>
         <span class="fk">Promotor</span><span class="fv">${d.promotor1}</span>
+        ${filaConstructor(d)}
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
       </div>
       <p style="font-weight:600;margin-bottom:10px;">ACTA:</p>
@@ -1622,6 +1637,7 @@ function generarTextoDoc(doc,d){
         <span class="fk">Localidad</span><span class="fv">${d.municipio}</span>
         <span class="fk">Provincia</span><span class="fv">${d.provincia}</span>
         <span class="fk">Promotores</span><span class="fv">${d.promotores_todos}</span>
+        ${filaConstructor(d)}
         <span class="fk">Director de Obra</span><span class="fv">${d.arq}</span>
         <span class="fk">Coordinador S&amp;S</span><span class="fv">${d.arq}</span>
         <span class="fk">Licencia de Obras</span><span class="fv">${d.licencia}</span>
@@ -1755,6 +1771,7 @@ function generarTextoDoc(doc,d){
       </div>
       <p style="font-weight:600;margin-bottom:8px;">DATOS DE LA EDIFICACIÓN</p>
       ${fichaBase(d)}
+      ${filaConstructor(d)?`<div class="ficha">${filaConstructor(d)}</div>`:''}
       <div class="cuerpo">
         <p>${proms} declaran, bajo su responsabilidad, que el inmueble construido arriba referido es acorde con la licencia de obras en su momento concedida, habiéndose cumplido las condiciones en ella impuestas, y todo ello a los efectos de la primera ocupación o utilización de la edificación.</p>
       </div>
