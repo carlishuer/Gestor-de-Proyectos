@@ -435,16 +435,12 @@ textarea{resize:vertical;min-height:70px;}
           <button class="btn btn-primary btn-lg" onclick="generarExpediente()">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Generar Expediente
           </button>
-          <button class="btn btn-secondary" onclick="generarExcelDatos()" id="btn-excel">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar Excel (DATOS)
-          </button>
           <button class="btn btn-secondary" onclick="copiarDatosGestorMemorias()" id="btn-datos-memorias" style="background:#1a4e8a;color:#fff;border-color:#1a4e8a;">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar datos → Gestor de Memorias
           </button>
           <button class="btn btn-secondary" onclick="limpiarFormulario()">+ Nuevo expediente</button>
         </div>
         <div id="gen-status"></div>
-        <div id="excel-status" style="margin-top:6px;"></div>
         <div id="memorias-status" style="margin-top:6px;"></div>
 
         <hr class="divider">
@@ -458,11 +454,11 @@ textarea{resize:vertical;min-height:70px;}
           <button class="btn btn-primary" onclick="generarPortadasPDF(TITULOS_DIPUTACION,'portadas diputación','portada-status')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PORTADAS DIPUTACIÓN
           </button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['MEMORIA'],'portada memoria','portada-status')">↓ Memoria</button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['FOTOGRAFÍAS'],'portada fotografías','portada-status')">↓ Fotografías</button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">↓ Anexos ahorro energía</button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">↓ Planos</button>
-          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">↓ Presupuesto</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['MEMORIA'],'portada memoria','portada-status')">Memoria</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['FOTOGRAFÍAS'],'portada fotografías','portada-status')">Fotografías</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['ANEXOS AHORRO DE ENERGÍA'],'portada anexos ahorro de energía','portada-status')">Anexos ahorro energía</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PLANOS'],'portada planos','portada-status')">Planos</button>
+          <button class="btn btn-secondary" onclick="generarPortadasPDF(['PRESUPUESTO','ESTADO DE MEDICIONES Y PRESUPUESTO','RESUMEN DE PRESUPUESTO'],'portada presupuesto','portada-status')">Presupuesto</button>
         </div>
         <div id="portada-status" style="margin-top:6px;"></div>
       </div>
@@ -3004,169 +3000,6 @@ function resetarDriveEnviado(){
   document.getElementById('make-status').innerHTML=`<div class="status info">ℹ Listo para volver a enviar a Drive.</div>`;
 }
 function copiarPayloadMake(){if(!expedienteActual)return;const p={...expedienteActual,nombre_carpeta:document.getElementById('nombre-carpeta')?.value||expedienteActual.expediente,subcarpetas:buildSubcarpetas(expedienteActual.expediente)};navigator.clipboard.writeText(JSON.stringify(p,null,2)).then(()=>alert('Payload copiado.'));}
-
-async function generarExcelDatos(){
-  const statusEl=document.getElementById('excel-status');
-  if(!expedienteActual){statusEl.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
-  if(typeof ExcelJS==='undefined'){statusEl.innerHTML=`<div class="status error">⚠ No se pudo cargar la librería de Excel (revisa la conexión a internet).</div>`;return;}
-  sincronizarContratistaEnExpediente();
-  statusEl.innerHTML=`<div class="status loading"><div class="spinner"></div> Generando Excel…</div>`;
-  try{
-    const d=expedienteActual;
-    const wb=new ExcelJS.Workbook();
-    const ws=wb.addWorksheet('DATOS');
-    ws.columns=[{width:22.71},{width:34.43},{width:31.86},{width:8.43},{width:16},{width:34.43}];
-
-    const F_LABEL={name:'Arial',size:9};
-    const F_PLAIN={name:'Arial',size:10};
-    const F_IN={name:'Arial',size:10,bold:true,color:{argb:'FF0000FF'}};
-    const F_CALC={name:'Arial',size:10,bold:true};
-    const THIN={style:'thin'};
-    const EUR='#,##0.00\\ "€";\\-#,##0.00\\ "€"';
-    const EURBOX='_-* #,##0.00\\ "€"_-;\\-* #,##0.00\\ "€"_-;_-* "-"??\\ "€"_-;_-@_-';
-    const DATEFMT='dd/mm/yyyy';
-
-    function set(addr,val,font,extra){
-      extra=extra||{};
-      const c=ws.getCell(addr);
-      if(val!==undefined)c.value=val;
-      c.font=font;
-      if(extra.numFmt)c.numFmt=extra.numFmt;
-      if(extra.align)c.alignment={horizontal:extra.align};
-    }
-    function header(row,title){
-      ws.mergeCells(`A${row}:F${row}`);
-      const c=ws.getCell(`A${row}`);
-      c.value=title;c.font=F_PLAIN;c.alignment={horizontal:'center'};
-      ['A','B','C','D','E','F'].forEach(col=>{
-        ws.getCell(`${col}${row}`).border={
-          top:THIN,bottom:THIN,
-          left:col==='A'?THIN:undefined,
-          right:col==='F'?THIN:undefined
-        };
-      });
-    }
-    function toDate(s){return s?new Date(s+'T00:00:00'):null;}
-
-    // ── DATOS GENERALES ──
-    header(1,'DATOS GENERALES');
-    set('A2','EXPEDIENTE',F_LABEL); set('B2',d.expediente||'',F_IN,{numFmt:'@'});
-    set('C2','REPRESENTANTE',F_LABEL); set('F2','CONTRATISTA',F_LABEL);
-    set('A3','FECHA INICIAL',F_LABEL);
-    set('B3',d.fecha_iso?toDate(d.fecha_iso):'',F_IN,{numFmt:DATEFMT});
-    set('A4','FECHA',F_LABEL); set('B4',{formula:'TODAY()'},F_IN,{numFmt:DATEFMT});
-    set('A5','PROMOTOR',F_LABEL); set('B5',d.cliente_nombre_completo||'',F_IN,{numFmt:'@'});
-    set('E5','CONTRATISTA',F_LABEL); set('F5',d.pro_constructor||'',F_IN,{numFmt:'@'});
-    set('A6','CIF/NIF',F_LABEL); set('B6',d.cliente_nif||'',F_IN,{numFmt:'@'});
-    set('E6','CIF/NIF',F_LABEL); set('F6',d.pro_constructor_nif||'',F_IN,{numFmt:'@'});
-    set('A7','DIRECCION',F_LABEL); set('B7',d.cliente_direccion||'',F_IN,{numFmt:'@'});
-    set('E7','DIRECCION',F_LABEL); set('F7',d.pro_constructor_dir||'',F_IN,{numFmt:'@'});
-    set('A8','CODIGO POSTAL',F_LABEL); set('B8',d.cliente_cp||'',F_IN,{numFmt:'@'});
-    set('E8','CODIGO POST.',F_LABEL); set('F8',d.pro_constructor_cp||'',F_IN,{numFmt:'@'});
-    set('A9','LOCALIDAD',F_LABEL); set('B9',d.cliente_municipio||'',F_IN,{numFmt:'@'});
-    set('E9','POBLACION',F_LABEL); set('F9',d.pro_constructor_municipio||'',F_IN,{numFmt:'@'});
-    set('A10','PROVINCIA',F_LABEL); set('B10',d.cliente_provincia||'',F_IN,{numFmt:'@'});
-    set('E10','PROVINCIA',F_LABEL); set('F10',d.pro_constructor_provincia||'',F_IN,{numFmt:'@'});
-    set('A11','CORREO ELCTRÓNICO',F_LABEL); set('B11',d.cliente_email||'',F_IN,{numFmt:'@'});
-    set('E11','REPRESENTANTE',F_LABEL); set('F11',d.pro_constructor_rep||'',F_IN,{numFmt:'@'});
-    set('A12','TELÉFONO',F_LABEL); set('B12',d.cliente_telefono||'',F_IN,{numFmt:'@'});
-    set('E12','FIRMA PSS OBRA',F_LABEL); set('F12',d.pro_constructor_rep||'',F_IN,{numFmt:'@'});
-
-    // ── DATOS PROYECTO ──
-    header(15,'DATOS PROYECTO');
-    set('A16','FASE',F_LABEL); set('B16',d.pro_fase||'',F_IN,{numFmt:'@'});
-    set('D16','PEM',F_PLAIN); set('F16',parseFloat(d.pem)||0,F_CALC,{numFmt:EURBOX,align:'right'});
-    set('A17','PROYECTO',F_LABEL); set('B17',d.pro_nombre_proyecto||d.descripcion||'',F_IN,{numFmt:'@'});
-    set('D17','GG',F_PLAIN); set('E17',0,F_PLAIN,{numFmt:'0%',align:'center'});
-    set('F17',{formula:'ROUND(F16*E17,2)'},F_CALC,{numFmt:EUR});
-    set('A18','EMPLAZAMIENTO',F_LABEL); set('B18',d.direccion_proyecto||'',F_IN,{numFmt:'@'});
-    set('C18',d.ref_catastral||'',F_IN,{numFmt:'@'});
-    set('D18','BI',F_PLAIN); set('E18',0,F_PLAIN,{numFmt:'0%',align:'center'});
-    set('F18',{formula:'ROUND(F16*E18,2)'},F_CALC,{numFmt:EUR});
-    set('A19',{formula:'+A8'},F_LABEL); set('B19',d.cp_proyecto||'',F_IN,{numFmt:'@'});
-    set('F19',{formula:'SUM(F17:F18)'},F_CALC,{numFmt:EUR,align:'center'});
-    set('A20',{formula:'+A9'},F_LABEL); set('B20',d.municipio_proyecto||'',F_IN,{numFmt:'@'});
-    set('D20','SUMA',F_PLAIN); set('F20',{formula:'F19+F16'},F_CALC,{numFmt:EUR,align:'right'});
-    set('A21',{formula:'+A10'},F_LABEL); set('B21',d.provincia_proyecto||'',F_IN,{numFmt:'@'});
-    set('D21','IVA',F_PLAIN); set('E21',0.1,F_PLAIN,{numFmt:'0%',align:'center'});
-    set('F21',{formula:'ROUND(F20*E21,2)'},F_CALC,{numFmt:EUR});
-    set('D22','TOTAL',F_PLAIN); set('F22',{formula:'F20+F21'},F_CALC,{numFmt:EUR,align:'right'});
-
-    // ── DATOS DE OBRA ──
-    header(23,'DATOS DE OBRA');
-    set('A24','PROYECTISTA',F_LABEL); set('B24',d.arquitecto||'',F_IN,{numFmt:'@'});
-    set('C24','ARQUITECTO',F_IN,{numFmt:'@'}); set('D24',d.coacm||'',F_IN,{numFmt:'@'}); set('F24','04568387N',F_IN,{numFmt:'@'});
-    set('A25','DIRECTOR DE OBRA',F_LABEL); set('B25',d.arquitecto||'',F_IN,{numFmt:'@'});
-    set('C25','ARQUITECTO',F_IN,{numFmt:'@'}); set('D25',d.coacm||'',F_IN,{numFmt:'@'}); set('F25','04568387N',F_IN,{numFmt:'@'});
-    set('A26','DIRECTOR DE EJECUCION',F_LABEL); set('B26',d.pro_dir_ejecucion||'',F_IN,{numFmt:'@'});
-    set('C26','ARQUITECTO TÉCNICO',F_IN,{numFmt:'@'});
-    set('A27','COORDINADOR DE SEGURIDAD Y SALUD EN OBRA',F_LABEL); set('B27',d.arquitecto||'',F_IN,{numFmt:'@'});
-    set('C27','ARQUITECTO',F_IN,{numFmt:'@'}); set('D27',d.coacm||'',F_IN,{numFmt:'@'}); set('F27','04568387N',F_IN,{numFmt:'@'});
-    set('A28','CONSTRUCTOR',F_LABEL); set('B28',{formula:'F5'},F_IN,{numFmt:'@'});
-    set('A29','REPRESENTANTE',F_LABEL); set('B29',{formula:'F11'},F_IN,{numFmt:'@'});
-
-    // ── SOLICITUDES / FECHAS ──
-    set('A31','SOLICITUDES',F_LABEL); set('B31','',F_IN,{numFmt:DATEFMT});
-    set('A32','LICENCIA DE OBRAS',F_LABEL); set('B32',d.licencia||'',F_IN,{numFmt:'@'});
-    set('A33','FECHA DE APROBACIÓN DEL PLAN DE SEGURIDAD Y SALUD EN OBRA',F_LABEL); set('B33','',F_IN,{numFmt:DATEFMT});
-    set('A34','COMIENZO OBRA',F_LABEL);
-    if(d.pro_fecha_inicio){
-      set('B34',toDate(d.pro_fecha_inicio),F_IN,{numFmt:DATEFMT});
-      set('C34','09:00',F_IN,{numFmt:'@'});
-      set('D34',{formula:'DAY(B34)'},F_CALC,{numFmt:'@'});
-      set('E34',{formula:'TEXT(B34,"MMMM")'},F_CALC);
-      set('F34',{formula:'YEAR(B34)'},F_CALC,{numFmt:'@'});
-    }else{
-      set('B34','',F_IN,{numFmt:DATEFMT}); set('C34','',F_IN,{numFmt:'@'});
-    }
-    set('A35','ACTA PAVIMENTO MOBILIARIO',F_LABEL); set('B35','',F_IN,{numFmt:DATEFMT}); set('C35','',F_IN,{numFmt:'@'});
-
-    set('A37','NIF EMPRESA (ANEXO V)',F_LABEL); set('B37',{formula:'F6'},F_IN,{numFmt:'@'});
-    set('A38','EMPRESA (ANEXO V)',F_LABEL); set('B38',{formula:'F5'},F_IN,{numFmt:'@'});
-    set('A39','FIN DE OBRA',F_LABEL);
-    if(d.pro_fecha_fin){
-      set('B39',toDate(d.pro_fecha_fin),F_IN,{numFmt:DATEFMT});
-      set('C39',{formula:'B39'},F_IN,{numFmt:DATEFMT});
-    }else{
-      set('B39','',F_IN,{numFmt:DATEFMT});
-    }
-    set('A40','ACTA DE RECEPCION',F_LABEL);
-    set('C40','13:00',F_IN,{numFmt:'@'});
-    if(d.pro_fecha_recepcion){
-      set('B40',toDate(d.pro_fecha_recepcion),F_IN,{numFmt:DATEFMT});
-      set('D40',{formula:'DAY(B40)'},F_CALC,{numFmt:'@'});
-      set('E40',{formula:'TEXT(B40,"MMMM")'},F_CALC);
-      set('F40',{formula:'YEAR(B40)'},F_CALC,{numFmt:'@'});
-    }else if(d.pro_fecha_fin){
-      set('B40',{formula:'B39'},F_IN,{numFmt:DATEFMT});
-      set('D40',{formula:'DAY(B40)'},F_CALC,{numFmt:'@'});
-      set('E40',{formula:'TEXT(B40,"MMMM")'},F_CALC);
-      set('F40',{formula:'YEAR(B40)'},F_CALC,{numFmt:'@'});
-    }else{
-      set('B40','',F_IN,{numFmt:DATEFMT});
-    }
-
-    // ── ACTAS DE VISITA (a rellenar manualmente) ──
-    [[44,'ACTA NUMERO'],[45,'FECHA DE ACTA'],[46,'FECHA ACTA ANTERIOR'],[47,'ANTECEDENTES'],
-     [48,'CUMPLIMIENTO DE ACUERDOS'],[49,'TEMAS TRATADOS'],[50,'SEGURIDAD Y SALUD'],
-     [51,'FOTOGRAFÍAS'],[52,'FIRMA']].forEach(([row,label])=>{
-      set(`A${row}`,label,F_LABEL);
-      set(`B${row}`,'',F_IN,{numFmt:'@'});
-    });
-
-    const buf=await wb.xlsx.writeBuffer();
-    const blob=new Blob([buf],{type:'application/octet-stream'});
-    const url=URL.createObjectURL(blob);
-    const nombre=`${d.expediente} DATOS.xlsx`;
-    const a=document.createElement('a');
-    a.href=url;a.download=nombre;
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    statusEl.innerHTML=`<div class="status ok">✓ Excel generado con el formato de la hoja "DATOS": <strong>${nombre}</strong>. Súbelo a la carpeta "DATOS Y TEXTO" del expediente en Drive.</div>`;
-  }catch(err){
-    statusEl.innerHTML=`<div class="status error">✗ Error generando el Excel: ${err.message}</div>`;
-  }
-}
 
 // ── Portadas (PDF) ────────────────────────────────────────────────────────────
 const TITULOS_DIPUTACION = [
