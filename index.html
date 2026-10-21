@@ -2646,7 +2646,7 @@ async function cargarListadoDrive(){
 }
 function limpiarFormulario(){
   if(!confirm('¿Limpiar el formulario?'))return;
-  document.querySelectorAll('input:not([readonly]),select,textarea').forEach(el=>el.value='');
+  document.querySelectorAll('input:not([readonly]):not(#make-webhook-url),select,textarea').forEach(el=>el.value='');
   setTipoPersona('cli',1,'fisica');setTipoPersona('cli2',2,'fisica');setTipoPersona('cli3',3,'fisica');
   ['cli','cli2','cli3'].forEach(p=>{const m=document.getElementById(p+'-nif-match');if(m)m.style.display='none';});
   document.getElementById('catastro-data').style.display='none';
@@ -2905,7 +2905,7 @@ async function descargarExcelPresupuesto(){
           b64+=String.fromCharCode(...arr.subarray(i,i+chunk));
         }
         const base64=btoa(b64);
-        const wh=document.getElementById('make-webhook-url').value.trim();
+        const wh=(document.getElementById('make-webhook-url').value||localStorage.getItem('make_webhook_url')||'https://hook.eu1.make.com/rmj9ywkfh38kalhvji1kxy9llaqjru4e').trim();
         // Enviar al mismo webhook con acción "subir_excel"
         const r=await fetch(wh,{
           method:'POST',
@@ -2953,7 +2953,7 @@ async function resetearPlantillaExcel(){
 function toggleSeccion(id,btn){const el=document.getElementById(id);if(el.style.display==='none'){el.style.display='block';btn.textContent=btn.textContent.replace('+ Añadir','− Ocultar');}else{el.style.display='none';btn.textContent=btn.textContent.replace('− Ocultar','+ Añadir');}}
 
 async function enviarAMake(){
-  const wh=document.getElementById('make-webhook-url').value.trim();const statusEl=document.getElementById('make-status');
+  const wh=(document.getElementById('make-webhook-url').value||localStorage.getItem('make_webhook_url')||'https://hook.eu1.make.com/rmj9ywkfh38kalhvji1kxy9llaqjru4e').trim();const statusEl=document.getElementById('make-status');
   if(!wh||!wh.startsWith('https://hook.')){statusEl.innerHTML=`<div class="status error">⚠ Introduce la URL del webhook de Make.</div>`;return;}
   if(!expedienteActual){statusEl.innerHTML=`<div class="status error">⚠ Primero genera un expediente.</div>`;return;}
   sincronizarContratistaEnExpediente();
