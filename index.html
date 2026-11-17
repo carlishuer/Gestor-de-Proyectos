@@ -3514,18 +3514,46 @@ function _esCuenca(e){
   const m=(datosCatastro?.municipio||document.getElementById('c-municipio')?.value||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   return m==='CUENCA';
 }
+// ---------- Biblioteca local: NN.SS. de Carboneras de Guadazaón (septiembre 1991) ----------
+const ORD_CARBONERAS={
+  ine:'16055',titulo:'NN.SS. de Carboneras de Guadazaón',
+  fuente:'NN.SS. de Carboneras de Guadazaón (sept. 1991) · Normas particulares por zonas',
+  nota:'Zona indicada por el usuario según el plano de calificación. Comprobar modificaciones posteriores de las Normas.',
+  ayuda:'elige la zona del plano de calificación para cargar sus condiciones',
+  zonas:(()=>{const z=(n,ep,uso,o)=>({nombre:n,ep,uso,grados:{'—':{n:'Única',...o}}});const NO='No se permite ninguna edificación';return{
+    '1':z('Casco urbano consolidado (manzana cerrada)','2.1.02','Residencial A y B; comercial B1 en planta baja (compatibles industrial, terciario y dotacional)',{edificabilidad:'E = 0,75 × S × nº de plantas',ocupacion:'75 % (solares < 100 m²: no se fija, cumpliendo condiciones higiénicas y de patios)',altura:'3 plantas y/o 9,60 m (en manzana edificada en más de 2/3, el Ayuntamiento puede autorizar la media de los edificios)',retranqueos:'No: línea de edificación en la alineación exterior',parcela_minima:'No se establece (vale el solar que admita una vivienda); en segregaciones 50 m²'}),
+    '2':z('Ensanche (casco parcialmente consolidado)','2.1.03','Residencial A y B; compatibles los de la zona 1',{edificabilidad:'Nº de plantas (según ancho de calle) × superficie de parcela dentro de un fondo de 12 m desde la alineación',ocupacion:'60 %',altura:'Calle hasta 6 m: 2 plantas, 7,30 m; más de 6 m: 3 plantas, 9,60 m',retranqueos:'En la alineación exterior o retranqueada hasta 3 m (medianerías tratadas como fachadas)',parcela_minima:'No se establece; en segregaciones 125 m²'}),
+    '3':z('Ampliación del casco en las Huertas (aislada)','2.1.04','Residencial unifamiliar (A); pareadas con acuerdo protocolizado y proyecto conjunto',{edificabilidad:'0,7 m²/m²',ocupacion:'25 %',altura:'3 plantas',retranqueos:'5 m a calle y 4 m a linderos',parcela_minima:'300 m²'}),
+    '4':z('Industrial en casco urbano','2.1.05','Industrial; compatible 1 vivienda por industria',{edificabilidad:'2 m²/m²',ocupacion:'75 %',altura:'7 m hasta el tirante o 9,60 m totales; altura mínima por planta 3,20 m',retranqueos:'Entre medianerías o aislada; aislada: mín. 3 m. Puede retranquearse de la alineación (aparcamiento, muelles)',parcela_minima:'No se establece; en segregaciones 250 m²'}),
+    '5':z('No urbanizable industrial agropecuario','2.3.05','Industrial agropecuario; vivienda solo de vigilancia, 1 por parcela, máx. 125 m²',{edificabilidad:'No se fija (rige la ocupación)',ocupacion:'25 %',altura:'9,00 m y 2 plantas',retranqueos:'20 m a viales; a linderos según el apartado M.3 (la cifra no figura en el texto)',parcela_minima:'35.000 m²'}),
+    '6':z('No urbanizable común','2.3.06','Agrícola, ganadero o forestal; vivienda familiar aislada con parcela igual a la unidad mínima de cultivo',{edificabilidad:'0,069 m²/m²',ocupacion:'5 %',altura:'7 m',retranqueos:'5 m a linderos; alineaciones según Leyes de Carreteras',parcela_minima:'Unidad mínima de cultivo; fachada mínima 20 m'}),
+    '7':z('No urbanizable agrícola de regadío (márgenes del Guadazaón)','2.3.07','Agrícola de regadío; vivienda solo de vigilancia, 1 por parcela',{edificabilidad:'0,069 m²/m²',ocupacion:'5 %',altura:'6,00 m',retranqueos:'4 m a linderos',parcela_minima:'2.500 m²'}),
+    '8':z('Protección de masas forestales','2.3.08','Mantenimiento del medio natural; solo edificaciones vinculadas a él y a servicios; vivienda de guarda, 1 por cada 100 ha',{edificabilidad:'Vivienda de guarda: máx. 300 m² edificados',ocupacion:'No se fija',altura:'2 plantas y 7,50 m a la cara inferior del alero',retranqueos:'A linderos más que la altura de la edificación, mín. 4 m',parcela_minima:'35.000 m²'}),
+    '9':z('Protección de carreteras','2.3.09','Según Leyes de Carreteras (zona de afección); ferrocarril según RD 1211/1990',{edificabilidad:'No se fija',ocupacion:'25 %',altura:'4,50 m',retranqueos:'Alineaciones según Leyes de Carreteras; a más de 250 m de cualquier otra edificación',parcela_minima:'1.000 m²; fachada mínima 20 m'}),
+    '10':z('Protección de cauces (río Guadazaón y ramblas)','2.3.10','Agrícola de regadío; prohibido el vertido de aguas residuales sin depurar',{edificabilidad:NO,ocupacion:NO,altura:NO,retranqueos:'Franja protegida de 11 m (cauces discontinuos) o 25 m (continuos, lagunas y embalses) desde la máxima avenida',parcela_minima:'—'}),
+    '11':z('Protección de tendidos eléctricos','2.3.11','Los de la zona por la que discurra la línea',{edificabilidad:'Según la zona por la que discurra',ocupacion:'Según la zona por la que discurra',altura:'Según la zona por la que discurra',retranqueos:'Edificaciones a 3,3 + V/100 m (mín. 5 m); arbolado a 1,5 + V/100 m (mín. 2 m); líneas actuales V = 22',parcela_minima:'Según la zona por la que discurra'}),
+    '12':z('Protección del cementerio (250 m)','2.3.11 [zona 12]','Agrícola en las condiciones actuales',{edificabilidad:'No se autoriza construcción alguna',ocupacion:'No se autoriza construcción alguna',altura:'No se autoriza construcción alguna',retranqueos:'Polígono a 250 m de las tapias del cementerio',parcela_minima:'—'})};})()
+};
+ORD_CUENCA.titulo='PGOU de Cuenca';ORD_CUENCA.ayuda='elige la zona y el grado del plano nº 5 para cargar sus condiciones';
+const ORD_MUNICIPIOS={[ORD_CUENCA.ine]:ORD_CUENCA,[ORD_CARBONERAS.ine]:ORD_CARBONERAS};
+function _ordLib(e){
+  if(e?.municipio_ine)return ORD_MUNICIPIOS[e.municipio_ine]||null;
+  return _esCuenca(e)?ORD_CUENCA:null;
+}
 function _ordGrados(){
   const z=document.getElementById('ord-zona')?.value;const sg=document.getElementById('ord-grado');if(!sg)return;
-  const gr=ORD_CUENCA.zonas[z]?.grados||{};
+  const L=_ordLib(emplazamiento)||ORD_CUENCA;
+  const gr=L.zonas[z]?.grados||{};
   sg.innerHTML='<option value="">— Grado —</option>'+Object.entries(gr).map(([k,g])=>`<option value="${k}">${k==='—'?'':k+' · '}${_esc(g.n)}</option>`).join('');
   if(Object.keys(gr).length===1)sg.value=Object.keys(gr)[0];
 }
 function aplicarOrdenanzaCuenca(){
   if(!emplazamiento)return;
+  const L=_ordLib(emplazamiento)||ORD_CUENCA;
   const z=document.getElementById('ord-zona').value,g=document.getElementById('ord-grado').value;
-  const Z=ORD_CUENCA.zonas[z],G=Z?.grados[g];
+  const Z=L.zonas[z],G=Z?.grados[g];
   if(!Z||!G){alert('Elige zona y grado.');return;}
-  const F=`${ORD_CUENCA.fuente} · ep. ${Z.ep}`;const nota=ORD_CUENCA.nota;
+  const F=`${L.fuente} · ${L===ORD_CUENCA?'ep.':'apdo.'} ${Z.ep}`;const nota=L.nota;
   const esPlan=z==='PERI'||z==='SUP';
   const titulo=esPlan?`${Z.nombre} ${g} — ${G.n}`:`Zona ${z} — ${Z.nombre}${g!=='—'?`, grado ${g} · ${G.n}`:''}`;
   const d=emplazamiento.datos;
@@ -3536,7 +3564,7 @@ function aplicarOrdenanzaCuenca(){
     const val=k==='uso_caracteristico'?(G.uso||Z.uso):(G[k]||def);
     d[k]=_dato(val,'pendiente',F,{nota});
   }
-  emplazamiento.ordenanza_sel={municipio:'CUENCA',zona:z,grado:g};
+  emplazamiento.ordenanza_sel={municipio:L===ORD_CUENCA?'CUENCA':L.ine,zona:z,grado:g};
   renderEmplazamiento();
 }
 function _editarDatoUrb(k,val){
@@ -3647,17 +3675,17 @@ function renderEmplazamiento(){
     }
   }
   let lib='';
-  if(_aplicaNNSS(e))lib=_panelNNSS(e);
-  else if(_esCuenca(e)){
-    lib=`<div class="emplaz-lib"><strong>Ordenanzas del PGOU de Cuenca</strong> — elige la zona y el grado del plano nº 5 para cargar sus condiciones:
+  const L=_ordLib(e);
+  if(L){
+    lib=`<div class="emplaz-lib"><strong>Ordenanzas: ${_esc(L.titulo)}</strong> — ${_esc(L.ayuda)}:
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-        <select id="ord-zona" onchange="_ordGrados()"><option value="">— Zona —</option>${Object.entries(ORD_CUENCA.zonas).map(([k,z])=>`<option value="${k}">${/^\d$/.test(k)?'Zona '+k+' · ':''}${_esc(z.nombre)}</option>`).join('')}</select>
+        <select id="ord-zona" onchange="_ordGrados()"><option value="">— Zona —</option>${Object.entries(L.zonas).map(([k,z])=>`<option value="${k}">${/^\d+$/.test(k)?'Zona '+k+' · ':''}${_esc(z.nombre)}</option>`).join('')}</select>
         <select id="ord-grado"><option value="">— Grado —</option></select>
         <button class="btn btn-secondary" onclick="aplicarOrdenanzaCuenca()">Cargar condiciones</button>
       </div></div>`;
-  }
+  }else if(_aplicaNNSS(e))lib=_panelNNSS(e);
   box.innerHTML=`<table class="emplaz-table"><thead><tr><th>Dato</th><th>Valor</th><th>Tipo</th><th>Fuente · fecha de consulta</th></tr></thead><tbody>${h}</tbody></table>${lib}<div class="help" style="margin-top:8px;">Los datos urbanísticos del SIU son informativos. La información vinculante es la del Ayuntamiento (cédula o informe urbanístico). <a href="${SIU_CFG.VISOR}" target="_blank" rel="noopener">Visor SIU de Castilla-La Mancha</a></div>`;
-  if(e.ordenanza_sel&&e.ordenanza_sel.municipio==='CUENCA'&&document.getElementById('ord-zona')){document.getElementById('ord-zona').value=e.ordenanza_sel.zona;_ordGrados();document.getElementById('ord-grado').value=e.ordenanza_sel.grado;}
+  if(L&&e.ordenanza_sel&&e.ordenanza_sel.municipio===(L===ORD_CUENCA?'CUENCA':L.ine)&&document.getElementById('ord-zona')){document.getElementById('ord-zona').value=e.ordenanza_sel.zona;_ordGrados();document.getElementById('ord-grado').value=e.ordenanza_sel.grado;}
 }
 
 // Datos de emplazamiento en campos planos (para Gestor de Memorias y CSV)
