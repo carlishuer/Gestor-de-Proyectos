@@ -129,6 +129,23 @@ textarea{resize:vertical;min-height:70px;}
 .doc-preview .firma-bloque{font-weight:600;font-size:11px;margin-top:6px;}
 .doc-preview hr{border:none;border-top:.5px solid #ccc;margin:14px 0;}
 @media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}.span-2,.span-3{grid-column:span 1;}.catastro-row{flex-direction:column;}header{padding:14px 16px;}.app{padding:20px 14px 48px;}.doc-grid{grid-template-columns:1fr;}}
+.emplaz-table{width:100%;border-collapse:collapse;font-size:12px;}
+.emplaz-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);}
+.emplaz-table td{padding:6px 8px;border-bottom:1px solid var(--surface2);vertical-align:top;}
+.emplaz-grupo td{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-pale);padding:5px 8px;}
+.emplaz-val{font-family:'DM Mono',monospace;white-space:nowrap;}
+.emplaz-ud{color:var(--ink3);font-size:10px;}
+.emplaz-fuente{color:var(--ink2);font-size:11px;}
+.emplaz-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px;white-space:nowrap;}
+.emplaz-badge.oficial{background:var(--ok-pale);color:var(--ok);}
+.emplaz-badge.calculado{background:#EEF2FF;color:#3730A3;}
+.emplaz-badge.pendiente{background:var(--warn-pale);color:var(--warn);}
+.emplaz-badge.nd{background:var(--surface2);color:var(--ink3);}
+.emplaz-badge.manual{background:#FFF4D6;color:#8A5A00;}
+.emplaz-input{width:100%;min-width:220px;font-size:12px;padding:5px 8px;}
+.emplaz-lib{margin-top:14px;padding:12px 14px;background:var(--accent-pale);border:1px solid #B8D4C8;border-radius:var(--radius);font-size:12px;}
+.emplaz-lib select{width:auto;min-width:200px;font-size:12px;}
+.emplaz-table td.emplaz-val{white-space:normal;}
 </style>
 </head>
 <body>
@@ -201,6 +218,20 @@ textarea{resize:vertical;min-height:70px;}
             </button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="card" id="card-emplazamiento">
+      <div class="card-header"><h2>Emplazamiento y Normativa</h2><span class="tag">Catastro · IGN · CTE</span></div>
+      <div class="card-body">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="completarEmplazamiento()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s-8-6.5-8-13a8 8 0 0 1 16 0c0 6.5-8 13-8 13z"/><circle cx="12" cy="9" r="3"/></svg>Completar emplazamiento
+          </button>
+          <span class="help" style="margin:0;">Se completa automáticamente tras consultar Catastro: coordenadas, altitud, zona climática y planeamiento.</span>
+        </div>
+        <div id="emplaz-status" style="margin-top:12px;"></div>
+        <div id="emplaz-data" style="display:none;margin-top:14px;"><div id="emplaz-tabla"></div></div>
       </div>
     </div>
 
@@ -2112,8 +2143,16 @@ function copiarDatosGestorMemorias(){
     promotor1:      d.promotor1||d.cliente_nombre_completo||d.cliente_nombre||'',
     promotor1_nif:  d.promotor1_nif||d.cliente_nif||'',
     promotor1_dir:  d.promotor1_dir||d.cliente_direccion||'',
+    cliente_cp:        d.cliente_cp||'',
+    cliente_municipio: d.cliente_municipio||'',
+    cliente_provincia: d.cliente_provincia||'',
+    promotor1_cp:   d.cliente_cp||'',
+    promotor1_mun:  d.cliente_municipio||'',
+    promotor1_prov: d.cliente_provincia||'',
     pro_fase:       d.pro_fase||'',
     pem:            d.pem ? parseFloat(d.pem).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) : '',
+    zona_climatica: d.zona_climatica||'',
+    ...(typeof datosEmplazamientoPlano==='function'?datosEmplazamientoPlano(d.emplazamiento):{}),
   });
   navigator.clipboard.writeText(payload).then(()=>{
     statusEl.innerHTML=`<div class="status ok">✓ Datos copiados. Abre el Gestor de Memorias y pulsa "Pegar datos del expediente".</div>`;
@@ -2559,8 +2598,9 @@ function cargarParaDocumentos(code){
 
 function exportarCSV(){
   if(!proyectos.length)return alert('No hay expedientes.');
-  const keys=Object.keys(proyectos[0]);
-  const csv=[keys.join(';'),...proyectos.map(p=>keys.map(k=>`"${(p[k]||'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const filas=proyectos.map(p=>{const f={};for(const [k,v] of Object.entries(p)){if(k==='emplazamiento')Object.assign(f,typeof datosEmplazamientoPlano==='function'?datosEmplazamientoPlano(v):{});else if(v&&typeof v==='object')f[k]=JSON.stringify(v);else f[k]=v;}return f;});
+  const keys=[...new Set(filas.flatMap(f=>Object.keys(f)))];
+  const csv=[keys.join(';'),...filas.map(p=>keys.map(k=>`"${(p[k]??'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
   dlBlob(csv,`expedientes_${new Date().getFullYear()}.csv`,'text/csv;charset=utf-8;');
 }
 function exportarJSON(){if(!proyectos.length)return alert('No hay expedientes.');dlBlob(JSON.stringify(proyectos,null,2),`expedientes_${new Date().getFullYear()}.json`,'application/json');}
@@ -3094,6 +3134,592 @@ function generarPortadasPDF(titulos, sufijoNombre, statusElId){
 
 previewExpediente();
 inicializarFechaPortada();
+</script>
+<script>
+// =====================================================================
+// MÓDULO EMPLAZAMIENTO (Catastro coordenadas + IGN altitud + CTE DB-HE)
+// Independiente: no modifica consultarCatastro() ni ninguna función
+// existente; se engancha envolviéndolas al final de este bloque.
+// =====================================================================
+const EMPLAZ_CFG={
+  CPMRC:'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCoordenadas.svc/json/Consulta_CPMRC',
+  WFS_PARCELA:'https://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx',
+  IGN_ALTITUD:'https://api-processes.idee.es/processes/getElevation/execution',
+  TIMEOUT_MS:15000,
+  MAX_PUNTOS_MUESTREO:60
+};
+const FUENTES={
+  CAT_COORD:'Catastro · Servicio de coordenadas (Consulta_CPMRC)',
+  CAT_PARCELA:'Catastro · WFS INSPIRE Parcela catastral',
+  IGN:'IGN/IDEE · MDT05 (getElevation)',
+  CTE:'CTE DB-HE 2019, Anejo B, tabla a (RD 732/2019)'
+};
+
+// Tabla a-Anejo B (DB-HE 2019). Columnas de altitud (límite superior, m):
+const ANEJOB_LIMITES=[50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1050,1250,1300,Infinity];
+// Cada provincia: [zona, nº de columnas que abarca] en orden de altitud creciente
+const ANEJOB_TABLA={
+  'ALBACETE':[['C3',9],['D3',10],['E1',5]],
+  'ALICANTE':[['B4',5],['C3',11],['D3',8]],
+  'ALMERIA':[['A4',2],['B4',3],['B3',3],['C3',8],['D3',8]],
+  'ARABA':[['D1',12],['E1',12]],
+  'ASTURIAS':[['C1',1],['D1',10],['E1',13]],
+  'AVILA':[['D2',11],['D1',6],['E1',7]],
+  'BADAJOZ':[['C4',8],['C3',1],['D3',15]],
+  'BALEARS':[['B3',5],['C3',19]],
+  'BARCELONA':[['C2',5],['D2',4],['D1',6],['E1',9]],
+  'BIZKAIA':[['C1',5],['D1',19]],
+  'BURGOS':[['D1',12],['E1',12]],
+  'CACERES':[['C4',12],['D3',9],['E1',3]],
+  'CADIZ':[['A3',3],['B3',6],['C3',3],['C2',5],['D2',7]],
+  'CANTABRIA':[['C1',3],['D1',10],['E1',11]],
+  'CASTELLON':[['B3',2],['C3',8],['D3',2],['D2',8],['E1',4]],
+  'CEUTA':[['B3',24]],
+  'CIUDAD REAL':[['C4',9],['C3',1],['D3',14]],
+  'CORDOBA':[['B4',3],['C4',8],['D3',13]],
+  'CORUNA':[['C1',4],['D1',20]],
+  'CUENCA':[['D3',16],['D2',5],['E1',3]],
+  'GIPUZKOA':[['D1',8],['E1',16]],
+  'GIRONA':[['C2',2],['D2',10],['E1',12]],
+  'GRANADA':[['A4',1],['B4',6],['C4',5],['C3',4],['D3',7],['E1',1]],
+  'GUADALAJARA':[['D3',19],['D2',1],['E1',4]],
+  'HUELVA':[['A4',1],['B4',2],['B3',4],['C3',9],['D3',8]],
+  'HUESCA':[['C3',4],['D3',4],['D2',6],['E1',10]],
+  'JAEN':[['B4',7],['C4',8],['D3',8],['E1',1]],
+  'LEON':[['E1',24]],
+  'LLEIDA':[['C3',2],['D3',10],['E1',12]],
+  'LUGO':[['D1',10],['E1',14]],
+  'MADRID':[['C3',10],['D3',9],['D2',1],['E1',4]],
+  'MALAGA':[['A3',2],['B3',4],['C3',8],['D3',10]],
+  'MELILLA':[['A3',24]],
+  'MURCIA':[['B3',2],['C3',9],['D3',13]],
+  'NAVARRA':[['C2',2],['D2',5],['D1',5],['E1',12]],
+  'OURENSE':[['C3',3],['C2',3],['D2',10],['E1',8]],
+  'PALENCIA':[['D1',16],['E1',8]],
+  'LAS PALMAS':[['α3',7],['A2',8],['B2',5],['C2',4]],
+  'PONTEVEDRA':[['C1',7],['D1',17]],
+  'RIOJA':[['C2',4],['D2',10],['E1',10]],
+  'SALAMANCA':[['D2',17],['E1',7]],
+  'SANTA CRUZ DE TENERIFE':[['α3',7],['A2',8],['B2',5],['C2',4]],
+  'SEGOVIA':[['D2',21],['E1',3]],
+  'SEVILLA':[['B4',4],['C4',20]],
+  'SORIA':[['D2',15],['D1',1],['E1',8]],
+  'TARRAGONA':[['B3',2],['C3',8],['D3',14]],
+  'TERUEL':[['C3',9],['C2',1],['D2',10],['E1',4]],
+  'TOLEDO':[['C4',10],['D3',14]],
+  'VALENCIA':[['B3',1],['C3',9],['D2',9],['E1',5]],
+  'VALLADOLID':[['D2',16],['E1',8]],
+  'ZAMORA':[['D2',16],['E1',8]],
+  'ZARAGOZA':[['C3',4],['D3',9],['E1',11]]
+};
+const ANEJOB_ALIAS={'ALACANT':'ALICANTE','ALAVA':'ARABA','ILLES BALEARS':'BALEARS','BALEARES':'BALEARS','CASTELLO':'CASTELLON',
+  'A CORUNA':'CORUNA','LA CORUNA':'CORUNA','LA RIOJA':'RIOJA','PALMAS':'LAS PALMAS','TENERIFE':'SANTA CRUZ DE TENERIFE',
+  'VIZCAYA':'BIZKAIA','GUIPUZCOA':'GIPUZKOA','GERONA':'GIRONA','LERIDA':'LLEIDA','ORENSE':'OURENSE'};
+
+let emplazamiento=null;
+
+function _normProv(p){
+  let s=(p||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\(.*?\)/g,'').trim();
+  const partes=s.split('/').map(x=>x.replace(/,\s*(LA|LAS|EL|LOS|A|ILLES)$/,'').trim());
+  for(const x of partes){
+    const inv=x.match(/^(.*),\s*(.*)$/);const cand=[x,inv?`${inv[2]} ${inv[1]}`:''].filter(Boolean);
+    for(const c of cand){if(ANEJOB_TABLA[c])return c;if(ANEJOB_ALIAS[c])return ANEJOB_ALIAS[c];}
+  }
+  for(const k of Object.keys(ANEJOB_TABLA))if(partes.some(x=>x.includes(k)))return k;
+  return null;
+}
+function zonaClimaticaAnejoB(provincia,altitud){
+  const key=_normProv(provincia);
+  if(!key)return{error:`Provincia "${provincia}" no reconocida en la tabla del Anejo B`};
+  const h=Math.round(altitud);
+  let col=ANEJOB_LIMITES.findIndex(l=>h<=l);
+  let acc=0;
+  for(const [z,n] of ANEJOB_TABLA[key]){acc+=n;if(col<acc)return{zona:z,invierno:z.slice(0,-1),verano:z.slice(-1),provinciaTabla:key,h};}
+  return{error:'Altitud fuera de rango de la tabla'};
+}
+
+async function _fetchT(url,opt={},intentos=2){
+  for(let i=0;i<intentos;i++){
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),EMPLAZ_CFG.TIMEOUT_MS);
+    try{
+      const r=await fetch(url,{...opt,signal:ctl.signal});clearTimeout(t);
+      if(r.status>=500&&i<intentos-1)continue;
+      if(!r.ok)throw new Error(`HTTP ${r.status}`);
+      return r;
+    }catch(e){clearTimeout(t);
+      if(i===intentos-1)throw new Error(e.name==='AbortError'?'el servicio no responde (tiempo agotado)':(e.message==='Failed to fetch'?'servicio no disponible o sin conexión':e.message));
+    }
+  }
+}
+
+async function _coordenadasCatastro(rc,srs){
+  const r=await _fetchT(`${EMPLAZ_CFG.CPMRC}?SRS=${encodeURIComponent(srs)}&RefCat=${encodeURIComponent(rc)}`);
+  const j=await r.json();const res=j?.Consulta_CPMRCResult;
+  if(res?.lerr){const e=Array.isArray(res.lerr)?res.lerr[0]:res.lerr?.err||res.lerr;throw new Error(e?.des||'Catastro devolvió un error');}
+  const c=res?.coordenadas?.coord;const c0=Array.isArray(c)?c[0]:c;
+  const x=parseFloat(c0?.geo?.xcen),y=parseFloat(c0?.geo?.ycen);
+  if(!isFinite(x)||!isFinite(y))throw new Error('sin coordenadas');
+  return{x,y,ldt:c0?.ldt||''};
+}
+
+async function _parcelaCatastro(rc){
+  const u=`${EMPLAZ_CFG.WFS_PARCELA}?service=wfs&version=2.0.0&request=GetFeature&STOREDQUERIE_ID=GetParcel&refcat=${encodeURIComponent(rc)}&srsname=EPSG::25830`;
+  const txt=await (await _fetchT(u)).text();
+  const doc=new DOMParser().parseFromString(txt,'text/xml');
+  if(doc.getElementsByTagNameNS('*','ExceptionText')[0])throw new Error(doc.getElementsByTagNameNS('*','ExceptionText')[0].textContent.trim());
+  const pls=[...doc.getElementsByTagNameNS('*','posList')];
+  if(!pls.length)throw new Error('sin geometría de parcela');
+  const anillos=pls.map(pl=>{const n=pl.textContent.trim().split(/\s+/).map(Number);const pts=[];for(let i=0;i+1<n.length;i+=2)pts.push([n[i],n[i+1]]);return pts;});
+  const area=parseFloat(doc.getElementsByTagNameNS('*','areaValue')[0]?.textContent);
+  return{anillos,area:isFinite(area)?area:null};
+}
+
+function _dentro(p,anillo){let d=false;for(let i=0,j=anillo.length-1;i<anillo.length;j=i++){const[xi,yi]=anillo[i],[xj,yj]=anillo[j];if(((yi>p[1])!==(yj>p[1]))&&(p[0]<(xj-xi)*(p[1]-yi)/(yj-yi)+xi))d=!d;}return d;}
+function _puntosMuestreo(centro,parcela){
+  const pts=[[centro.x,centro.y]];
+  if(!parcela)return pts;
+  const ext=parcela.anillos[0];
+  const huecos=parcela.anillos.slice(1);
+  const MAX=EMPLAZ_CFG.MAX_PUNTOS_MUESTREO;
+  const paso=Math.max(1,Math.ceil(ext.length/(MAX/2)));
+  for(let i=0;i<ext.length;i+=paso)pts.push(ext[i]);
+  const xs=ext.map(p=>p[0]),ys=ext.map(p=>p[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const g=Math.max(5,Math.sqrt(((x1-x0)*(y1-y0))/(MAX/2)));
+  for(let x=x0+g/2;x<x1&&pts.length<MAX;x+=g)for(let y=y0+g/2;y<y1&&pts.length<MAX;y+=g){
+    const p=[x,y];if(_dentro(p,ext)&&!huecos.some(h=>_dentro(p,h)))pts.push(p);
+  }
+  return pts;
+}
+async function _altitudIGN(puntos){
+  const wkt='MULTIPOINT('+puntos.map(p=>`(${p[0].toFixed(2)} ${p[1].toFixed(2)})`).join(',')+')';
+  const r=await _fetchT(EMPLAZ_CFG.IGN_ALTITUD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({inputs:{geom:wkt,formato:'wkt',crs:25830}})});
+  const j=await r.json();
+  if(!Array.isArray(j?.values))throw new Error(j?.description||'respuesta sin altitudes');
+  return j.values.map(v=>(typeof v==='number'&&v>-100&&v<5000)?v:null);
+}
+
+function _num(v,d){return Number(v).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});}
+function _dato(valor,tipo,fuente,extra={}){return{valor,tipo,fuente,fecha:new Date().toISOString(),...extra};}
+
+async function completarEmplazamiento(opts={}){
+  const ref=(document.getElementById('ref-catastral')?.value||'').trim().replace(/\s/g,'').toUpperCase();
+  const st=document.getElementById('emplaz-status');
+  if(!ref||(ref.length!==14&&ref.length!==20)){st.innerHTML=`<div class="status error">⚠ Introduce primero una referencia catastral válida.</div>`;return;}
+  const rc=ref.slice(0,14);
+  const provincia=datosCatastro?.provincia||document.getElementById('c-provincia')?.value||document.getElementById('pro-provincia')?.value||'';
+  const e={ref:rc,consultado:new Date().toISOString(),datos:{},avisos:[]};
+  const paso=t=>{st.innerHTML=`<div class="status loading"><div class="spinner"></div> ${t}</div>`;};
+  document.getElementById('emplaz-data').style.display='block';
+
+  // 1 · Coordenadas (Catastro)
+  paso('Obteniendo coordenadas de Catastro…');
+  let utm=null;
+  const [rGeo,rUtm]=await Promise.allSettled([_coordenadasCatastro(rc,'EPSG:4326'),_coordenadasCatastro(rc,'EPSG:25830')]);
+  if(rGeo.status==='fulfilled'){
+    e.datos.latitud=_dato(_num(rGeo.value.y,6),'oficial',FUENTES.CAT_COORD,{unidad:'° (ETRS89/WGS84)'});
+    e.datos.longitud=_dato(_num(rGeo.value.x,6),'oficial',FUENTES.CAT_COORD,{unidad:'° (ETRS89/WGS84)'});
+  }else e.avisos.push(`Coordenadas geográficas: ${rGeo.reason.message}`);
+  if(rUtm.status==='fulfilled'){
+    utm=rUtm.value;
+    e.datos.utm_x=_dato(_num(utm.x,2),'oficial',FUENTES.CAT_COORD,{unidad:'m (ETRS89 UTM H30)'});
+    e.datos.utm_y=_dato(_num(utm.y,2),'oficial',FUENTES.CAT_COORD,{unidad:'m (ETRS89 UTM H30)'});
+  }else e.avisos.push(`Coordenadas UTM: ${rUtm.reason.message}`);
+
+  // 2 · Contorno de parcela (Catastro INSPIRE)
+  let parcela=null;
+  if(utm){
+    paso('Obteniendo contorno de la parcela…');
+    try{parcela=await _parcelaCatastro(rc);
+      if(parcela.area)e.datos.sup_grafica=_dato(parcela.area.toLocaleString('es-ES'),'oficial',FUENTES.CAT_PARCELA,{unidad:'m²',nota:'Superficie gráfica de la parcela'});
+    }catch(err){e.avisos.push(`Contorno de parcela: ${err.message}. Se usará solo el punto central.`);}
+  }
+
+  // 3 · Altitud (IGN MDT05)
+  let hCentro=null;
+  if(utm){
+    paso('Consultando altitud en el IGN (MDT05)…');
+    try{
+      const pts=_puntosMuestreo(utm,parcela);
+      const vals=await _altitudIGN(pts);
+      hCentro=vals[0];
+      const validos=vals.filter(v=>v!==null);
+      if(hCentro===null)throw new Error('sin dato de altitud en el punto central');
+      e.datos.altitud=_dato(_num(hCentro,1),'oficial',FUENTES.IGN,{unidad:'m s.n.m.',nota:'Terreno en el punto central de la parcela'});
+      if(parcela&&validos.length>2){
+        const mn=Math.min(...validos),mx=Math.max(...validos);
+        e.datos.altitud_min=_dato(_num(mn,1),'calculado',FUENTES.IGN,{unidad:'m s.n.m.',nota:`Mínimo de ${validos.length} puntos muestreados en la parcela`});
+        e.datos.altitud_max=_dato(_num(mx,1),'calculado',FUENTES.IGN,{unidad:'m s.n.m.',nota:`Máximo de ${validos.length} puntos muestreados en la parcela`});
+        e.datos.desnivel=_dato(_num(mx-mn,1),'calculado',FUENTES.IGN,{unidad:'m',nota:'Diferencia entre máximo y mínimo muestreados'});
+        e._rango=[mn,mx];
+      }
+    }catch(err){e.avisos.push(`Altitud IGN: ${err.message}`);}
+  }
+
+  // 4 · Zona climática (CTE DB-HE Anejo B)
+  if(hCentro!==null&&provincia){
+    const z=zonaClimaticaAnejoB(provincia,hCentro);
+    if(z.error)e.avisos.push(`Zona climática: ${z.error}`);
+    else{
+      let nota=`Provincia ${z.provinciaTabla}, h = ${z.h} m`;
+      if(e._rango){const a=zonaClimaticaAnejoB(provincia,e._rango[0]).zona,b=zonaClimaticaAnejoB(provincia,e._rango[1]).zona;
+        if(a!==b){nota+=`. ATENCIÓN: la parcela abarca las zonas ${a} y ${b}; comprobar la cota del edificio`;e.avisos.push(`La parcela abarca las zonas climáticas ${a} y ${b} según la cota. Se ha tomado el punto central (${z.zona}).`);}}
+      e.datos.zona_invierno=_dato(z.invierno,'calculado',FUENTES.CTE,{nota});
+      e.datos.zona_verano=_dato(z.verano,'calculado',FUENTES.CTE,{nota});
+      e.datos.zona_climatica=_dato(z.zona,'calculado',FUENTES.CTE,{nota});
+      _aplicarZonaAlProyecto(z.zona,opts.auto);
+    }
+  }else if(!provincia)e.avisos.push('Zona climática: falta la provincia');
+  delete e._rango;
+
+  // 5 · Planeamiento (SIU Castilla-La Mancha) y lo introducido antes por el usuario
+  if(utm){paso('Consultando planeamiento en el SIU de Castilla-La Mancha…');await _urbanismoSIU(e,utm,parcela,provincia);}
+  _conservarUrbanismo(e,emplazamiento);
+
+  emplazamiento=e;
+  renderEmplazamiento();
+  const n=Object.keys(e.datos).length;
+  st.innerHTML=e.avisos.length
+    ?`<div class="status ${n?'info':'error'}">${n?'✓ Emplazamiento completado parcialmente.':'✗ No se pudo obtener información del emplazamiento.'}<br>${e.avisos.map(a=>'· '+_esc(a)).join('<br>')}</div>`
+    :`<div class="status ok">✓ Emplazamiento completado (${n} datos).</div>`;
+}
+
+function _aplicarZonaAlProyecto(zona,auto){
+  const sel=document.getElementById('pro-zona');if(!sel)return;
+  if(![...sel.options].some(o=>o.value===zona)){const o=document.createElement('option');o.value=zona;o.textContent=zona;sel.appendChild(o);}
+  sel.value=zona;
+  const lbl=document.getElementById('pro-zona-origen');
+  if(lbl)lbl.textContent=`calculada: ${zona}`;
+}
+
+function _esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+const EMPLAZ_FILAS=[
+  ['Coordenadas',[['latitud','Latitud'],['longitud','Longitud'],['utm_x','UTM X'],['utm_y','UTM Y'],['sup_grafica','Superficie gráfica parcela']]],
+  ['Altitud y terreno',[['altitud','Altitud (centro parcela)'],['altitud_min','Altitud mínima'],['altitud_max','Altitud máxima'],['desnivel','Desnivel en parcela']]],
+  ['CTE DB-HE',[['zona_climatica','Zona climática'],['zona_invierno','Zona de invierno'],['zona_verano','Zona de verano']]],
+  ['Planeamiento (SIU Castilla-La Mancha)',[['figura_planeamiento','Planeamiento general vigente'],['clasificacion','Clase y categoría del suelo'],['proteccion','Protección / subcategoría'],['ambito','Ámbito'],['otras_clases','Otras clases en la parcela'],['observaciones_siu','Observaciones SIU'],['documentacion','Documentación del planeamiento']]],
+  ['Condiciones de la ordenanza',[['ordenanza','Ordenanza / zona y grado'],['uso_caracteristico','Uso característico'],['edificabilidad','Edificabilidad'],['ocupacion','Ocupación máxima'],['altura','Altura máxima'],['retranqueos','Retranqueos'],['parcela_minima','Parcela mínima']]]
+];
+const EMPLAZ_EDITABLES=['ordenanza','uso_caracteristico','edificabilidad','ocupacion','altura','retranqueos','parcela_minima'];
+
+// ---------- SIU de Castilla-La Mancha (Consejería de Fomento) ----------
+const SIU_CFG={
+  BASE:'https://geoservicios.castillalamancha.es/arcgis/rest/services/Vector/',
+  CLASES:'Sistema_Informacion_Urbana/MapServer/1',
+  MUNICIPIOS:'SIU_municipios/MapServer/0',
+  VISOR:'https://urbanismo.castillalamancha.es/planeamiento/sistema-de-informacion-urbana',
+  FUENTE:'SIU Castilla-La Mancha · Consejería de Fomento'
+};
+const PROV_CLM=['ALBACETE','CIUDAD REAL','CUENCA','GUADALAJARA','TOLEDO'];
+async function _siuQuery(capa,geom){
+  const p=new URLSearchParams({f:'json',outFields:'*',returnGeometry:'false',inSR:'25830',spatialRel:'esriSpatialRelIntersects'});
+  if(geom.rings){p.set('geometryType','esriGeometryPolygon');p.set('geometry',JSON.stringify({rings:geom.rings,spatialReference:{wkid:25830}}));}
+  else{p.set('geometryType','esriGeometryPoint');p.set('geometry',`${geom.x},${geom.y}`);}
+  const r=await _fetchT(SIU_CFG.BASE+capa+'/query',{method:'POST',body:p});
+  const j=await r.json();
+  if(j.error)throw new Error(j.error.message||'error del servicio');
+  return (j.features||[]).map(f=>f.attributes);
+}
+const _v=x=>(x===null||x===undefined||String(x).trim()===''||String(x).trim()==='0')?'':String(x).trim();
+async function _urbanismoSIU(e,utm,parcela,provincia){
+  if(!utm)return;
+  const prov=_normProv(provincia);
+  if(prov&&!PROV_CLM.includes(prov)){e.avisos.push('Planeamiento: el SIU de Castilla-La Mancha solo cubre las cinco provincias de la región.');return;}
+  const F=SIU_CFG.FUENTE;
+  // Planeamiento general del municipio
+  try{
+    const m=(await _siuQuery(SIU_CFG.MUNICIPIOS,utm))[0];
+    if(m){
+      e.municipio_ine=m.COD_INE||'';e.plan_codigo=m.PLAN_||'';e.municipio_siu=m.MUNICIPIO||'';
+      e.datos.figura_planeamiento=_dato(`${_v(m.NOM_PLAN)||'—'}${_v(m.PLAN_)?` (${m.PLAN_})`:''}`,'oficial',F,{nota:`${m.MUNICIPIO||''} · INE ${m.COD_INE||''}`});
+      if(_v(m.DESCARGA))e.datos.documentacion=_dato('Descargar planeamiento digitalizado (.zip)','oficial',F,{url:m.DESCARGA,nota:'Cartografía del planeamiento entregada al SIU'});
+    }
+  }catch(err){e.avisos.push(`Planeamiento municipal (SIU): ${err.message}`);}
+  // Clase de suelo en el centro de la parcela
+  try{
+    const c=(await _siuQuery(SIU_CFG.CLASES,utm))[0];
+    if(c){
+      const cls=[_v(c.CLASE),_v(c.CATEGORIA)].filter(Boolean).join(' — ');
+      if(cls)e.datos.clasificacion=_dato(cls,'oficial',F,{nota:'En el punto central de la parcela'});
+      const prot=[_v(c.SUBCATEGOR),_v(c.DIFERENC),_v(c.ADSCRIP),_v(c.DENOMINAC)].filter(Boolean).join(' · ');
+      if(prot)e.datos.proteccion=_dato(prot,'oficial',F);
+      const amb=[_v(c.NOMBR_PLAN),_v(c.PLANEAM_IN)].filter(Boolean).join(' · ');
+      if(amb)e.datos.ambito=_dato(amb,'oficial',F);
+      if(_v(c.OBSERVAC))e.datos.observaciones_siu=_dato(c.OBSERVAC,'oficial',F);
+      if(_v(c.ORDENANZA))e.datos.ordenanza=_dato(c.ORDENANZA,'oficial',F);
+      if(_v(c.USO_GLOBAL))e.datos.uso_caracteristico=_dato(c.USO_GLOBAL,'oficial',F,{nota:'Uso global del ámbito'});
+      const edN=parseFloat(c.ED_N_m2_m2),edB=parseFloat(c.ED_B_m2_m2);
+      if(edN>0)e.datos.edificabilidad=_dato(_num(edN,3),'oficial',F,{unidad:'m²/m² (neta)',nota:'Edificabilidad del ámbito según SIU'});
+      else if(edB>0)e.datos.edificabilidad=_dato(_num(edB,3),'oficial',F,{unidad:'m²/m² (bruta)',nota:'Edificabilidad del ámbito según SIU'});
+    }else e.avisos.push('Planeamiento: el SIU no tiene clase de suelo para este punto.');
+  }catch(err){e.avisos.push(`Clase de suelo (SIU): ${err.message}`);}
+  // Otras clases que toca la parcela
+  if(parcela){
+    try{
+      const todas=await _siuQuery(SIU_CFG.CLASES,{rings:parcela.anillos});
+      const etiquetas=[...new Set(todas.map(c=>_v(c.SIMBOLOGIA)||[_v(c.CLASE),_v(c.CATEGORIA)].filter(Boolean).join(' — ')).filter(Boolean))];
+      if(etiquetas.length>1){
+        e.datos.otras_clases=_dato(etiquetas.join(' · '),'oficial',F,{nota:'La parcela intersecta varias clases o protecciones; comprobar el reparto en el visor'});
+        e.avisos.push('La parcela toca varias clases de suelo o protecciones en el SIU: revisar el reparto.');
+      }
+    }catch(err){/* la consulta por punto ya da el dato principal */}
+  }
+}
+
+// ---------- Biblioteca local de ordenanzas: PGOU de Cuenca ----------
+const ORD_CUENCA={
+  ine:'16078',
+  fuente:'PGOU de Cuenca · NN.UU., cap. 8 (texto actualizado hasta MP nº 51)',
+  nota:'Zona y grado indicados por el usuario según el plano nº 5. Comprobar planos nº 7 y 12 y modificaciones posteriores.',
+  zonas:{
+    '1':{nombre:'Dotacional',ep:'8.3.1',uso:'Dotacional',grados:{
+      '1':{n:'Dotacional compacto',edificabilidad:'La existente + 30 %; sin edificar: 2 m²/m²',ocupacion:'100 % dentro de alineaciones',altura:'Las existentes; sin edificar: las de la colindante, máx. IV plantas (MP nº 4)',retranqueos:'No indicado en la ficha (ver ep. 8.3.1)',parcela_minima:'No se establece'},
+      '2':{n:'Dotacional deportivo',edificabilidad:'La existente + 30 %; sin edificar: 0,30 m²/m²',ocupacion:'100 % dentro de alineaciones',altura:'II plantas',retranqueos:'No indicado en la ficha (ver ep. 8.3.1)',parcela_minima:'No se establece'}}},
+    '2':{nombre:'Edificación entre medianerías (barrios)',ep:'8.3.2',uso:'Residencial (unifamiliar o plurifamiliar entre medianerías)',grados:{
+      '—':{n:'Único',edificabilidad:'Resultante de ocupación y altura, descontando patios de parcela (MP nº 1-A)',ocupacion:'100 %',altura:'II plantas 6,5 m · III plantas 9,5 m (nº de plantas según plano nº 7). Sin bajo cubierta ni vuelos; cubierta inclinada de teja',retranqueos:'No se permiten',parcela_minima:'60 m² (fachada ≥ 5 m, fondo ≥ 8 m)'}}},
+    '3':{nombre:'Edificación en manzana cerrada',ep:'8.3.3',uso:'Residencial (plurifamiliar en manzana cerrada)',grados:(()=>{const b={edificabilidad:'Resultante de ocupación y altura, descontando patios de parcela (MP nº 1-A)',ocupacion:'100 % (patio de manzana edificable en planta baja)',retranqueos:'No se permiten',parcela_minima:'120 m² (fachada ≥ 8 m, fondo ≥ 15 m)'};return{
+      '1':{n:'2 y 3 plantas',...b,altura:'II 7 m · III 10 m (según plano nº 7)'},
+      '2':{n:'4 y 5 plantas',...b,altura:'IV 13 m · V 16 m (según plano nº 7)'},
+      '3':{n:'6 o más plantas',...b,altura:'VI 19 m · VII 22 m (según plano nº 7)'}};})()},
+    '4':{nombre:'Edificación en bloque abierto',ep:'8.3.4',uso:'Residencial (plurifamiliar en bloque abierto)',grados:(()=>{
+      const b={edificabilidad:'Ocupación + alineaciones + plantas del plano nº 7 (aprovechamientos en plano nº 12)',ocupacion:'Según plano nº 7',altura:'Según plano nº 7 (III 10 m · IV 13 m · V 16 m · VI 19 m · VII 22 m · VIII 25 m · IX 28 m · XII 37 m)',retranqueos:'Según plano nº 7',parcela_minima:'La existente'};
+      const n=['','Edificio con espacio libre privado','Villaromán','Fuente del Oro','Antigua ordenanza 3ª','San Fernando','San Antonio','Antiguo PERI A','Antiguo PERI B','Antiguo PERI G','Antiguo RM2A','La Resinera','Modificación Puntual 3.C','Villaromán II','Avda. Reyes Católicos','Antigua Ordenanza 6ª'];
+      const o={1:{edificabilidad:'Según fichas de unidades de ejecución o planeamiento de desarrollo',ocupacion:'100 % (ajardinando el espacio libre privado)',retranqueos:'Según plano nº 7; sin alineación interior: ≥ H/2 a linderos y testeros (mín. 3 m) y ≥ H/2 entre bloques',parcela_minima:'300 m², fachada ≥ 15 m'},11:{ocupacion:'100 %'},12:{ocupacion:'60 %'},13:{parcela_minima:'1.800 m²'},14:{parcela_minima:'800 m² con círculo inscrito de 20 m'},15:{ocupacion:'70 %',retranqueos:'3 m a alineaciones y linderos'}};
+      const g={};for(let i=1;i<=15;i++)g[String(i)]={n:n[i],...b,...(o[i]||{})};return g;})()},
+    '5':{nombre:'Edificación unifamiliar',ep:'8.3.5',uso:'Residencial unifamiliar (cat. 1ª)',grados:(()=>{
+      const A2='II plantas / 7 m',A3='III plantas / 10 m';
+      const t=[['1','Nueva edificación (en hilera)','1 m²/m²','No se establece','80 %','300 m²',A2],['2','Antigua ordenanza 4ª grado 3ª (en hilera)','2 m²/m²','No se establece','No se establece','60 m²',A2],['3','Villaromán (en hilera)','1 m²/m²','3 m','60 %','120 m²',A2],['4','San Antonio (pareada)','Según plano nº 7','No se establece','75 %','No se establece',A2],['5','Antiguo PERI RM2A (en hilera)','0,972 m²/m²','3,5 m','No se establece','144 m²',A2],['6','El Sotillo (aislada)','0,30 m²/m²','6 m a calle, 4 m resto','20 %','2.000 m²',A2],['7','Antiguo PERI B (en hilera)','0,50 m²/m²','No se establece','No se establece','300 m²',A3],['9','Antiguo PERI C (en hilera)','1 m²/m²','No se establecen','No se establece','La necesaria para una vivienda con frente ≥ 8 m',A3],['10','Villaromán II (en hilera)','1 m²/m²','3 m','60 %','1.600 m²',A2],['11','El Sotillo II (en hilera, MP nº 32)','0,705 m²/m²','No se fija','No se fija','No indicada (máx. 100 parcelas)',A3]];
+      const g={};for(const [k,n,ed,re,oc,pm,al] of t)g[k]={n,edificabilidad:ed,retranqueos:re,ocupacion:oc,parcela_minima:pm,altura:al};return g;})()},
+    '6':{nombre:'Edificación en núcleos pedáneos',ep:'8.3.6',uso:'Residencial',grados:{
+      '1':{n:'Áreas consolidadas (entre medianerías)',edificabilidad:'2,6 m²/m² (fondo máx. 16 m)',retranqueos:'No se permiten (modificados en 1999: comprobar)',ocupacion:'100 %',parcela_minima:'80 m²',altura:'II plantas / 7 m'},
+      '2':{n:'Áreas de remate (aislada, pareada o hilera)',edificabilidad:'0,50 m²/m²',retranqueos:'No se establecen (modificados en 1999: comprobar)',ocupacion:'30 %',parcela_minima:'400 m²',altura:'II plantas / 7 m'},
+      '3':{n:'Áreas no consolidadas (hilera)',edificabilidad:'1,0 m²/m²',retranqueos:'No se establecen (modificados en 1999: comprobar)',ocupacion:'50 % (modificación de 2006)',parcela_minima:'60 m²',altura:'II plantas / 7 m'}}},
+    '7':{nombre:'Edificación industrial',ep:'8.3.7',uso:'Industrial',grados:(()=>{
+      const PM='Sin parcela mínima (se fija longitud de fachada); G8 en texto original 10.000 m²';const X=' (terciario, hospedaje y dotacional hasta VII plantas)';
+      const t=[['1','Nueva edificación','1,2 m²/m²','10 m a fachada, 5 m a linderos','80 %','II plantas, 10 m'],['2','Antigua Ord. 17 (ctra. de Madrid)','1,2 m²/m²','5 m a todos los linderos','80 %','II plantas, 15 m'],['3','Antigua Ord. 18 (Cerrajera)','1,2 m²/m²','Según plano nº 7','80 %','II plantas, 15 m'],['4','Antigua Ord. 19 (Cuberg IM3)','0,7 m²/m²','25 m (auxiliares 25 m a frente, 10 m resto)','100 %','II plantas, 15 m'],['5','Antiguo PERI IM2','0,5 m²/m²','Libres cumpliendo edificabilidad','80 %','II plantas, 15 m'],['6','CAMPSA','0,7 m²/m²','No se establecen','80 %','II plantas, 15 m'],['7','El Cantorral','0,57 m²/m²','8 m frontal, 3 m linderos','80 %','II plantas, 7 m'],['8','Cooperativa farmacéutica','0,20 m²/m²','No se establecen','80 %','II plantas, 10 m']];
+      const g={};for(const [k,n,ed,re,oc,al] of t)g[k]={n,edificabilidad:ed,retranqueos:re,ocupacion:oc+' (MP nº 7, 31, 41 y 43)',parcela_minima:PM,altura:al+X};return g;})()},
+    '8':{nombre:'Ferroviaria',ep:'8.3.8',uso:'Red ferroviaria',grados:{
+      '1':{n:'Grado 1',edificabilidad:'La existente + 30 %; sin edificar: 2 m²/m²',ocupacion:'No indicada en la ficha',altura:'Libres',retranqueos:'No indicados en la ficha',parcela_minima:'No indicada en la ficha'}}},
+    '9':{nombre:'Terciario (MP nº 38, 49 y 51)',ep:'8.3.9',uso:'Terciario A y C; Dotacional Salud y Bienestar Social',grados:(()=>{
+      const b={edificabilidad:'Según planos nº 12 o ficha de planeamiento',ocupacion:'100 %',retranqueos:'Permitidos',parcela_minima:'120 m² (fachada 8 m, fondo 15 m)'};const C='; comercio máx. IV plantas (I 5 m · II 10 m · III 15 m · IV 20 m)';
+      return{'1':{n:'2 y 3 plantas',...b,altura:'Hospedaje y dotacional II 7 m · III 10 m'+C},'2':{n:'4 y 5 plantas',...b,altura:'Hospedaje y dotacional IV 13 m · V 16 m'+C},'3':{n:'6 o más plantas',...b,altura:'Hospedaje y dotacional VI 19 m · VII 22 m'+C}};})()},
+    'PERI':{nombre:'Área remitida a PERI',ep:'8.2.3',uso:'Según el PERI',grados:{
+      '1':{n:'Casco Antiguo (Plan Especial)'},'2':{n:'Río Júcar'},'3':{n:'Santa Mónica'},'4':{n:'Ermita de San Antonio'},'5':{n:'Vega Tordera'},'6':{n:'Planta de Hormigón'},'7':{n:'Fábrica de Maderas'},'8':{n:'Carretera de Valencia'},'10':{n:'Buenavista'}}},
+    'SUP':{nombre:'Suelo urbanizable programado (Plan Parcial)',ep:'7.1.4',uso:'Según el Plan Parcial del sector',grados:{
+      'S-1':{n:'Buenavista'},'S-2':{n:'Las Cañadillas Este'},'S-3':{n:'Camino del Terminillo'},'S-4':{n:'Cerro de la Horca',uso:'Residencial colectiva en altura',edificabilidad:'0,60 m²/m² (intensidad del sector)',altura:'VI plantas',ocupacion:'Según Plan Parcial',retranqueos:'Según Plan Parcial',parcela_minima:'Según Plan Parcial'},'S-5':{n:'Venta del Francés'},'S-6':{n:'San Antonio'},'S-7':{n:'Ctra. de Alcázar Oeste'},'S-8':{n:'Ctra. de Alcázar Este'},'S-9':{n:'La Esperanza'},'S-10':{n:'Palancares II'}}}
+  }
+};
+function _esCuenca(e){
+  if(e?.municipio_ine)return e.municipio_ine===ORD_CUENCA.ine;
+  const m=(datosCatastro?.municipio||document.getElementById('c-municipio')?.value||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  return m==='CUENCA';
+}
+function _ordGrados(){
+  const z=document.getElementById('ord-zona')?.value;const sg=document.getElementById('ord-grado');if(!sg)return;
+  const gr=ORD_CUENCA.zonas[z]?.grados||{};
+  sg.innerHTML='<option value="">— Grado —</option>'+Object.entries(gr).map(([k,g])=>`<option value="${k}">${k==='—'?'':k+' · '}${_esc(g.n)}</option>`).join('');
+  if(Object.keys(gr).length===1)sg.value=Object.keys(gr)[0];
+}
+function aplicarOrdenanzaCuenca(){
+  if(!emplazamiento)return;
+  const z=document.getElementById('ord-zona').value,g=document.getElementById('ord-grado').value;
+  const Z=ORD_CUENCA.zonas[z],G=Z?.grados[g];
+  if(!Z||!G){alert('Elige zona y grado.');return;}
+  const F=`${ORD_CUENCA.fuente} · ep. ${Z.ep}`;const nota=ORD_CUENCA.nota;
+  const esPlan=z==='PERI'||z==='SUP';
+  const titulo=esPlan?`${Z.nombre} ${g} — ${G.n}`:`Zona ${z} — ${Z.nombre}${g!=='—'?`, grado ${g} · ${G.n}`:''}`;
+  const d=emplazamiento.datos;
+  if(d.ordenanza?.tipo!=='oficial')d.ordenanza=_dato(titulo,'pendiente',F,{nota});
+  const def=esPlan?'Según el planeamiento de desarrollo (no recogido en la biblioteca)':'No indicado en la ficha';
+  for(const k of ['uso_caracteristico','edificabilidad','ocupacion','altura','retranqueos','parcela_minima']){
+    if(d[k]?.tipo==='oficial')continue;
+    const val=k==='uso_caracteristico'?(G.uso||Z.uso):(G[k]||def);
+    d[k]=_dato(val,'pendiente',F,{nota});
+  }
+  emplazamiento.ordenanza_sel={municipio:'CUENCA',zona:z,grado:g};
+  renderEmplazamiento();
+}
+function _editarDatoUrb(k,val){
+  if(!emplazamiento)return;val=(val||'').trim();
+  if(!val){delete emplazamiento.datos[k];}
+  else emplazamiento.datos[k]=_dato(val,'manual','Introducido manualmente');
+  renderEmplazamiento();
+}
+// Al repetir la consulta conserva lo elegido o escrito a mano
+function _conservarUrbanismo(e,prev){
+  if(!prev||prev.ref!==e.ref)return;
+  for(const k of EMPLAZ_EDITABLES){const d=prev.datos?.[k];if(d&&d.tipo!=='oficial'&&!e.datos[k])e.datos[k]=d;}
+  if(prev.ordenanza_sel)e.ordenanza_sel=prev.ordenanza_sel;
+}
+
+// ---------- NN.SS. de Planeamiento Municipal con Ámbito Provincial de Cuenca (DOCM nº 4, 27/01/1995) ----------
+// Se aplican en municipios sin planeamiento propio (SIU: SP) o con Delimitación de Suelo Urbano (DSU/PDSU).
+const NNSS_CU={
+  fuente:'NN.SS. de Planeamiento Municipal con Ámbito Provincial de Cuenca (DOCM nº 4, 27/01/1995)',
+  planes:['SP','DSU','PDSU'],
+  // Anejo 1: municipio (código INE) → comarca (A Alcarria · M Mancha · S Serranía)
+  comarcaIne:Object.fromEntries('16001:M,16002:M,16004:S,16005:A,16006:A,16008:S,16009:A,16010:A,16011:A,16012:M,16013:S,16019:M,16020:A,16022:S,16025:A,16026:M,16029:S,16030:A,16031:S,16032:M,16034:M,16036:S,16038:A,16039:M,16040:S,16041:A,16043:S,16044:S,16045:A,16046:S,16047:M,16049:M,16050:A,16051:A,16053:S,16057:S,16062:S,16063:M,16065:M,16067:A,16068:M,16070:S,16071:A,16072:M,16073:M,16074:S,16079:S,16081:S,16083:M,16084:S,16085:A,16087:M,16088:S,16091:S,16092:M,16094:A,16095:S,16096:M,16097:S,16101:M,16103:M,16104:M,16106:M,16108:M,16109:S,16110:M,16111:S,16115:S,16116:S,16117:S,16119:A,16123:S,16126:S,16128:M,16129:M,16131:S,16132:S,16135:S,16137:S,16139:M,16140:A,16141:S,16142:M,16143:A,16146:S,16150:S,16151:M,16152:S,16153:M,16155:M,16156:A,16157:S,16159:M,16160:A,16161:S,16162:A,16163:S,16165:S,16166:M,16167:M,16169:S,16173:A,16174:M,16176:M,16177:S,16181:M,16188:A,16189:S,16192:S,16193:A,16197:S,16199:S,16205:S,16206:A,16209:A,16211:M,16212:M,16213:M,16217:M,16224:S,16225:S,16227:S,16228:A,16231:M,16234:S,16237:S,16239:S,16240:A,16242:A,16246:A,16247:M,16250:A,16251:M,16254:A,16255:M,16258:S,16259:A,16264:M,16265:A,16266:M,16269:M,16270:M,16272:A,16273:M,16274:S,16275:A,16276:S,16277:M,16278:S,16901:M,16906:A,16910:A'.split(',').map(x=>x.split(':'))),
+  comarcas:{A:{n:'Alcarria',art:'6.2',parcela:'90 m², frente ≥ 4,50 m y círculo inscrito de 4,50 m (a efectos de segregación)'},
+            M:{n:'Mancha',art:'6.3',parcela:'150 m², frente ≥ 12,00 m y círculo inscrito de 4,50 m (a efectos de segregación)'},
+            S:{n:'Serranía',art:'6.4',parcela:'50 m², frente ≥ 4,50 m y círculo inscrito de 4,50 m (a efectos de segregación)'}},
+  suelos:{
+    urbano:{n:'Suelo urbano'},
+    comun:{n:'Suelo no urbanizable común',art:'7.2',uso:'Agrícola, ganadero o forestal; vivienda familiar aislada vinculada, con parcela igual a la unidad mínima de cultivo',edificabilidad:'0,069 m²/m²',ocupacion:'5 %',altura:'7 m',retranqueos:'5 m a linderos o caminos; cerramientos a 5 m del borde del camino',parcela_minima:'Unidad mínima de cultivo; vivienda aislada: círculo inscrito de 40 m y no formar núcleo de población (art. 7.1.7); fachada mínima 20 m'},
+    protegido:{n:'Suelo no urbanizable especialmente protegido',art:'7.3',uso:'Solo usos dotacionales relacionados con la protección',edificabilidad:'No se permite ninguna construcción',ocupacion:'No se permite ninguna construcción',altura:'No se permite ninguna construcción',retranqueos:'—',parcela_minima:'—'},
+    carreteras:{n:'Suelo no urbanizable de protección de vías de comunicación',art:'7.4',uso:'Según Leyes de Carreteras (estatal 25/1988 y CLM 9/1990)',edificabilidad:'No se fija',ocupacion:'25 %',altura:'4,50 m',retranqueos:'Alineaciones según Ley de Carreteras; a más de 250 m de cualquier otra edificación',parcela_minima:'1.000 m², fachada mínima 20 m'},
+    cauces:{n:'Suelo no urbanizable de protección de cauces y zonas húmedas',art:'7.5',uso:'Según Ley de Aguas, con autorización de la Confederación Hidrográfica',edificabilidad:'No se permite ninguna edificación',ocupacion:'No se permite ninguna edificación',altura:'No se permite ninguna edificación',retranqueos:'—',parcela_minima:'—'},
+    tendidos:{n:'Suelo no urbanizable de protección de tendidos eléctricos',art:'7.6',uso:'Según Reglamento de líneas de alta tensión',edificabilidad:'No se fija',ocupacion:'No se fija',altura:'No se fija',retranqueos:'Edificaciones a 3,3 + V/100 m de la línea (mín. 5 m); arbolado a 1,5 + V/100 m (mín. 2 m)',parcela_minima:'No se fija'}
+  },
+  urbano:{uso:'Residencial unifamiliar y multifamiliar; compatibles terciario, dotacional e industrial limitado (talleres ≤ 25 CV en planta baja, ≤ 50 CV en edificio exclusivo)',
+    edificabilidad:'No se fija: resultante de ocupación, fondo y altura',ocupacion:'100 %; fondo máximo edificable 25 m',
+    altura:'Media de los edificios del tramo de calle; calles sin edificación representativa o nuevas: máx. 3 plantas (3 pl. 9,50 m · 2 pl. 6,80 m · 1 pl. 4,10 m, art. 5.1.2)',
+    retranqueos:'Fachada sobre la alineación exterior; edificación abierta o aislada: 3 m a linderos'},
+  notaUrbano:'Comarca según el Anejo 1. Si la Delimitación de Suelo Urbano tiene ordenanzas propias, prevalecen sobre estas Normas.',
+  notaRustico:'En suelo rústico prevalecen además el TRLOTAU, el Reglamento de Suelo Rústico y la Instrucción Técnica de Planeamiento vigente: comprobar.'
+};
+function _aplicaNNSS(e){return !!(e&&e.municipio_ine&&e.municipio_ine.startsWith('16')&&e.municipio_ine!==ORD_CUENCA.ine&&NNSS_CU.planes.includes(e.plan_codigo));}
+function _sueloSugeridoNNSS(e){
+  const c=(e?.datos?.clasificacion?.valor||'').toUpperCase(),p=(e?.datos?.proteccion?.valor||'').toUpperCase();
+  if(!c)return'';
+  if(c.includes('URBANO'))return'urbano';
+  if(/HIDR|CAUCE|HÚMED|HUMED/.test(p))return'cauces';
+  if(/CARRETER|VIAS? DE COMUNICACI|VÍAS? DE COMUNICACI/.test(p))return'carreteras';
+  if(/ELÉCTRIC|ELECTRIC|TENDIDO/.test(p))return'tendidos';
+  if(c.includes('PROTECCI'))return'protegido';
+  if(c.includes('RÚSTICO')||c.includes('RUSTICO')||c.includes('NO URBANIZABLE'))return'comun';
+  return'';
+}
+function aplicarNNSSProvincial(){
+  if(!emplazamiento)return;
+  const com=document.getElementById('nnss-comarca').value,su=document.getElementById('nnss-suelo').value;
+  if(!su||(su==='urbano'&&!com)){alert('Elige la comarca y el tipo de suelo.');return;}
+  const d=emplazamiento.datos;let titulo,vals,F,nota;
+  if(su==='urbano'){
+    const C=NNSS_CU.comarcas[com];
+    titulo=`NN.SS. provinciales — Suelo urbano, comarca ${C.n} (art. ${C.art})`;
+    vals={uso_caracteristico:NNSS_CU.urbano.uso,edificabilidad:NNSS_CU.urbano.edificabilidad,ocupacion:NNSS_CU.urbano.ocupacion,altura:NNSS_CU.urbano.altura,retranqueos:NNSS_CU.urbano.retranqueos,parcela_minima:C.parcela};
+    F=`${NNSS_CU.fuente} · art. ${C.art}`;nota=NNSS_CU.notaUrbano;
+  }else{
+    const S=NNSS_CU.suelos[su];
+    titulo=`NN.SS. provinciales — ${S.n} (art. ${S.art})`;
+    vals={uso_caracteristico:S.uso,edificabilidad:S.edificabilidad,ocupacion:S.ocupacion,altura:S.altura,retranqueos:S.retranqueos,parcela_minima:S.parcela_minima};
+    F=`${NNSS_CU.fuente} · art. ${S.art}`;nota=NNSS_CU.notaRustico;
+  }
+  if(d.ordenanza?.tipo!=='oficial')d.ordenanza=_dato(titulo,'pendiente',F,{nota});
+  for(const [k,v] of Object.entries(vals)){if(d[k]?.tipo==='oficial')continue;d[k]=_dato(v,'pendiente',F,{nota});}
+  emplazamiento.ordenanza_sel={municipio:'NNSS',comarca:com,suelo:su};
+  renderEmplazamiento();
+}
+function _panelNNSS(e){
+  const comAuto=NNSS_CU.comarcaIne[e.municipio_ine]||'';
+  const sel=e.ordenanza_sel?.municipio==='NNSS'?e.ordenanza_sel:null;
+  const com=sel?.comarca||comAuto,su=sel?.suelo||_sueloSugeridoNNSS(e);
+  const opt=(o,v)=>Object.entries(o).map(([k,x])=>`<option value="${k}"${k===v?' selected':''}>${_esc(x.n)}</option>`).join('');
+  const aviso=e.plan_codigo==='SP'?'Municipio sin planeamiento propio: rigen estas Normas.':'Municipio con Delimitación de Suelo Urbano: si tiene ordenanzas propias, estas Normas solo rigen en suelo rústico.';
+  return `<div class="emplaz-lib"><strong>Normas Subsidiarias provinciales de Cuenca (1995)</strong> — ${aviso}
+    ${comAuto?`<br>Comarca según el Anejo 1: <strong>${NNSS_CU.comarcas[comAuto].n}</strong>.`:'<br>Este municipio no figura en el Anejo 1: elige la comarca.'}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <select id="nnss-comarca"><option value="">— Comarca —</option>${opt(NNSS_CU.comarcas,com)}</select>
+      <select id="nnss-suelo"><option value="">— Tipo de suelo —</option>${opt(NNSS_CU.suelos,su)}</select>
+      <button class="btn btn-secondary" onclick="aplicarNNSSProvincial()">Cargar condiciones</button>
+    </div></div>`;
+}
+
+function renderEmplazamiento(){
+  const box=document.getElementById('emplaz-tabla');if(!box)return;
+  const e=emplazamiento;
+  if(!e){box.innerHTML='';document.getElementById('emplaz-data').style.display='none';return;}
+  document.getElementById('emplaz-data').style.display='block';
+  const etq={oficial:'Oficial',calculado:'Calculado',pendiente:'Pendiente',manual:'Manual'};
+  const f=iso=>{try{return new Date(iso).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return'';}};
+  let h='';
+  for(const [grupo,filas] of EMPLAZ_FILAS){
+    h+=`<tr class="emplaz-grupo"><td colspan="4">${grupo}</td></tr>`;
+    for(const [k,nom] of filas){
+      const d=e.datos[k];const editable=EMPLAZ_EDITABLES.includes(k);
+      if(k==='otras_clases'&&!d)continue;
+      if(editable&&(!d||d.tipo!=='oficial')){
+        h+=`<tr><td>${nom}</td><td class="emplaz-val"><input type="text" class="emplaz-input" value="${_esc(d?.valor||'')}" placeholder="Escribir o elegir ordenanza…" onchange="_editarDatoUrb('${k}',this.value)"/></td><td><span class="emplaz-badge ${d?d.tipo:'pendiente'}">${d?etq[d.tipo]:'Pendiente'}</span></td><td class="emplaz-fuente">${d?`${_esc(d.fuente)} · ${f(d.fecha)}${d.nota?`<br><em>${_esc(d.nota)}</em>`:''}`:'Sin fuente automática · comprobar en el planeamiento vigente'}</td></tr>`;
+      }else if(d){
+        const val=d.url?`<a href="${_esc(d.url)}" target="_blank" rel="noopener">${_esc(d.valor)}</a>`:`${_esc(d.valor)} ${d.unidad?`<span class="emplaz-ud">${_esc(d.unidad)}</span>`:''}`;
+        h+=`<tr><td>${nom}</td><td class="emplaz-val">${val}</td><td><span class="emplaz-badge ${d.tipo}">${etq[d.tipo]}</span></td><td class="emplaz-fuente">${_esc(d.fuente)} · ${f(d.fecha)}${d.nota?`<br><em>${_esc(d.nota)}</em>`:''}</td></tr>`;
+      }else h+=`<tr><td>${nom}</td><td class="emplaz-val">—</td><td><span class="emplaz-badge nd">No disponible</span></td><td class="emplaz-fuente">La fuente no devolvió resultado</td></tr>`;
+    }
+  }
+  let lib='';
+  if(_aplicaNNSS(e))lib=_panelNNSS(e);
+  else if(_esCuenca(e)){
+    lib=`<div class="emplaz-lib"><strong>Ordenanzas del PGOU de Cuenca</strong> — elige la zona y el grado del plano nº 5 para cargar sus condiciones:
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        <select id="ord-zona" onchange="_ordGrados()"><option value="">— Zona —</option>${Object.entries(ORD_CUENCA.zonas).map(([k,z])=>`<option value="${k}">${/^\d$/.test(k)?'Zona '+k+' · ':''}${_esc(z.nombre)}</option>`).join('')}</select>
+        <select id="ord-grado"><option value="">— Grado —</option></select>
+        <button class="btn btn-secondary" onclick="aplicarOrdenanzaCuenca()">Cargar condiciones</button>
+      </div></div>`;
+  }
+  box.innerHTML=`<table class="emplaz-table"><thead><tr><th>Dato</th><th>Valor</th><th>Tipo</th><th>Fuente · fecha de consulta</th></tr></thead><tbody>${h}</tbody></table>${lib}<div class="help" style="margin-top:8px;">Los datos urbanísticos del SIU son informativos. La información vinculante es la del Ayuntamiento (cédula o informe urbanístico). <a href="${SIU_CFG.VISOR}" target="_blank" rel="noopener">Visor SIU de Castilla-La Mancha</a></div>`;
+  if(e.ordenanza_sel&&e.ordenanza_sel.municipio==='CUENCA'&&document.getElementById('ord-zona')){document.getElementById('ord-zona').value=e.ordenanza_sel.zona;_ordGrados();document.getElementById('ord-grado').value=e.ordenanza_sel.grado;}
+}
+
+// Datos de emplazamiento en campos planos (para Gestor de Memorias y CSV)
+function datosEmplazamientoPlano(e){
+  const d=e?.datos||{};const v=k=>d[k]?.valor??'';
+  const tipo=k=>d[k]?({oficial:'oficial',calculado:'calculado',pendiente:'pendiente de comprobación',manual:'manual'}[d[k].tipo]||''):'';
+  return{
+    emp_latitud:v('latitud'),emp_longitud:v('longitud'),emp_utm_x:v('utm_x'),emp_utm_y:v('utm_y'),
+    emp_sup_grafica:v('sup_grafica'),
+    altitud:v('altitud'),altitud_min:v('altitud_min'),altitud_max:v('altitud_max'),
+    zona_climatica_calculada:v('zona_climatica'),zona_invierno:v('zona_invierno'),zona_verano:v('zona_verano'),
+    planeamiento:v('figura_planeamiento'),clasificacion_suelo:v('clasificacion'),proteccion_suelo:v('proteccion'),
+    ordenanza:v('ordenanza'),uso_caracteristico:v('uso_caracteristico'),edificabilidad:v('edificabilidad'),
+    ocupacion:v('ocupacion'),altura_maxima:v('altura'),retranqueos:v('retranqueos'),parcela_minima:v('parcela_minima'),
+    ordenanza_estado:tipo('ordenanza'),emp_fecha_consulta:e?.consultado?new Date(e.consultado).toLocaleDateString('es-ES'):''
+  };
+}
+
+// ---------- Enganches (envuelven funciones existentes sin editarlas) ----------
+(function(){
+  const _consultarCatastro=consultarCatastro;
+  consultarCatastro=async function(...a){
+    const r=await _consultarCatastro.apply(this,a);
+    if(datosCatastro&&datosCatastro.referencia)completarEmplazamiento({auto:true});
+    else{
+      const ref=(document.getElementById('ref-catastral')?.value||'').trim().replace(/\s/g,'').toUpperCase().slice(0,14);
+      if(emplazamiento&&emplazamiento.ref!==ref){emplazamiento=null;renderEmplazamiento();const st=document.getElementById('emplaz-status');if(st)st.innerHTML='';}
+    }
+    return r;
+  };
+  const _generarExpediente=generarExpediente;
+  generarExpediente=function(...a){
+    const r=_generarExpediente.apply(this,a);
+    if(expedienteActual&&emplazamiento){
+      expedienteActual.emplazamiento=emplazamiento;
+      const out=document.getElementById('output-json');if(out)out.innerHTML=formatJSON(expedienteActual);
+    }
+    return r;
+  };
+  const _cargarDatosEnFormulario=cargarDatosEnFormulario;
+  cargarDatosEnFormulario=function(p,...a){
+    const r=_cargarDatosEnFormulario.call(this,p,...a);
+    emplazamiento=p&&p.emplazamiento?p.emplazamiento:null;
+    renderEmplazamiento();
+    const st=document.getElementById('emplaz-status');
+    if(st)st.innerHTML=emplazamiento?`<div class="status ok">✓ Datos de emplazamiento del expediente guardado (consultados el ${new Date(emplazamiento.consultado).toLocaleDateString('es-ES')}).</div>`:'';
+    const lbl=document.getElementById('pro-zona-origen');if(lbl)lbl.textContent=emplazamiento?.datos?.zona_climatica?`calculada: ${emplazamiento.datos.zona_climatica.valor}`:'';
+    return r;
+  };
+  const _limpiarFormulario=limpiarFormulario;
+  limpiarFormulario=function(...a){
+    const r=_limpiarFormulario.apply(this,a);
+    if(datosCatastro===null){emplazamiento=null;renderEmplazamiento();
+      const st=document.getElementById('emplaz-status');if(st)st.innerHTML='';
+      const lbl=document.getElementById('pro-zona-origen');if(lbl)lbl.textContent='';}
+    return r;
+  };
+})();
+
+// Marca junto al selector de zona climática del proyecto
+(function(){const sel=document.getElementById('pro-zona');const lbl=sel?.closest('.field')?.querySelector('label');
+  if(lbl&&!document.getElementById('pro-zona-origen'))lbl.insertAdjacentHTML('beforeend',' <span class="auto" id="pro-zona-origen"></span>');})();
 </script>
 </body>
 </html>

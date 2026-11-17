@@ -70,6 +70,7 @@
     </button>
   </div>
   <div id="paste-status"></div>
+  <div id="emplaz-recibido"></div>
 
   <!-- PLANTILLAS -->
   <div class="card">
@@ -123,6 +124,11 @@
       <div><label>Dirección del promotor</label><input type="text" id="d-dir-promotor" placeholder="Calle Mayor 1, 16001 Cuenca"></div>
       <div><label>Referencia catastral</label><input type="text" id="d-refcat" placeholder="1874809XK0117S0001YJ"></div>
     </div>
+    <div class="grid3">
+      <div><label>CP del promotor</label><input type="text" id="d-cp-promotor" placeholder="16001" maxlength="5"></div>
+      <div><label>Municipio del promotor</label><input type="text" id="d-municipio-promotor" placeholder="Cuenca"></div>
+      <div><label>Provincia del promotor</label><input type="text" id="d-provincia-promotor" placeholder="Cuenca"></div>
+    </div>
     <div>
       <label>PEM — Presupuesto Ejecución Material (ej: 65.500,00)</label>
       <input type="text" id="d-pem" placeholder="65.500,00" oninput="actualizarPemPreview(this.value)">
@@ -131,7 +137,7 @@
     <hr class="divider">
     <div>
       <label>Día de la fecha final</label>
-      <input type="hidden" id="d-municipio-promotor"><input type="hidden" id="d-provincia-promotor"><input type="text" id="d-dia" placeholder="22" style="max-width:80px;">
+      <input type="text" id="d-dia" placeholder="22" style="max-width:80px;">
     </div>
     <div class="grid3">
       <div><label>Tipología de edificación</label>
@@ -253,8 +259,12 @@ async function pegarDatos(){
     set('d-refcat',     d.ref_catastral||'');
     set('d-municipio',  d.municipio_proyecto||d.municipio||'');
     set('d-provincia',  d.provincia||'Cuenca');
-    set('d-municipio-promotor', d.cliente_municipio||d.promotor1_mun||d.municipio||'');
-    set('d-provincia-promotor', d.cliente_provincia||d.promotor1_prov||d.provincia||'Cuenca');
+    // Domicilio del promotor: se sobrescribe siempre (aunque venga vacío) y nunca con los datos de la obra
+    const setSiempre = (id,val) => { const el=document.getElementById(id); if(el) el.value = val||''; };
+    setSiempre('d-cp-promotor',        d.cliente_cp||d.promotor1_cp||'');
+    setSiempre('d-municipio-promotor', d.cliente_municipio||d.promotor1_mun||'');
+    setSiempre('d-provincia-promotor', d.cliente_provincia||d.promotor1_prov||'');
+    mostrarEmplazamientoRecibido(d);
     set('d-fase',       (d.pro_fase||'PROYECTO BÁSICO Y DE EJECUCIÓN').toUpperCase());
     set('d-pem',        d.pem||'');
     set('d-promotor2',  d.promotor2_nombre||d.cliente2_nombre||'');
@@ -269,6 +279,29 @@ async function pegarDatos(){
   }catch(e){
     st.innerHTML=`<div class="status error">⚠ No se pudo leer el portapapeles o el formato no es válido. Asegúrate de haber pulsado "Copiar datos para Gestor de Memorias" en el Gestor de Proyectos. (${e.message})</div>`;
   }
+}
+
+// ── Datos de emplazamiento recibidos del Gestor de Proyectos (solo consulta) ──
+// Las 5 plantillas anexas no contienen estos datos: se muestran para usarlos en la memoria principal.
+const EMPLAZ_CAMPOS=[['altitud','Altitud (centro parcela)',' m'],['zona_climatica','Zona climática (proyecto)',''],['zona_climatica_calculada','Zona climática calculada (DB-HE Anejo B)',''],
+  ['emp_utm_x','UTM X (ETRS89 H30)',''],['emp_utm_y','UTM Y (ETRS89 H30)',''],['emp_sup_grafica','Superficie gráfica parcela',' m²'],
+  ['planeamiento','Planeamiento vigente',''],['clasificacion_suelo','Clase de suelo',''],['proteccion_suelo','Protección',''],
+  ['ordenanza','Ordenanza',''],['uso_caracteristico','Uso característico',''],['edificabilidad','Edificabilidad',''],['ocupacion','Ocupación máxima',''],
+  ['altura_maxima','Altura máxima',''],['retranqueos','Retranqueos',''],['parcela_minima','Parcela mínima','']];
+let datosEmplazamientoRecibidos='';
+function mostrarEmplazamientoRecibido(d){
+  const box=document.getElementById('emplaz-recibido');if(!box)return;
+  const filas=EMPLAZ_CAMPOS.filter(([k])=>d[k]).map(([k,n,u])=>[n,d[k]+u]);
+  if(!filas.length){box.innerHTML='';datosEmplazamientoRecibidos='';return;}
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const estado=d.ordenanza_estado?` <em>(ordenanza: ${esc(d.ordenanza_estado)})</em>`:'';
+  datosEmplazamientoRecibidos=filas.map(([n,v])=>n+': '+v).join('\n')+(d.emp_fecha_consulta?'\nConsulta: '+d.emp_fecha_consulta:'');
+  box.innerHTML=`<div style="margin-top:10px;padding:10px 12px;border:1px solid #d8d4c8;border-radius:4px;font-size:12px;background:#faf8f3;">
+    <div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:6px;">Emplazamiento y normativa (para la memoria principal)</div>
+    <table style="width:100%;border-collapse:collapse;">${filas.map(([n,v])=>`<tr><td style="padding:2px 8px 2px 0;color:var(--ink2);white-space:nowrap;vertical-align:top;">${esc(n)}</td><td style="padding:2px 0;">${esc(v)}</td></tr>`).join('')}</table>
+    <div style="margin-top:6px;color:var(--ink3);">No se sustituyen en las 5 memorias anexas: sus plantillas no contienen estos datos.${estado}${d.emp_fecha_consulta?' Consulta: '+esc(d.emp_fecha_consulta)+'.':''}</div>
+    <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="navigator.clipboard.writeText(datosEmplazamientoRecibidos).then(()=>this.textContent='✓ Copiado')">Copiar datos de emplazamiento</button>
+  </div>`;
 }
 
 // ── Carga manual de plantillas ────────────────────────────────────────────────
@@ -303,8 +336,10 @@ function getSustituciones(d){
   const fechaFinal = 'En Cuenca a '+fechaFinalMin;
   const fechaFinal2 = 'Cuenca, a '+fechaFinalMin;
   // Datos propiedad: municipio y provincia del PROMOTOR, no de la obra
-  const munProm = d.municipioPromotor||d.municipio;
-  const provProm = d.provinciaPromotor||d.provincia;
+  const munProm = d.municipioPromotor;
+  const provProm = d.provinciaPromotor;
+  const cpProm = d.cpPromotor;
+  const domicilioProm = d.dirPromotor+(cpProm?' y CP. '+cpProm:'')+(munProm?(cpProm?' de ':', ')+munProm:'')+(provProm?', '+provProm:'');
 
   const lista = [
     // Portada
@@ -327,7 +362,7 @@ function getSustituciones(d){
     ['Cuenca, a 22 de diciembre de 2025', fechaFinal2],
     // EBSS — datos propiedad (municipio del promotor)
     ['Carlos Garrido Laguia con NIF 22528325D y Adelina Barquero Ortega con NIF 22638167A con domicilio en la calle Vicente Roca Cervera, 5-6 y CP. 46950 de Xirivella, Valencia.',
-      d.personasConNif+' con domicilio en '+d.dirPromotor+(munProm?', '+munProm:'')+(provProm?', '+provProm:'')+'.'],
+      d.personasConNif+' con domicilio en '+domicilioProm+'.'],
     // EBSS — situación de la finca
     ['carretera Campillos, 5, CP 16316 de Valdemoro Sierra, Cuenca, con referencia catastral 5498004XK0359N0001AM',
       d.situacionFullMin+(d.refcat?', con referencia catastral '+d.refcat:'')],
@@ -462,8 +497,8 @@ function getDatos(){
     ? pemLetraAuto + ' (' + pemCifraES + ' €)'
     : 'Pendiente de determinar';
   // Municipio/provincia del promotor: del campo dirección o del expediente pegado
-  const municipioPromotorTC = titleCase(v('d-municipio-promotor')||v('d-municipio'));
-  const provinciaPromotorTC = titleCase(v('d-provincia-promotor')||v('d-provincia'));
+  const municipioPromotorTC = titleCase(v('d-municipio-promotor'));
+  const provinciaPromotorTC = titleCase(v('d-provincia-promotor'));
   const dia = v('d-dia') || '22';
   return {
     expediente:           v('d-expediente'),
@@ -478,6 +513,7 @@ function getDatos(){
     municipioMin:         municipioTC,
     municipioPromotor:    municipioPromotorTC,
     provinciaPromotor:    provinciaPromotorTC,
+    cpPromotor:           v('d-cp-promotor'),
     provincia:            provinciaTC,
     fase,
     fecha:                v('d-fecha'),
