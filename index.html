@@ -143,6 +143,7 @@ textarea{resize:vertical;min-height:70px;}
 .emplaz-badge.nd{background:var(--surface2);color:var(--ink3);}
 .emplaz-badge.manual{background:#FFF4D6;color:#8A5A00;}
 .emplaz-input{width:100%;min-width:220px;font-size:12px;padding:5px 8px;}
+textarea.emplaz-input{min-height:0;resize:none;overflow:hidden;line-height:1.4;field-sizing:content;white-space:pre-wrap;word-break:break-word;}
 .emplaz-lib{margin-top:14px;padding:12px 14px;background:var(--accent-pale);border:1px solid #B8D4C8;border-radius:var(--radius);font-size:12px;}
 .emplaz-lib select{width:auto;min-width:200px;font-size:12px;}
 .emplaz-table td.emplaz-val{white-space:normal;}
@@ -3761,7 +3762,7 @@ function renderEmplazamiento(){
       const d=e.datos[k];const editable=EMPLAZ_EDITABLES.includes(k);
       if(k==='otras_clases'&&!d)continue;
       if(editable&&(!d||d.tipo!=='oficial')){
-        h+=`<tr><td>${nom}</td><td class="emplaz-val"><input type="text" class="emplaz-input" value="${_esc(d?.valor||'')}" placeholder="Escribir o elegir ordenanza…" onchange="_editarDatoUrb('${k}',this.value)"/></td><td><span class="emplaz-badge ${d?d.tipo:'pendiente'}">${d?etq[d.tipo]:'Pendiente'}</span></td><td class="emplaz-fuente">${d?`${_esc(d.fuente)} · ${f(d.fecha)}${d.nota?`<br><em>${_esc(d.nota)}</em>`:''}`:'Sin fuente automática · comprobar en el planeamiento vigente'}</td></tr>`;
+        h+=`<tr><td>${nom}</td><td class="emplaz-val"><textarea class="emplaz-input" rows="1" placeholder="Escribir o elegir ordenanza…" oninput="_ajustarAltoEmplaz(this)" onfocus="_ajustarAltoEmplaz(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" onchange="_editarDatoUrb('${k}',this.value)">${_esc(d?.valor||'')}</textarea></td><td><span class="emplaz-badge ${d?d.tipo:'pendiente'}">${d?etq[d.tipo]:'Pendiente'}</span></td><td class="emplaz-fuente">${d?`${_esc(d.fuente)} · ${f(d.fecha)}${d.nota?`<br><em>${_esc(d.nota)}</em>`:''}`:'Sin fuente automática · comprobar en el planeamiento vigente'}</td></tr>`;
       }else if(d){
         const val=d.url?`<a href="${_esc(d.url)}" target="_blank" rel="noopener">${_esc(d.valor)}</a>`:`${_esc(d.valor)} ${d.unidad?`<span class="emplaz-ud">${_esc(d.unidad)}</span>`:''}`;
         h+=`<tr><td>${nom}</td><td class="emplaz-val">${val}</td><td><span class="emplaz-badge ${d.tipo}">${etq[d.tipo]}</span></td><td class="emplaz-fuente">${_esc(d.fuente)} · ${f(d.fecha)}${d.nota?`<br><em>${_esc(d.nota)}</em>`:''}</td></tr>`;
@@ -3782,7 +3783,10 @@ function renderEmplazamiento(){
   box.innerHTML=`<table class="emplaz-table"><thead><tr><th>Dato</th><th>Valor</th><th>Tipo</th><th>Fuente · fecha de consulta</th></tr></thead><tbody>${h}</tbody></table>${lib}<div class="help" style="margin-top:8px;">Los datos urbanísticos del SIU son informativos. La información vinculante es la del Ayuntamiento (cédula o informe urbanístico). <a href="${SIU_CFG.VISOR}" target="_blank" rel="noopener">Visor SIU de Castilla-La Mancha</a></div>`;
   if(L&&e.ordenanza_sel&&e.ordenanza_sel.municipio===(L===ORD_CUENCA?'CUENCA':L.ine)&&document.getElementById('ord-zona')){document.getElementById('ord-zona').value=e.ordenanza_sel.zona;_ordGrados();document.getElementById('ord-grado').value=e.ordenanza_sel.grado;}
   _dibujarPlanoCalif();
+  requestAnimationFrame(()=>box.querySelectorAll('textarea.emplaz-input').forEach(_ajustarAltoEmplaz));
 }
+// Ajusta el alto de los campos de la ordenanza para que se lea todo el texto
+function _ajustarAltoEmplaz(t){if(!t||!t.scrollHeight)return;t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';}
 
 // Datos de emplazamiento en campos planos (para Gestor de Memorias y CSV)
 function datosEmplazamientoPlano(e){
